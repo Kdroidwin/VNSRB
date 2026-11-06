@@ -5,6 +5,7 @@ import 'package:vndb_lite/src/routing/app_router.dart';
 import 'package:vndb_lite/src/util/responsive.dart';
 import 'package:vndb_lite/src/features/_base/data/base_menu_sections.dart';
 import 'package:vndb_lite/src/features/sync/presentation/auth_screen_controller.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
 import '../../../../util/context_shortcut.dart';
 
@@ -14,9 +15,20 @@ class AppBarTitle extends ConsumerWidget {
 
   final AppRoute route;
 
-  String get _activePageTitle {
+  String _activePageTitle(BuildContext context) {
     if (BASE_TAB_MENU_SECTIONS[route.name] == null) return '';
-    return BASE_TAB_MENU_SECTIONS[route.name]!.title;
+    final japaneseTitle = switch (route) {
+      AppRoute.home => 'ホーム',
+      AppRoute.search => '検索',
+      AppRoute.collection => 'コレクション',
+      AppRoute.others => 'その他',
+      _ => '',
+    };
+    return appText(
+      context,
+      BASE_TAB_MENU_SECTIONS[route.name]!.title,
+      japaneseTitle,
+    );
   }
 
   @override
@@ -35,7 +47,7 @@ class AppBarTitle extends ConsumerWidget {
                   ? EdgeInsets.only(top: responsiveUI.own(0.03))
                   : const EdgeInsets.only(top: 0),
           child: ShadowText(
-            _activePageTitle,
+            _activePageTitle(context),
             color: kColor(context).tertiary,
             fontSize:
                 (userDidAuth && (route == AppRoute.collection))

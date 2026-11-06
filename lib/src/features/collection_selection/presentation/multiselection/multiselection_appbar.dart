@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:vndb_lite/src/app.dart';
 import 'package:vndb_lite/src/common_widgets/generic_shadowy_text.dart';
 import 'package:vndb_lite/src/features/collection/presentation/collection_appbar_tabs.dart';
 import 'package:vndb_lite/src/util/responsive.dart';
 import 'package:vndb_lite/src/core/local_db/shared_prefs.dart';
-import 'package:vndb_lite/src/features/_base/presentation/main_outer_layout.dart';
 import 'package:vndb_lite/src/features/collection/presentation/collection_content_controller.dart';
 import 'package:vndb_lite/src/features/collection_selection/presentation/dialogs/base_dialog.dart';
 import 'package:vndb_lite/src/features/collection_selection/presentation/dialogs/dialog_dismissed_state.dart';
@@ -13,6 +11,7 @@ import 'package:vndb_lite/src/features/collection_selection/presentation/multise
 import 'package:vndb_lite/src/features/settings/presentation/settings_general_state.dart';
 import 'package:vndb_lite/src/features/vn_item/presentation/vn_item_grid_.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
 class MultiSelectionBarActions extends ConsumerWidget {
   const MultiSelectionBarActions({super.key});
@@ -86,7 +85,10 @@ class MultiSelectionBarActions extends ConsumerWidget {
             child: IconButton(
               highlightColor: Colors.white.withOpacity(0.25),
               onPressed: () async {
-                final p1 = await ref.read(recordSelectedControllerProvider.notifier).convertToP1();
+                final p1 =
+                    await ref
+                        .read(recordSelectedControllerProvider.notifier)
+                        .convertToP1();
                 if (p1.isEmpty) return;
 
                 // Leaving only the first selected record to be preserved
@@ -113,7 +115,11 @@ class MultiSelectionBarActions extends ConsumerWidget {
           // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
           // Number count selected
           ShadowText(
-            '${recordSelected.length} selected',
+            appText(
+              context,
+              '${recordSelected.length} selected',
+              '${recordSelected.length} 件選択中',
+            ),
             color: kColor(context).tertiary,
             fontSize: responsiveUI.own(0.0525),
           ),
@@ -128,15 +134,20 @@ class MultiSelectionBarActions extends ConsumerWidget {
             padding: EdgeInsets.only(right: responsiveUI.own(0.02)),
             child: IconButton(
               highlightColor: Colors.white.withOpacity(0.25),
-              tooltip: 'Select all',
+              tooltip: appText(context, 'Select all', 'すべて選択'),
               onPressed: () async {
                 // Get user current location in the collection tabs.
                 final tabsArrangement =
-                    ref.read(settingsGeneralStateProvider).collectionStatusTabArrangement;
-                final statusBasedOnIndex = tabsArrangement[CollectionAppBarTabs.controller!.index];
+                    ref
+                        .read(settingsGeneralStateProvider)
+                        .collectionStatusTabArrangement;
+                final statusBasedOnIndex =
+                    tabsArrangement[CollectionAppBarTabs.controller!.index];
 
                 // For every vnData in the current status category, include them all.
-                final collectionContent = ref.read(collectionContentControllerProvider);
+                final collectionContent = ref.read(
+                  collectionContentControllerProvider,
+                );
                 _selectAll(ref, collectionContent[statusBasedOnIndex]!);
 
                 await sharedPref.reload();
@@ -151,16 +162,21 @@ class MultiSelectionBarActions extends ConsumerWidget {
           Padding(
             padding: EdgeInsets.only(right: responsiveUI.own(0.02)),
             child: IconButton(
-              tooltip: 'Select inverse',
+              tooltip: appText(context, 'Select inverse', '選択を反転'),
               highlightColor: Colors.white.withOpacity(0.25),
               onPressed: () async {
                 // Get user current location in the collection tabs.
                 final tabsArrangement =
-                    ref.read(settingsGeneralStateProvider).collectionStatusTabArrangement;
-                final statusBasedOnIndex = tabsArrangement[CollectionAppBarTabs.controller!.index];
+                    ref
+                        .read(settingsGeneralStateProvider)
+                        .collectionStatusTabArrangement;
+                final statusBasedOnIndex =
+                    tabsArrangement[CollectionAppBarTabs.controller!.index];
 
                 // For every vnData in the current status category, inverse them.
-                final collectionContent = ref.read(collectionContentControllerProvider);
+                final collectionContent = ref.read(
+                  collectionContentControllerProvider,
+                );
                 _inverseSelect(ref, collectionContent[statusBasedOnIndex]!);
 
                 await sharedPref.reload();

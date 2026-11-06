@@ -9,6 +9,7 @@ import 'package:vndb_lite/src/features/collection_selection/domain/vn_selection.
 import 'package:vndb_lite/src/features/collection_selection/presentation/collection_selection_controller.dart';
 import 'package:vndb_lite/src/features/collection_selection/presentation/dialog_components/footer_button_state.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
 class RecordDateOptions extends ConsumerStatefulWidget {
   const RecordDateOptions({super.key});
@@ -18,7 +19,8 @@ class RecordDateOptions extends ConsumerStatefulWidget {
 }
 
 class _RecordDateOptionsState extends ConsumerState<RecordDateOptions> {
-  final DateFormat _dtFormatter = DateFormat.yMd();
+  DateFormat get _dtFormatter =>
+      DateFormat.yMd(Localizations.localeOf(context).toString());
 
   bool _errorStartDate = false;
   bool _errorFinishDate = false;
@@ -33,13 +35,17 @@ class _RecordDateOptionsState extends ConsumerState<RecordDateOptions> {
   bool get _incorrectStartDate {
     final startDate = ref.read(vnSelectionControllerProvider).started;
     final finishDate = ref.read(vnSelectionControllerProvider).finished;
-    return startDate != null && finishDate != null && startDate.isAfter(finishDate); // Incorrect
+    return startDate != null &&
+        finishDate != null &&
+        startDate.isAfter(finishDate); // Incorrect
   }
 
   bool get _incorrectFinishDate {
     final startDate = ref.read(vnSelectionControllerProvider).started;
     final finishDate = ref.read(vnSelectionControllerProvider).finished;
-    return finishDate != null && startDate != null && finishDate.isBefore(startDate); // Incorrect
+    return finishDate != null &&
+        startDate != null &&
+        finishDate.isBefore(startDate); // Incorrect
   }
 
   set _canConfirm(bool value) {
@@ -110,13 +116,26 @@ class _RecordDateOptionsState extends ConsumerState<RecordDateOptions> {
   // provide the identifier for both start and finish date.
   String _dateOptionText(DateTime? selectedDate, bool isError) {
     if (selectedDate != null) {
-      if (_errorFinishDate && isError) return 'Finish date must be after the start date.';
-      if (_errorStartDate && isError) return 'Start date must be before the finish date.';
+      if (_errorFinishDate && isError) {
+        return appText(
+          context,
+          'Finish date must be after the start date.',
+          '終了日は開始日以降の日付にしてください。',
+        );
+      }
+      if (_errorStartDate && isError) {
+        return appText(
+          context,
+          'Start date must be before the finish date.',
+          '開始日は終了日以前の日付にしてください。',
+        );
+      }
       return '  ${_dtFormatter.format(selectedDate)}';
     }
 
-    final isInMultiSelection = ref.read(recordSelectedControllerProvider).isNotEmpty;
-    if (isInMultiSelection) return ' Mixed';
+    final isInMultiSelection =
+        ref.read(recordSelectedControllerProvider).isNotEmpty;
+    if (isInMultiSelection) return appText(context, ' Mixed', ' 混在');
     return '';
   }
 
@@ -131,7 +150,9 @@ class _RecordDateOptionsState extends ConsumerState<RecordDateOptions> {
       _canConfirm = true;
       _errorStartDate = false;
       _errorFinishDate = false;
-      ref.read(vnSelectionControllerProvider.notifier).copyWith(started: _now, finished: _now);
+      ref
+          .read(vnSelectionControllerProvider.notifier)
+          .copyWith(started: _now, finished: _now);
     }
   }
 
@@ -173,8 +194,12 @@ class _RecordDateOptionsState extends ConsumerState<RecordDateOptions> {
                         splashRadius: 2,
                         value: _selectingDateTimeNow,
                         checkColor: kColor(context).primary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.0)),
-                        fillColor: WidgetStatePropertyAll(kColor(context).secondary),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
+                        fillColor: WidgetStatePropertyAll(
+                          kColor(context).secondary,
+                        ),
                         onChanged: (value) {
                           _tapNowDate(selectionController);
                           setState(() {});
@@ -186,8 +211,11 @@ class _RecordDateOptionsState extends ConsumerState<RecordDateOptions> {
                     padding: EdgeInsets.only(left: responsiveUI.own(0.01)),
                     child: Wrap(
                       children: [
-                        ShadowText('Now ('),
-                        ShadowText(_dtFormatter.format(_now), color: kColor(context).secondary),
+                        ShadowText(appText(context, 'Now (', '今日（')),
+                        ShadowText(
+                          _dtFormatter.format(_now),
+                          color: kColor(context).secondary,
+                        ),
                         ShadowText(')'),
                       ],
                     ),
@@ -202,22 +230,31 @@ class _RecordDateOptionsState extends ConsumerState<RecordDateOptions> {
           // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
           // Started
           Opacity(
-            opacity: (_selectingDateTimeNow || buttonState == ButtonState.loading) ? 0.6 : 1,
+            opacity:
+                (_selectingDateTimeNow || buttonState == ButtonState.loading)
+                    ? 0.6
+                    : 1,
             child: GestureDetector(
               onTap: (_selectingDateTimeNow) ? () {} : _startDatePicker,
               child: Wrap(
                 alignment: WrapAlignment.start,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  ShadowText('Start Date (Opt.) '),
+                  ShadowText(appText(context, 'Start Date (Opt.) ', '開始日（任意）')),
                   Icon(
                     Icons.calendar_month,
                     size: responsiveUI.own(0.045),
                     color: kColor(context).secondary,
                   ),
                   ShadowText(
-                    _dateOptionText(selectionController.started, _errorStartDate),
-                    color: (_errorStartDate) ? Colors.red : kColor(context).secondary,
+                    _dateOptionText(
+                      selectionController.started,
+                      _errorStartDate,
+                    ),
+                    color:
+                        (_errorStartDate)
+                            ? Colors.red
+                            : kColor(context).secondary,
                   ),
                 ],
               ),
@@ -229,22 +266,33 @@ class _RecordDateOptionsState extends ConsumerState<RecordDateOptions> {
           // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
           // Finished
           Opacity(
-            opacity: (_selectingDateTimeNow || buttonState == ButtonState.loading) ? 0.6 : 1,
+            opacity:
+                (_selectingDateTimeNow || buttonState == ButtonState.loading)
+                    ? 0.6
+                    : 1,
             child: GestureDetector(
               onTap: (_selectingDateTimeNow) ? () {} : _finishDatePicker,
               child: Wrap(
                 crossAxisAlignment: WrapCrossAlignment.center,
                 alignment: WrapAlignment.start,
                 children: [
-                  ShadowText('Finish Date (Opt.) '),
+                  ShadowText(
+                    appText(context, 'Finish Date (Opt.) ', '終了日（任意）'),
+                  ),
                   Icon(
                     Icons.calendar_month,
                     size: responsiveUI.own(0.045),
                     color: kColor(context).secondary,
                   ),
                   ShadowText(
-                    _dateOptionText(selectionController.finished, _errorFinishDate),
-                    color: (_errorFinishDate) ? Colors.red : kColor(context).secondary,
+                    _dateOptionText(
+                      selectionController.finished,
+                      _errorFinishDate,
+                    ),
+                    color:
+                        (_errorFinishDate)
+                            ? Colors.red
+                            : kColor(context).secondary,
                   ),
                 ],
               ),

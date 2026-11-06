@@ -1,9 +1,8 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:vndb_lite/src/app.dart';
@@ -57,35 +56,19 @@ class _VnItemGridCoverState extends State<VnItemGridCover> {
   late final String _blurId;
   String? _customCoverPath;
 
-  bool _isSystematicallyCensored = false;
-
   @override
   void initState() {
     super.initState();
     _coverUrl = widget.image?.thumbnail;
-    _hasCover = widget.image != null && _coverUrl != null;
+    _hasCover = widget.image != null && (_coverUrl?.isNotEmpty ?? false);
     _blurId = widget.vnId + widget.labelCode + App.currentRoute;
     _customCoverPath = ref_
         .read(sharedPrefProvider)
         .getString('${DBKeys.CUSTOM_COVER_PATH}${widget.vnId}');
-
-    if (_hasCover) {
-      final settings = ref_.read(settingsGeneralStateProvider);
-      if (settings.showCoverCensor && _vnMatchCensorRequirement) {
-        _isSystematicallyCensored = true;
-      }
-    }
-
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      ref_
-          .read(vnItemGridCoverCensorNotifierProvider(_blurId).notifier)
-          .set(_isSystematicallyCensored);
-    });
   }
 
   @override
   void dispose() {
-    DefaultCacheManager().emptyCache();
     super.dispose();
   }
 
@@ -98,9 +81,11 @@ class _VnItemGridCoverState extends State<VnItemGridCover> {
   Widget build(BuildContext context) {
     final cover = Consumer(
       builder: (context, ref, child) {
+        final settings = ref.watch(settingsGeneralStateProvider);
         final isCensor =
-            ref.watch(vnItemGridCoverCensorNotifierProvider(_blurId)) ??
-            _isSystematicallyCensored;
+            settings.showCoverCensor &&
+            (ref.watch(vnItemGridCoverCensorNotifierProvider(_blurId)) ??
+                _vnMatchCensorRequirement);
 
         // return FutureBuilder(
         //   future: CustomCacheManager().getSingleFile(widget.image!.thumbnail!),
@@ -112,39 +97,71 @@ class _VnItemGridCoverState extends State<VnItemGridCover> {
         //   },
         // );
 
+        final Widget image;
         if (_customCoverPath != null && File(_customCoverPath!).existsSync()) {
-          return Image.file(
+          image = Image.file(
             File(_customCoverPath!),
             width: widget.isGridView ? double.infinity : null,
             height:
                 widget.isGridView ? null : VnItemGridCover.nonGridViewHeight,
             fit: BoxFit.cover,
+            cacheWidth: widget.isGridView ? 420 : null,
+          );
+        } else {
+          image = CachedNetworkImage(
+            imageUrl: (_hasCover) ? (_coverUrl ?? '') : '',
+            width: (widget.isGridView) ? double.infinity : null,
+            height:
+                (widget.isGridView) ? null : VnItemGridCover.nonGridViewHeight,
+            placeholder:
+                (_, _) => SizedBox.square(
+                  dimension:
+                      VnItemGridCover.sizes[widget.vnId] ??
+                      VnItemGridCover.placeHolderSize,
+                ),
+            fit: BoxFit.cover,
+            filterQuality: FilterQuality.low,
+            // Avoid animating each cover as it enters an actively scrolling grid.
+            fadeInDuration: Duration.zero,
+            fadeOutDuration: Duration.zero,
+            errorWidget: (_, url, error) => const GenericErrorImage(),
+            errorListener: null,
+            cacheManager: (!App.isInSearchScreen) ? CustomCacheManager() : null,
+            cacheKey:
+                (!App.isInSearchScreen)
+                    ? (isCensor)
+                        ? "CENSORED-PREVIEW-${widget.vnId}"
+                        : "PREVIEW-${widget.vnId}"
+                    : null,
+            memCacheWidth: widget.isGridView ? 420 : 700,
+            maxHeightDiskCache: widget.isGridView ? 600 : 1000,
+            maxWidthDiskCache: widget.isGridView ? 420 : 700,
           );
         }
 
-        return CachedNetworkImage(
-          imageUrl: (_hasCover) ? (_coverUrl ?? '') : '',
-          width: (widget.isGridView) ? double.infinity : null,
-          height:
-              (widget.isGridView) ? null : VnItemGridCover.nonGridViewHeight,
-          placeholder:
-              (_, _) => SizedBox.square(
-                dimension:
-                    VnItemGridCover.sizes[widget.vnId] ??
-                    VnItemGridCover.placeHolderSize,
+        return Stack(
+          fit: StackFit.passthrough,
+          children: [
+            if (isCensor)
+              ImageFiltered(
+                imageFilter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                child: image,
+              )
+            else
+              image,
+            if (isCensor)
+              const Positioned.fill(
+                child: IgnorePointer(
+                  child: Center(
+                    child: Icon(
+                      Icons.visibility,
+                      color: Colors.white,
+                      shadows: [Shadow(color: Colors.black, blurRadius: 8)],
+                    ),
+                  ),
+                ),
               ),
-          fit: BoxFit.cover,
-          errorWidget: (_, url, error) => const GenericErrorImage(),
-          errorListener: null,
-          cacheManager: (!App.isInSearchScreen) ? CustomCacheManager() : null,
-          cacheKey:
-              (!App.isInSearchScreen)
-                  ? (isCensor)
-                      ? "CENSORED-PREVIEW-${widget.vnId}"
-                      : "PREVIEW-${widget.vnId}"
-                  : null,
-          maxHeightDiskCache: (isCensor) ? 15 : null,
-          maxWidthDiskCache: (isCensor) ? 15 : null,
+          ],
         );
       },
     );
@@ -152,6 +169,7 @@ class _VnItemGridCoverState extends State<VnItemGridCover> {
     // * Exists only to fetch the size for the placeholder image to prevent
     // * stuttering in a gridview.
     if (widget.isGridView &&
+        !App.isInCollectionScreen &&
         VnItemGridCover.placeHolderSize ==
             (VnItemGridCover.sizes[widget.vnId] ??
                 VnItemGridCover.placeHolderSize)) {

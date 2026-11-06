@@ -182,7 +182,6 @@ class CollectionContentController extends _$CollectionContentController {
       if (!localVnRepo.p1Exist(vnId) || !localVnRepo.p2Exist(vnId)) {
         bool isConnected = false;
 
-        await Future.delayed(const Duration(milliseconds: 1500));
         final valid = await ref.read(
           validateVnAndSaveToLocalProvider(vnId).future,
         );

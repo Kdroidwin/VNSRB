@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:vndb_lite/src/app.dart';
 import 'package:vndb_lite/src/common_widgets/generic_shadowy_text.dart';
 import 'package:vndb_lite/src/util/responsive.dart';
@@ -16,8 +15,9 @@ import 'package:vndb_lite/src/features/collection_selection/presentation/dialog_
 import 'package:vndb_lite/src/features/collection_selection/presentation/dialog_components/vote_option.dart';
 import 'package:vndb_lite/src/features/vn/domain/p1.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
-class VnSelection extends ConsumerWidget {
+class VnSelection extends ConsumerStatefulWidget {
   const VnSelection(this.p1, {super.key, required this.isGridView});
 
   final List<VnDataPhase01> p1;
@@ -28,7 +28,22 @@ class VnSelection extends ConsumerWidget {
   //
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<VnSelection> createState() => _VnSelectionState();
+}
+
+class _VnSelectionState extends ConsumerState<VnSelection> {
+  @override
+  void initState() {
+    super.initState();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.invalidate(vnSelectionControllerProvider);
+      ref.read(vnSelectionControllerProvider.notifier).init(widget.p1);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // If an ongoing progress exist then user shall not interrupt the progress
     // assuming that it would hurt the progress if related to collection.
     if (ref.watch(bottomProgressIndicatorProvider)) {
@@ -37,14 +52,8 @@ class VnSelection extends ConsumerWidget {
 
     // vnTitles will be an indicator whether the selection is single or for multiple.
     final List<String> vnTitles = [
-      for (VnDataPhase01 selectedVn in p1) selectedVn.displayTitle,
+      for (VnDataPhase01 selectedVn in widget.p1) selectedVn.displayTitle,
     ];
-
-    // Initialization.
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      ref.invalidate(vnSelectionControllerProvider);
-      ref.read(vnSelectionControllerProvider.notifier).init(p1);
-    });
 
     return SingleChildScrollView(
       child: Column(
@@ -54,7 +63,7 @@ class VnSelection extends ConsumerWidget {
           Container(
             alignment: Alignment.centerLeft,
             child: ShadowText(
-              "Add to collection",
+              appText(context, 'Add to collection', 'コレクションに追加'),
               fontSize: responsiveUI.catgTitle,
               fontWeight: FontWeight.bold,
             ),
@@ -79,8 +88,10 @@ class VnSelection extends ConsumerWidget {
           //
           // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
           // Plus button for multi-selection
-          if (App.isInCollectionScreen && !App.isInVnDetailScreen && isGridView)
-            VnSelectionDialogPlusButton(data: p1),
+          if (App.isInCollectionScreen &&
+              !App.isInVnDetailScreen &&
+              widget.isGridView)
+            VnSelectionDialogPlusButton(data: widget.p1),
           SizedBox(height: responsiveUI.own(0.015)),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,7 +103,7 @@ class VnSelection extends ConsumerWidget {
               Wrap(
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  ShadowText('Status: '),
+                  ShadowText(appText(context, 'Status: ', 'ステータス：')),
                   Consumer(
                     builder: (context, ref, child) {
                       final selectionController = ref.watch(
@@ -100,7 +111,8 @@ class VnSelection extends ConsumerWidget {
                       );
 
                       return ShadowText(
-                        toBeginningOfSentenceCase<String>(
+                        collectionStatusText(
+                          context,
                           selectionController.status,
                         ),
                         color: kColor(context).secondary,
@@ -172,7 +184,7 @@ class VnSelection extends ConsumerWidget {
           // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
           //
           SizedBox(height: responsiveUI.own(0.025)),
-          VnSelectionDialogFooter(data: p1),
+          VnSelectionDialogFooter(data: widget.p1),
           //
           // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
           //

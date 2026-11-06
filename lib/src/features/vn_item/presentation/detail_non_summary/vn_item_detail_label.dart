@@ -19,65 +19,55 @@ class VnItemDetailLabel extends ConsumerWidget {
   });
 
   final VnDataPhase01 p1;
-
   final String labelCode;
 
-  Future<String> _getLabelData(
-    WidgetRef ref,
-    String label, {
-    VnRecord? record,
-  }) async {
-    final labelCode = label.toLowerCase();
-    if (labelCode == SortableCode.title.name || labelCode.isEmpty) return '';
-    if (labelCode == SortableCode.rating.name)
+  String _getLabelData(String label, {VnRecord? record}) {
+    final code = label.toLowerCase();
+    if (code == SortableCode.title.name || code.isEmpty) return '';
+    if (code == SortableCode.rating.name) {
       return (p1.rating! / 10).toStringAsFixed(2);
-    if (labelCode == SortableCode.votecount.name)
-      return p1.votecount.toString();
-    if (labelCode == SortableCode.released.name) return p1.released!;
-
-    final DateFormat dtFormatter = DateFormat.yMd();
-
-    if (labelCode == SortableCode.length_minutes.name) {
-      final localVnRepo = ref.read(localVnRepoProvider);
-      final p2 = await localVnRepo.getP2(p1.id);
-      return getVnLength(p2!.length_minutes ?? 0);
     }
-
-    if (labelCode == SortableCode.collection.name && record != null)
+    if (code == SortableCode.votecount.name) return p1.votecount.toString();
+    if (code == SortableCode.released.name) return p1.released!;
+    if (code == SortableCode.collection.name && record != null) {
       return record.status;
-
-    if (labelCode == SortableCode.vote.name && record != null)
+    }
+    if (code == SortableCode.vote.name && record != null) {
       return record.vote.toString();
-
-    if (labelCode == SortableCode.added.name &&
-        record != null &&
-        record.added != 'null') {
-      return dtFormatter.format(DateTime.parse(record.added!));
     }
 
-    if (labelCode == SortableCode.started.name &&
-        record != null &&
-        record.started != 'null') {
-      return dtFormatter.format(DateTime.parse(record.started!));
+    final formatter = DateFormat.yMd();
+    if (code == SortableCode.added.name &&
+        record?.added != null &&
+        record!.added != 'null') {
+      return formatter.format(DateTime.parse(record.added!));
+    }
+    if (code == SortableCode.started.name &&
+        record?.started != null &&
+        record!.started != 'null') {
+      return formatter.format(DateTime.parse(record.started!));
     }
 
-    // TODO create enum?
-    if (labelCode == 'orig') return 'Original';
-    if (labelCode == 'seq') return 'Sequel';
-    if (labelCode == 'preq') return 'Prequel';
-    if (labelCode == 'ser') return 'Same Series';
-    if (labelCode == 'set') return 'Same Setting';
-    if (labelCode == 'char') return 'Characters';
-    if (labelCode == 'fan') return 'Fandisc';
-    if (labelCode == 'side') return 'Side Story';
-    if (labelCode == 'alt') return 'Alternative';
-
-    return toBeginningOfSentenceCase<String>("Unknown");
+    return switch (code) {
+      'orig' => 'Original',
+      'seq' => 'Sequel',
+      'preq' => 'Prequel',
+      'ser' => 'Same Series',
+      'set' => 'Same Setting',
+      'char' => 'Characters',
+      'fan' => 'Fandisc',
+      'side' => 'Side Story',
+      'alt' => 'Alternative',
+      _ => toBeginningOfSentenceCase<String>('Unknown'),
+    };
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final vnRecord = ref.watch(vnRecordStateProvider(p1.id));
+    if (labelCode == SortableCode.title.name || labelCode.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     final isDateLabel =
         labelCode == SortableCode.released.name ||
         labelCode == SortableCode.added.name ||
@@ -88,22 +78,35 @@ class VnItemDetailLabel extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    if (labelCode != SortableCode.title.name) {
+    // These labels come from P1 or a fixed label. Avoid querying and decoding
+    // each VN's local collection record while creating grid cards.
+    final needsRecord =
+        labelCode == SortableCode.collection.name ||
+        labelCode == SortableCode.vote.name ||
+        labelCode == SortableCode.added.name ||
+        labelCode == SortableCode.started.name;
+    final VnRecord? record =
+        needsRecord ? ref.watch(vnRecordStateProvider(p1.id)) : null;
+
+    if (labelCode == SortableCode.length_minutes.name) {
       return FutureBuilder(
-        future: _getLabelData(ref, labelCode, record: vnRecord),
-        initialData: "",
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
+        future: ref.read(localVnRepoProvider).getP2(p1.id),
+        initialData: null,
+        builder: (context, snapshot) {
           return StatusLabel(
-            labelCode:
-                (labelCode == SortableCode.collection.name && vnRecord != null)
-                    ? vnRecord.status
-                    : labelCode,
-            labelText: snapshot.data,
+            labelCode: labelCode,
+            labelText: getVnLength(snapshot.data?.length_minutes),
           );
         },
       );
     }
 
-    return const SizedBox.shrink();
+    return StatusLabel(
+      labelCode:
+          (labelCode == SortableCode.collection.name && record != null)
+              ? record.status
+              : labelCode,
+      labelText: _getLabelData(labelCode, record: record),
+    );
   }
 }

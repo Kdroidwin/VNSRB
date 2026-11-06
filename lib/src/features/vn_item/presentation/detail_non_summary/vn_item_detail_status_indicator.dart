@@ -19,6 +19,9 @@ class VnItemDetailStatusIndicator extends ConsumerWidget {
   final VoidCallback toggleVnDetailSummary;
   final String? forceStatus;
 
+  Icon _infoIcon(Color color) =>
+      Icon(Icons.info_outline, color: color, size: responsiveUI.own(0.0575));
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (App.isInCollectionScreen) {
@@ -46,23 +49,24 @@ class VnItemDetailStatusIndicator extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(12),
                 color: kColor(context).primary.withOpacity(0.8),
               ),
-              child: Consumer(
-                builder: (context, ref, child) {
-                  final vnRecord = ref.watch(vnRecordStateProvider(id));
-
-                  return Icon(
-                    Icons.info_outline,
-                    color:
-                        (vnRecord != null)
-                            ? COLLECTION_STATUS_DATA[forceStatus ?? vnRecord.status]!.color
-                            : Colors.white,
-                    size: responsiveUI.own(0.0575),
-                    shadows: const [
-                      Shadow(color: Colors.black, blurRadius: 5, offset: Offset(3, 3)),
-                    ],
-                  );
-                },
-              ),
+              child:
+                  forceStatus != null
+                      ? _infoIcon(
+                        COLLECTION_STATUS_DATA[forceStatus]?.color ??
+                            Colors.white,
+                      )
+                      : Consumer(
+                        builder: (context, ref, child) {
+                          final vnRecord = ref.watch(vnRecordStateProvider(id));
+                          return _infoIcon(
+                            vnRecord != null
+                                ? COLLECTION_STATUS_DATA[vnRecord.status]
+                                        ?.color ??
+                                    Colors.white
+                                : Colors.white,
+                          );
+                        },
+                      ),
             ),
           ),
         ),

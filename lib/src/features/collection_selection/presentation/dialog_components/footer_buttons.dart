@@ -4,14 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:vndb_lite/src/app.dart';
 import 'package:vndb_lite/src/common_widgets/custom_dialog_button.dart';
 import 'package:vndb_lite/src/common_widgets/generic_shadowy_text.dart';
 import 'package:vndb_lite/src/common_widgets/generic_snackbar.dart';
 import 'package:vndb_lite/src/core/app/navigation.dart';
-import 'package:vndb_lite/src/features/sort_filter/presentation/local/local_sort_filter_controller.dart';
 import 'package:vndb_lite/src/util/responsive.dart';
-import 'package:vndb_lite/src/features/collection/presentation/collection_content_controller.dart';
 import 'package:vndb_lite/src/features/collection_selection/application/collection_selection_service.dart';
 import 'package:vndb_lite/src/features/collection_selection/presentation/dialogs/dialog_dismissed_state.dart';
 import 'package:vndb_lite/src/features/collection_selection/presentation/multiselection/record_selected_controller.dart';
@@ -24,6 +21,7 @@ import 'package:vndb_lite/src/features/vn_item/presentation/detail_non_summary/v
 import 'package:vndb_lite/src/util/alt_provider_reader.dart';
 import 'package:vndb_lite/src/common_widgets/custom_button.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
 class VnSelectionDialogFooter extends ConsumerWidget {
   const VnSelectionDialogFooter({super.key, required this.data});
@@ -34,10 +32,18 @@ class VnSelectionDialogFooter extends ConsumerWidget {
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   //
 
-  void _showSnackbar({Color? color, required String text, required IconData icon}) {
+  void _showSnackbar({
+    Color? color,
+    required String text,
+    required IconData icon,
+  }) {
     GenericSnackBar(
       content: [
-        Icon(icon, size: responsiveUI.snackbarIcon, color: color ?? kColor().tertiary),
+        Icon(
+          icon,
+          size: responsiveUI.snackbarIcon,
+          color: color ?? kColor().tertiary,
+        ),
         SizedBox(width: responsiveUI.own(0.015)),
         Flexible(child: ShadowText(text, fontSize: responsiveUI.snackbarTxt)),
       ],
@@ -52,15 +58,9 @@ class VnSelectionDialogFooter extends ConsumerWidget {
   Future<void> _notifyCollectionPreview() async {
     ref_.invalidate(homePreviewServiceProvider);
 
-    // Prevent changing collection refreshing the items which made the items disappear and force user to
-    // go up from where the user scroll.
-    if (!App.isInCollectionScreen) {
-      final filterData = ref_.read(localFilterControllerProvider);
-      final sortData = ref_.read(localSortControllerProvider);
-      await ref_
-          .read(collectionContentControllerProvider.notifier)
-          .separateVNsByStatus(filterData, sortData);
-    }
+    // The home preview reads P1 directly from local storage. Rebuilding the
+    // entire collection here caused unnecessary metadata requests and jank;
+    // the collection screen refreshes its own content when opened.
   }
 
   //
@@ -74,6 +74,17 @@ class VnSelectionDialogFooter extends ConsumerWidget {
     // Watch states, to update UI.
     final selectionState = ref.watch(vnSelectionControllerProvider);
     final buttonState = ref.watch(vnButtonStateProvider);
+    final updatedMessage = appText(context, 'Updated.', '更新しました。');
+    final addedMessage = appText(
+      context,
+      'Added to library.',
+      'コレクションに追加しました。',
+    );
+    final removedMessage = appText(
+      context,
+      'Record removed.',
+      'コレクションから削除しました。',
+    );
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
@@ -82,7 +93,7 @@ class VnSelectionDialogFooter extends ConsumerWidget {
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         // Cancel button
         CustomDialogButton(
-          text: 'Cancel',
+          text: appText(context, 'Cancel', 'キャンセル'),
           color: Colors.transparent,
           padding: EdgeInsets.symmetric(
             vertical: responsiveUI.own(0.025),
@@ -104,7 +115,7 @@ class VnSelectionDialogFooter extends ConsumerWidget {
         // Remove button
         if (!selectionState.isNew && buttonState == ButtonState.active)
           CustomDialogButton(
-            text: 'Remove',
+            text: appText(context, 'Remove', '削除'),
             padding: EdgeInsets.symmetric(
               vertical: responsiveUI.own(0.025),
               horizontal: responsiveUI.own(0.035),
@@ -120,7 +131,8 @@ class VnSelectionDialogFooter extends ConsumerWidget {
                     ref.invalidate(recordSelectedControllerProvider);
 
                     // Dialog is not dimissed (cancelled).
-                    ref.read(dialogDismissedStateProvider.notifier).dismissed = false;
+                    ref.read(dialogDismissedStateProvider.notifier).dismissed =
+                        false;
                     NavigationService.currentContext
                       ..pop()
                       ..pop();
@@ -129,14 +141,16 @@ class VnSelectionDialogFooter extends ConsumerWidget {
 
                     _showSnackbar(
                       color: Colors.red,
-                      text: 'Record removed.',
+                      text: removedMessage,
                       icon: Icons.delete_forever,
                     );
                   },
                   removeRefresh: (String id) {
                     SchedulerBinding.instance.addPostFrameCallback((_) {
                       ref.invalidate(vnRecordStateProvider(id));
-                      ref.read(vnRecordStateProvider(id).notifier).importRecord(null);
+                      ref
+                          .read(vnRecordStateProvider(id).notifier)
+                          .importRecord(null);
                     });
                   },
                 );
@@ -149,10 +163,12 @@ class VnSelectionDialogFooter extends ConsumerWidget {
         Opacity(
           opacity: (buttonState == ButtonState.active) ? 1 : 0.6,
           child: CustomDialogButton(
-            text: 'Confirm',
+            text: appText(context, 'Confirm', '確定'),
             color: kColor(context).tertiary,
             textColor: kColor(context).primary,
-            textShadow: const [Shadow(color: Color.fromARGB(120, 0, 0, 0), blurRadius: 1)],
+            textShadow: const [
+              Shadow(color: Color.fromARGB(120, 0, 0, 0), blurRadius: 1),
+            ],
             onPressed: () async {
               if (buttonState == ButtonState.loading) return;
 
@@ -179,23 +195,33 @@ class VnSelectionDialogFooter extends ConsumerWidget {
                   // ignore: provider_parameters
                   whenSuccess: () async {
                     changeButton.state = ButtonState.active;
-                    final isNew = selectionState.isNew; // Storing the state temporarily.
+                    final isNew =
+                        selectionState.isNew; // Storing the state temporarily.
 
                     // Turning off multiselection mode
                     ref.invalidate(recordSelectedControllerProvider);
 
                     // Dialog is not dimissed (cancelled).
-                    ref.read(dialogDismissedStateProvider.notifier).dismissed = false;
+                    ref.read(dialogDismissedStateProvider.notifier).dismissed =
+                        false;
                     NavigationService.currentContext.pop();
 
                     await _notifyCollectionPreview();
 
-                    final recordSelected = ref.read(recordSelectedControllerProvider);
+                    final recordSelected = ref.read(
+                      recordSelectedControllerProvider,
+                    );
                     if (recordSelected.length > 1 || !isNew) {
-                      return _showSnackbar(text: 'Updated.', icon: Icons.update);
+                      return _showSnackbar(
+                        text: updatedMessage,
+                        icon: Icons.update,
+                      );
                     }
 
-                    _showSnackbar(text: 'Added to library.', icon: Icons.library_add_check);
+                    _showSnackbar(
+                      text: addedMessage,
+                      icon: Icons.library_add_check,
+                    );
                   },
                   // ignore: provider_parameters
                   whenErr: (err, st) {
@@ -205,7 +231,11 @@ class VnSelectionDialogFooter extends ConsumerWidget {
                     changeButton.state = ButtonState.active;
                     _showSnackbar(
                       color: Colors.red,
-                      text: 'An error occurred... Please try again later.',
+                      text: appText(
+                        context,
+                        'An error occurred... Please try again later.',
+                        'エラーが発生しました。通信状態を確認して、もう一度お試しください。',
+                      ),
                       icon: Icons.error_outline,
                     );
                   },

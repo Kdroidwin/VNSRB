@@ -19,6 +19,7 @@ import 'package:vndb_lite/src/features/sort_filter/data/sortable_data.dart';
 import 'package:vndb_lite/src/features/sort_filter/presentation/remote/remote_sort_filter_controller.dart';
 
 import '../../../util/alt_provider_reader.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
 class SearchScreen extends ConsumerWidget {
   const SearchScreen({super.key});
@@ -26,7 +27,7 @@ class SearchScreen extends ConsumerWidget {
   static ScrollController? scrollController;
   static const Key onHoldStatusKey = ValueKey("onhold");
 
-  void _showConnectionErrorSnackbar() {
+  void _showConnectionErrorSnackbar(BuildContext context) {
     final snackbar = GenericSnackBar(
       duration: const Duration(milliseconds: 6000),
       content: [
@@ -38,7 +39,11 @@ class SearchScreen extends ConsumerWidget {
         SizedBox(width: responsiveUI.own(0.018)),
         Flexible(
           child: ShadowText(
-            'Connection error, unable to fetch data.\nPlease try again later.',
+            appText(
+              context,
+              'Connection error, unable to fetch data.\nPlease try again later.',
+              '通信エラーでデータを取得できませんでした。\n時間をおいて再度お試しください。',
+            ),
             fontSize: responsiveUI.snackbarTxt,
           ),
         ),
@@ -113,27 +118,32 @@ class SearchScreen extends ConsumerWidget {
           return Padding(
             key: onHoldStatusKey,
             padding: EdgeInsets.only(
-              bottom: (pageResult > 1) ? 0 : MediaQuery.sizeOf(context).height * 0.15,
+              bottom:
+                  (pageResult > 1)
+                      ? 0
+                      : MediaQuery.sizeOf(context).height * 0.15,
             ),
             child: SizedBox(
               height:
                   (pageResult > 1)
                       // Appending existing result
                       ? MediaQuery.sizeOf(context).height * 0.2
-                      : MediaQuery.sizeOf(context).height * 0.65, // First-time result
+                      : MediaQuery.sizeOf(context).height *
+                          0.65, // First-time result
               child: const Center(child: CircularProgressIndicator()),
             ),
           );
         }
 
         if (snapshot.hasError) {
-          _showConnectionErrorSnackbar();
+          _showConnectionErrorSnackbar(context);
           _removeErrorOrLoadingWidget();
           _readyToRefetch();
 
           // Configured in ApiService class for a scenario when no internet connection,
           // the exception type goes with connectionTimeout.
-          if ((snapshot.error as DioException).type == DioExceptionType.connectionTimeout &&
+          if ((snapshot.error as DioException).type ==
+                  DioExceptionType.connectionTimeout &&
               pageResult > 1) {
             return const SizedBox.shrink(key: onHoldStatusKey);
           }
@@ -145,13 +155,16 @@ class SearchScreen extends ConsumerWidget {
           // TODO better network error UI?
           return SingleChildScrollView(
             key: onHoldStatusKey,
-            physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+            physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
+            ),
             child: SizedBox(
               height:
                   (pageResult > 1)
                       ? MediaQuery.sizeOf(context).height *
                           0.2 // Appending existing result
-                      : MediaQuery.sizeOf(context).height * 0.75, // First-time result
+                      : MediaQuery.sizeOf(context).height *
+                          0.75, // First-time result
               child: const GenericFailureConnection(),
             ),
           );
@@ -161,7 +174,7 @@ class SearchScreen extends ConsumerWidget {
         _removeErrorOrLoadingWidget(once: true);
         final result = snapshot.data?.data['results'];
 
-        if (result.isEmpty || result == null) {
+        if (result == null || result.isEmpty) {
           // Will not be able continue
           _setNoResultYetSearchIndicator();
 
@@ -183,7 +196,9 @@ class SearchScreen extends ConsumerWidget {
         final p1 = remoteRepo.p1ListFromResponse(result);
 
         // Append the result to the controller, and should update UI.
-        ref_.read(searchResultControllerProvider.notifier).fromP1(p1, labelCode);
+        ref_
+            .read(searchResultControllerProvider.notifier)
+            .fromP1(p1, labelCode);
 
         // Only for the first time result, it will show the SearchResult widget, but afterwards the result will
         // just append the already existing searchResult from searchResultProvider.
@@ -203,7 +218,8 @@ class SearchScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsGeneralStateProvider);
-    final searchFilter = ref.watch(appliedRemoteFilterControllerProvider).search;
+    final searchFilter =
+        ref.watch(appliedRemoteFilterControllerProvider).search;
 
     return NestedScrollView(
       floatHeaderSlivers: true,

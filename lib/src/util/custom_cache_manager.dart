@@ -1,7 +1,8 @@
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:file/local.dart';
 import 'package:file/file.dart' hide FileSystem;
-import 'package:flutter_cache_manager/src/storage/file_system/file_system.dart' as c;
+import 'package:flutter_cache_manager/src/storage/file_system/file_system.dart'
+    as c;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -36,5 +37,10 @@ class IOFileSystem implements c.FileSystem {
 class CustomCacheManager extends CacheManager with ImageCacheManager {
   static const String key = "vndb_lite_cache";
 
-  CustomCacheManager() : super(Config(key, fileSystem: const IOFileSystem(key)));
+  static final CustomCacheManager _instance = CustomCacheManager._();
+
+  factory CustomCacheManager() => _instance;
+
+  CustomCacheManager._()
+    : super(Config(key, fileSystem: const IOFileSystem(key)));
 }

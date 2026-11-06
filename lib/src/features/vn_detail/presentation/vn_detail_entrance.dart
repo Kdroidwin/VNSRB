@@ -8,6 +8,7 @@ import 'package:vndb_lite/src/util/responsive.dart';
 import 'package:vndb_lite/src/features/collection_selection/application/collection_selection_remote_service.dart';
 import 'package:vndb_lite/src/features/vn/data/local_vn_repo.dart';
 import 'package:vndb_lite/src/features/vn/domain/p1.dart';
+import 'package:vndb_lite/src/features/vn/domain/p2.dart';
 import 'package:vndb_lite/src/features/vn_detail/presentation/components/vn_detail_content.dart';
 
 class VnDetailsEntrance extends ConsumerWidget {
@@ -19,19 +20,25 @@ class VnDetailsEntrance extends ConsumerWidget {
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   //
 
-  Widget get _loading {
-    final context = NavigationService.currentContext;
-
-    return Center(
-      child: SizedBox(
-        height:
-            (MediaQuery.of(context).orientation == Orientation.landscape)
-                ? responsiveUI.own(0.5)
-                : responsiveUI.own(1),
-        width: responsiveUI.own(0.1),
-        child: const Center(child: CircularProgressIndicator()),
-      ),
+  VnDataPhase02 _loadingP2(String vnId) {
+    return VnDataPhase02(
+      id: vnId,
+      developers: const [],
+      devstatus: -1,
+      length_minutes: 0,
+      aliases: const [],
+      minage: const [],
+      tags: const [],
+      screenshots: const [],
+      languages: const [],
+      mtl: const [],
+      platforms: const [],
     );
+  }
+
+  Widget _loading(VnDataPhase01 p1) {
+    // Render the tapped result immediately while additional metadata loads.
+    return VnDetailsContent(p1: p1, p2: _loadingP2(p1.id));
   }
 
   Widget _getError({bool isConnection = false}) {
@@ -40,7 +47,10 @@ class VnDetailsEntrance extends ConsumerWidget {
     return SizedBox(
       height: MediaQuery.sizeOf(context).height * 0.75,
       child: Center(
-        child: (isConnection) ? const GenericFailureConnection() : const GenericError(),
+        child:
+            (isConnection)
+                ? const GenericFailureConnection()
+                : const GenericError(),
       ),
     );
   }
@@ -70,7 +80,7 @@ class VnDetailsEntrance extends ConsumerWidget {
               // print(st);
               return _getError();
             },
-            loading: () => _loading,
+            loading: () => _loading(p1),
           );
     }
 
@@ -108,7 +118,7 @@ class VnDetailsEntrance extends ConsumerWidget {
                     // print(st);
                     return _getError();
                   },
-                  loading: () => _loading,
+                  loading: () => _loading(p1),
                 );
           },
           error: (err, st) {
@@ -116,7 +126,7 @@ class VnDetailsEntrance extends ConsumerWidget {
             // print(st);
             return _getError(isConnection: true);
           },
-          loading: () => _loading,
+          loading: () => _loading(p1),
         );
   }
 }

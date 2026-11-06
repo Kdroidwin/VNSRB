@@ -25,6 +25,7 @@ class VnItemGrid extends ConsumerWidget {
     this.labelCode = 'title',
     this.isGridView = false,
     this.withLabel = true,
+    this.collectionStatus,
   }) {
     _vnId = p1.id;
   }
@@ -33,6 +34,7 @@ class VnItemGrid extends ConsumerWidget {
   final String labelCode;
   final bool isGridView;
   final bool withLabel;
+  final String? collectionStatus;
 
   late final String _vnId;
   static final colorPlaceHolder = kColor().secondary.withAlpha(60);
@@ -58,6 +60,24 @@ class VnItemGrid extends ConsumerWidget {
   //
 
   Future<void> _vnOnTap(WidgetRef ref, BuildContext context) async {
+    final blurId = _vnId + labelCode + App.currentRoute;
+    final savedBlurState = ref.read(
+      vnItemGridCoverCensorNotifierProvider(blurId),
+    );
+    final settings = ref.read(settingsGeneralStateProvider);
+    final image = p1.image;
+    final isCensored =
+        settings.showCoverCensor &&
+        (savedBlurState ??
+            ((image?.sexual ?? 0) >= 1 || (image?.violence ?? 0) >= 1));
+    if (isCensored) {
+      // Match VNDB's cover interaction: a tap reveals a censored cover first.
+      ref
+          .read(vnItemGridCoverCensorNotifierProvider(blurId).notifier)
+          .set(false);
+      return;
+    }
+
     if (!App.isInCollectionScreen) return await _enterVnDetailScreen(context);
 
     // Checks whether multiselection mode is off or not.
@@ -101,7 +121,18 @@ class VnItemGrid extends ConsumerWidget {
 
   void _vnOnDoubleTap(WidgetRef ref) async {
     final blurId = _vnId + labelCode + App.currentRoute;
-    ref.read(vnItemGridCoverCensorNotifierProvider(blurId).notifier).toggle();
+    final notifier = ref.read(
+      vnItemGridCoverCensorNotifierProvider(blurId).notifier,
+    );
+    final savedBlurState = ref.read(
+      vnItemGridCoverCensorNotifierProvider(blurId),
+    );
+    final image = p1.image;
+    final isCensored =
+        ref.read(settingsGeneralStateProvider).showCoverCensor &&
+        (savedBlurState ??
+            ((image?.sexual ?? 0) >= 1 || (image?.violence ?? 0) >= 1));
+    notifier.set(!isCensored);
   }
 
   //
@@ -178,6 +209,7 @@ class VnItemGrid extends ConsumerWidget {
                       : VnItemGridDetails(
                         p1: p1,
                         labelCode: labelCode,
+                        collectionStatus: collectionStatus,
                         withLabel: showLabel,
                         toggleVnDetailSummary: toggle,
                       );

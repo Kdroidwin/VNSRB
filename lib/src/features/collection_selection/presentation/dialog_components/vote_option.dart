@@ -1,36 +1,35 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
-import 'package:vndb_lite/src/app.dart';
 import 'package:vndb_lite/src/common_widgets/generic_shadowy_text.dart';
 import 'package:vndb_lite/src/util/responsive.dart';
 import 'package:vndb_lite/src/features/collection_selection/data/vote_data.dart';
 import 'package:vndb_lite/src/features/collection_selection/presentation/dialog_components/footer_button_state.dart';
 import 'package:vndb_lite/src/common_widgets/custom_button.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
 class RecordVoteOption extends ConsumerWidget {
-  RecordVoteOption({super.key, required this.onChanged, required this.voteValue});
+  RecordVoteOption({
+    super.key,
+    required this.onChanged,
+    required this.voteValue,
+  });
 
   final int voteValue;
   final Function(int) onChanged;
 
-  final List<DropdownMenuItem> dropdownMenuItemWidgets = [];
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final buttonState = ref.watch(vnButtonStateProvider);
-
-    if (dropdownMenuItemWidgets.length != VOTE_DATA.length) {
-      //
-      for (int voteRange in VOTE_DATA.keys) {
-        if (voteRange == -1) continue;
-
-        dropdownMenuItemWidgets.add(
-          DropdownMenuItem(value: voteRange, child: ShadowText(VOTE_DATA[voteRange]!)),
-        );
-      }
-    }
+    final dropdownMenuItemWidgets = [
+      for (final voteRange in VOTE_DATA.keys)
+        if (voteRange != -1)
+          DropdownMenuItem(
+            value: voteRange,
+            child: ShadowText(collectionVoteText(context, voteRange)),
+          ),
+    ];
 
     return IgnorePointer(
       ignoring: (buttonState == ButtonState.loading),
@@ -48,7 +47,7 @@ class RecordVoteOption extends ConsumerWidget {
             hint: Wrap(
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                ShadowText('Vote ('),
+                ShadowText(appText(context, 'Vote (', '評価（')),
                 ShadowText(
                   (voteValue == -1) ? '~' : '$voteValue',
                   color: kColor(context).secondary,
@@ -62,7 +61,9 @@ class RecordVoteOption extends ConsumerWidget {
               width: responsiveUI.own(0.27),
               padding: EdgeInsets.only(left: responsiveUI.own(0.02)),
               decoration: BoxDecoration(
-                border: Border.all(color: kColor(context).tertiary.withOpacity(0.4)),
+                border: Border.all(
+                  color: kColor(context).tertiary.withOpacity(0.4),
+                ),
                 borderRadius: BorderRadius.circular(12),
                 gradient: LinearGradient(
                   colors: [
@@ -80,7 +81,10 @@ class RecordVoteOption extends ConsumerWidget {
             iconStyleData: IconStyleData(
               icon: Padding(
                 padding: EdgeInsets.only(right: responsiveUI.own(0.02)),
-                child: Icon(Icons.arrow_drop_down, color: kColor(context).tertiary),
+                child: Icon(
+                  Icons.arrow_drop_down,
+                  color: kColor(context).tertiary,
+                ),
               ),
             ),
             dropdownStyleData: DropdownStyleData(
@@ -101,7 +105,12 @@ class RecordVoteOption extends ConsumerWidget {
                     kColor(context).primary,
                   ],
                 ),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.6), blurRadius: 3)],
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.6),
+                    blurRadius: 3,
+                  ),
+                ],
               ),
               offset: const Offset(-20, 0),
               scrollbarTheme: ScrollbarThemeData(

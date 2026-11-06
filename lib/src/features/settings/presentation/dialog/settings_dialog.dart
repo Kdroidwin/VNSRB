@@ -5,6 +5,7 @@ import 'package:vndb_lite/src/common_widgets/generic_shadowy_text.dart';
 import 'package:vndb_lite/src/core/app/navigation.dart';
 import 'package:vndb_lite/src/util/responsive.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
 Future<void> showSettingsDialog({
   required String title,
@@ -57,7 +58,7 @@ Future<void> showSettingsDialog({
                   // Confirm button
                   if (yesOrNo)
                     CustomDialogButton(
-                      text: "Confirm",
+                      text: appText(context, 'Confirm', '確定'),
                       textColor:
                           (yesButtonColor != null)
                               ? kColor(context).tertiary
@@ -73,7 +74,7 @@ Future<void> showSettingsDialog({
                   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                   // Cancel
                   CustomDialogButton(
-                    text: "Cancel",
+                    text: appText(context, 'Cancel', 'キャンセル'),
                     color: Colors.transparent,
                     onPressed: () => Navigator.of(context).pop(),
                   ),

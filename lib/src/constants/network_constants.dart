@@ -7,7 +7,7 @@ class NetConsts {
   static const String CONTENT_TYPE = "content-type";
   static const String AUTHORIZATION = "Authorization";
   static const String ACCEPT = "accept";
-  static const int API_TIMEOUT = 60000;
+  static const int API_TIMEOUT = 20000;
 
   // Used for [VersionCheck].
   static const String URL_CHECK_VERSION =

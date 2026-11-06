@@ -35,15 +35,21 @@ class SearchResultController extends _$SearchResultController {
     return [];
   }
 
-  final List<String> vnId = [];
+  final Set<String> vnId = <String>{};
 
   final double limit = responsiveUI.own(0.7);
 
   void fromP1(List<VnDataPhase01> p1List, String labelCode) {
     for (VnDataPhase01 p1 in p1List) {
-      if (vnId.contains(p1.id)) return;
-      state.add(VnItemGrid(key: Key(p1.id), p1: p1, isGridView: true, labelCode: labelCode));
-      vnId.add(p1.id);
+      if (!vnId.add(p1.id)) continue;
+      state.add(
+        VnItemGrid(
+          key: Key(p1.id),
+          p1: p1,
+          isGridView: true,
+          labelCode: labelCode,
+        ),
+      );
     }
   }
 
@@ -62,7 +68,9 @@ class SearchResultController extends _$SearchResultController {
 
           await ref
               .read(searchScreenControllerProvider.notifier)
-              .searchWithCurrentConf(pageResult: ref.read(searchResultPageControllerProvider));
+              .searchWithCurrentConf(
+                pageResult: ref.read(searchResultPageControllerProvider),
+              );
         });
       }
     });

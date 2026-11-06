@@ -12,6 +12,8 @@ import 'package:vndb_lite/src/features/settings/presentation/components/settings
 import 'package:vndb_lite/src/features/settings/presentation/dialog/settings_dialog.dart';
 import 'package:vndb_lite/src/features/settings/presentation/settings_general_state.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
+import 'package:vndb_lite/src/features/collection/data/collection_status_data.dart';
 import 'package:flutter/material.dart';
 
 class SettingsGeneral extends ConsumerStatefulWidget {
@@ -60,28 +62,26 @@ class _SettingsGeneralState extends ConsumerState<SettingsGeneral>
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   //
 
-  Future<void> _censorCoverSwitch() async {
+  void _censorCoverSwitch() {
     final showCoverCensor =
         ref.read(settingsGeneralStateProvider).showCoverCensor;
     ref.read(settingsGeneralStateProvider.notifier).showCoverCensor =
         !showCoverCensor;
-
-    await _refreshApp();
   }
 
   Future<void> _chooseStartupTab() async {
-    const tabs = <String, String>{
-      'home': 'Home',
-      'search': 'Search',
-      'collection': 'Collection',
-      'others': 'Others',
+    final tabs = <String, String>{
+      'home': appText(context, 'Home', 'ホーム'),
+      'search': appText(context, 'Search', '検索'),
+      'collection': appText(context, 'Collection', 'コレクション'),
+      'others': appText(context, 'Others', 'その他'),
     };
     final selected = ref.read(settingsGeneralStateProvider).startupTab;
     final tab = await showDialog<String>(
       context: context,
       builder:
           (dialogContext) => AlertDialog(
-            title: const Text('Open on startup'),
+            title: Text(appText(context, 'Open on startup', '起動時に開くタブ')),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -97,8 +97,40 @@ class _SettingsGeneralState extends ConsumerState<SettingsGeneral>
             ),
           ),
     );
-    if (tab != null)
+    if (tab != null) {
       ref.read(settingsGeneralStateProvider.notifier).startupTab = tab;
+    }
+  }
+
+  Future<void> _chooseDefaultCollectionStatus() async {
+    final selected =
+        ref.read(settingsGeneralStateProvider).defaultCollectionStatus;
+    final status = await showDialog<String>(
+      context: context,
+      builder:
+          (dialogContext) => AlertDialog(
+            title: Text(
+              appText(context, 'Default collection status', '追加時の既定ステータス'),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final entry in COLLECTION_STATUS_DATA.entries)
+                  RadioListTile<String>(
+                    value: entry.key,
+                    groupValue: selected,
+                    title: Text(collectionStatusText(context, entry.key)),
+                    onChanged:
+                        (value) => Navigator.of(dialogContext).pop(value),
+                  ),
+              ],
+            ),
+          ),
+    );
+    if (status != null) {
+      ref.read(settingsGeneralStateProvider.notifier).defaultCollectionStatus =
+          status;
+    }
   }
 
   Future<void> _collectionLabelsSwitch() async {
@@ -178,7 +210,7 @@ class _SettingsGeneralState extends ConsumerState<SettingsGeneral>
     );
 
     await showSettingsDialog(
-      title: 'Re-arrange Tab Collection',
+      title: appText(context, 'Re-arrange Tab Collection', 'コレクションタブの並び替え'),
       yesOrNo: true,
       yesFunction: () async {
         ref
@@ -206,8 +238,11 @@ class _SettingsGeneralState extends ConsumerState<SettingsGeneral>
                 itemBuilder:
                     (ctx, idx) => _getDragAndDropItem(
                       key: collectionStatusArrangement[idx],
-                      title: toBeginningOfSentenceCase<String>(
-                        collectionStatusArrangement[idx],
+                      title: collectionStatusText(
+                        context,
+                        toBeginningOfSentenceCase<String>(
+                          collectionStatusArrangement[idx],
+                        ),
                       ),
                     ),
                 itemCount: collectionStatusArrangement.length,
@@ -234,7 +269,7 @@ class _SettingsGeneralState extends ConsumerState<SettingsGeneral>
     int maxPreviewItem = ref.read(settingsGeneralStateProvider).maxPreviewItem;
 
     await showSettingsDialog(
-      title: 'Home VN item previews count',
+      title: appText(context, 'Home VN item previews count', 'ホームの作品プレビュー数'),
       yesOrNo: true,
       yesFunction: () async {
         ref.read(settingsGeneralStateProvider.notifier).maxPreviewItem =
@@ -302,7 +337,7 @@ class _SettingsGeneralState extends ConsumerState<SettingsGeneral>
         ref.read(settingsGeneralStateProvider).maxItemPerRowLandscape;
 
     await showSettingsDialog(
-      title: 'VN item per row count',
+      title: appText(context, 'VN item per row count', '1行あたりの作品数'),
       yesOrNo: true,
       yesFunction: () async {
         ref.read(settingsGeneralStateProvider.notifier).maxItemPerRowPortrait =
@@ -357,11 +392,19 @@ class _SettingsGeneralState extends ConsumerState<SettingsGeneral>
                 isSelected: false,
                 borderColor: kColor(context).secondary,
                 padding: EdgeInsets.all(responsiveUI.own(0.02)),
-                onTap: () async => await _censorCoverSwitch(),
+                onTap: _censorCoverSwitch,
                 children: [
-                  ShadowText('Activate censor for VN cover '),
                   ShadowText(
-                    (settings.showCoverCensor) ? ' ON' : ' OFF',
+                    appText(
+                      context,
+                      'Blur sensitive VN covers ',
+                      '刺激の強い作品カバーをぼかす：',
+                    ),
+                  ),
+                  ShadowText(
+                    settings.showCoverCensor
+                        ? appText(context, ' ON', ' オン')
+                        : appText(context, ' OFF', ' オフ'),
                     fontWeight: FontWeight.bold,
                     color:
                         (settings.showCoverCensor) ? Colors.green : Colors.red,
@@ -388,9 +431,13 @@ class _SettingsGeneralState extends ConsumerState<SettingsGeneral>
                   padding: EdgeInsets.all(responsiveUI.own(0.02)),
                   onTap: _collectionDeveloperHeadersSwitch,
                   children: [
-                    ShadowText('Developer group names: '),
                     ShadowText(
-                      settings.showCollectionDeveloperHeaders ? ' ON' : ' OFF',
+                      appText(context, 'Developer group names: ', 'メーカー名の見出し：'),
+                    ),
+                    ShadowText(
+                      settings.showCollectionDeveloperHeaders
+                          ? appText(context, ' ON', ' オン')
+                          : appText(context, ' OFF', ' オフ'),
                       fontWeight: FontWeight.bold,
                       color:
                           settings.showCollectionDeveloperHeaders
@@ -408,11 +455,41 @@ class _SettingsGeneralState extends ConsumerState<SettingsGeneral>
                 isSelected: false,
                 borderColor: kColor(context).secondary,
                 padding: EdgeInsets.all(responsiveUI.own(0.02)),
+                onTap: _chooseDefaultCollectionStatus,
+                children: [
+                  ShadowText(
+                    appText(
+                      context,
+                      'Default status when adding: ',
+                      '追加時の既定ステータス：',
+                    ),
+                  ),
+                  ShadowText(
+                    collectionStatusText(
+                      context,
+                      settings.defaultCollectionStatus,
+                    ),
+                    color: kColor(context).tertiary.withAlpha(180),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: responsiveUI.own(0.03)),
+              CustomLabel(
+                useBorder: true,
+                borderRadius: 12,
+                isSelected: false,
+                borderColor: kColor(context).secondary,
+                padding: EdgeInsets.all(responsiveUI.own(0.02)),
                 onTap: _collectionCoverDatesSwitch,
                 children: [
-                  ShadowText('Collection cover dates: '),
                   ShadowText(
-                    settings.showCollectionCoverDates ? ' ON' : ' OFF',
+                    appText(context, 'Collection cover dates: ', 'カバー上の日付表示：'),
+                  ),
+                  ShadowText(
+                    settings.showCollectionCoverDates
+                        ? appText(context, ' ON', ' オン')
+                        : appText(context, ' OFF', ' オフ'),
                     fontWeight: FontWeight.bold,
                     color:
                         settings.showCollectionCoverDates
@@ -431,9 +508,17 @@ class _SettingsGeneralState extends ConsumerState<SettingsGeneral>
                 padding: EdgeInsets.all(responsiveUI.own(0.02)),
                 onTap: _groupCollectionByDeveloperSwitch,
                 children: [
-                  ShadowText('Group collection by developer: '),
                   ShadowText(
-                    settings.groupCollectionByDeveloper ? ' ON' : ' OFF',
+                    appText(
+                      context,
+                      'Group collection by developer: ',
+                      'メーカーごとに分類：',
+                    ),
+                  ),
+                  ShadowText(
+                    settings.groupCollectionByDeveloper
+                        ? appText(context, ' ON', ' オン')
+                        : appText(context, ' OFF', ' オフ'),
                     fontWeight: FontWeight.bold,
                     color:
                         settings.groupCollectionByDeveloper
@@ -454,7 +539,15 @@ class _SettingsGeneralState extends ConsumerState<SettingsGeneral>
                 borderColor: kColor(context).secondary,
                 padding: EdgeInsets.all(responsiveUI.own(0.02)),
                 onTap: () async => await _arrangeCollectionTab(),
-                children: [ShadowText('Arrange collection status tabs')],
+                children: [
+                  ShadowText(
+                    appText(
+                      context,
+                      'Arrange collection status tabs',
+                      'コレクションタブの並び替え',
+                    ),
+                  ),
+                ],
               ),
 
               SizedBox(height: responsiveUI.own(0.03)),
@@ -466,12 +559,15 @@ class _SettingsGeneralState extends ConsumerState<SettingsGeneral>
                 padding: EdgeInsets.all(responsiveUI.own(0.02)),
                 onTap: _chooseStartupTab,
                 children: [
-                  ShadowText('Open on startup: '),
                   ShadowText(
-                    settings.startupTab[0].toUpperCase() +
-                        settings.startupTab.substring(1),
-                    color: kColor(context).tertiary.withAlpha(180),
+                    appText(context, 'Open on startup: ', '起動時に開く画面：'),
                   ),
+                  ShadowText(switch (settings.startupTab) {
+                    'home' => appText(context, 'Home', 'ホーム'),
+                    'search' => appText(context, 'Search', '検索'),
+                    'collection' => appText(context, 'Collection', 'コレクション'),
+                    _ => appText(context, 'Others', 'その他'),
+                  }, color: kColor(context).tertiary.withAlpha(180)),
                 ],
               ),
 
@@ -484,9 +580,17 @@ class _SettingsGeneralState extends ConsumerState<SettingsGeneral>
                 padding: EdgeInsets.all(responsiveUI.own(0.02)),
                 onTap: _collectionLabelsSwitch,
                 children: [
-                  ShadowText('Collection cover labels: '),
                   ShadowText(
-                    settings.showCollectionItemLabels ? ' ON' : ' OFF',
+                    appText(
+                      context,
+                      'Collection cover labels: ',
+                      'カバー上のラベル表示：',
+                    ),
+                  ),
+                  ShadowText(
+                    settings.showCollectionItemLabels
+                        ? appText(context, ' ON', ' オン')
+                        : appText(context, ' OFF', ' オフ'),
                     fontWeight: FontWeight.bold,
                     color:
                         settings.showCollectionItemLabels
@@ -508,12 +612,18 @@ class _SettingsGeneralState extends ConsumerState<SettingsGeneral>
                 padding: EdgeInsets.all(responsiveUI.own(0.02)),
                 onTap: () async => await _previewItemCount(),
                 children: [
-                  ShadowText('Home VN item previews: '),
+                  ShadowText(
+                    appText(
+                      context,
+                      'Home VN item previews: ',
+                      'ホームの作品プレビュー数：',
+                    ),
+                  ),
                   ShadowText(
                     // Because index starts at 0, and 0 is not valid
                     (settings.maxPreviewItem != 20)
                         ? '${settings.maxPreviewItem}'
-                        : 'Default (20)',
+                        : appText(context, 'Default (20)', '既定（20）'),
                     color: kColor(context).tertiary.withAlpha(180),
                   ),
                 ],
@@ -530,9 +640,13 @@ class _SettingsGeneralState extends ConsumerState<SettingsGeneral>
                 padding: EdgeInsets.all(responsiveUI.own(0.02)),
                 onTap: () async => await _chartSwitch(),
                 children: [
-                  ShadowText('Show VNDB stats chart '),
                   ShadowText(
-                    (settings.showChart) ? ' YES' : ' NO',
+                    appText(context, 'Show VNDB stats chart ', 'VNDB統計チャート：'),
+                  ),
+                  ShadowText(
+                    settings.showChart
+                        ? appText(context, ' YES', ' 表示')
+                        : appText(context, ' NO', ' 非表示'),
                     fontWeight: FontWeight.bold,
                     color: (settings.showChart) ? Colors.green : Colors.red,
                     shadows: [
@@ -560,10 +674,12 @@ class _SettingsGeneralState extends ConsumerState<SettingsGeneral>
                 padding: EdgeInsets.all(responsiveUI.own(0.02)),
                 onTap: () async => await _vnItemsPerRow(),
                 children: [
-                  ShadowText('VN item per row: '),
                   ShadowText(
-                    'Potrait: ${(settings.maxItemPerRowPortrait == 2) ? 'Default (2)' : settings.maxItemPerRowPortrait} | '
-                    'Landscape: ${(settings.maxItemPerRowLandscape == 4) ? 'Default (4)' : settings.maxItemPerRowLandscape}',
+                    appText(context, 'VN item per row: ', '1行あたりの作品数：'),
+                  ),
+                  ShadowText(
+                    '${appText(context, 'Portrait', '縦')}: ${(settings.maxItemPerRowPortrait == 2) ? appText(context, 'Default (2)', '既定（2）') : settings.maxItemPerRowPortrait} | '
+                    '${appText(context, 'Landscape', '横')}: ${(settings.maxItemPerRowLandscape == 4) ? appText(context, 'Default (4)', '既定（4）') : settings.maxItemPerRowLandscape}',
                     color: kColor(context).tertiary.withAlpha(180),
                   ),
                 ],

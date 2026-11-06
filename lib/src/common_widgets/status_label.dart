@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -22,34 +20,22 @@ class StatusLabel extends StatelessWidget {
   //
 
   Widget _wrapWithPadding(Widget child) {
-    return Padding(padding: EdgeInsets.only(right: responsiveUI.own(0.01)), child: child);
+    return Padding(
+      padding: EdgeInsets.only(right: responsiveUI.own(0.01)),
+      child: child,
+    );
   }
 
   //
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   //
 
-  Widget _shadowyImage(String imgPath) {
-    return Stack(
-      children: [
-        Image.asset(
-          imgPath,
-          color: Colors.black,
-          width: responsiveUI.own(0.045),
-          height: responsiveUI.own(0.045),
-          opacity: const AlwaysStoppedAnimation(0.4),
-        ),
-        ClipRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
-            child: Image.asset(
-              imgPath,
-              width: responsiveUI.own(0.045),
-              height: responsiveUI.own(0.045),
-            ),
-          ),
-        ),
-      ],
+  Widget _statusImage(String imgPath) {
+    return Image.asset(
+      imgPath,
+      width: responsiveUI.own(0.045),
+      height: responsiveUI.own(0.045),
+      filterQuality: FilterQuality.low,
     );
   }
 
@@ -62,7 +48,8 @@ class StatusLabel extends StatelessWidget {
 
     final labelCode_ = labelCode.toLowerCase();
     final validCode =
-        labelCode_ != SortableCode.title.name && COLLECTION_STATUS_DATA[labelCode_] != null;
+        labelCode_ != SortableCode.title.name &&
+        COLLECTION_STATUS_DATA[labelCode_] != null;
 
     if (LOCAL_SORTABLE_DATA[labelCode_] != null) {
       return Icon(
@@ -73,7 +60,7 @@ class StatusLabel extends StatelessWidget {
     }
 
     if (validCode) {
-      return _shadowyImage(COLLECTION_STATUS_DATA[labelCode_]!.imagePath!);
+      return _statusImage(COLLECTION_STATUS_DATA[labelCode_]!.imagePath!);
     }
 
     return const SizedBox.shrink();
@@ -103,11 +90,11 @@ class StatusLabel extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [kColor(context).primary.withAlpha(220), kColor(context).primary.withAlpha(160)],
+          colors: [
+            kColor(context).primary.withAlpha(220),
+            kColor(context).primary.withAlpha(160),
+          ],
         ),
-        boxShadow: const [
-          BoxShadow(color: Color.fromARGB(120, 0, 0, 0), spreadRadius: 4, blurRadius: 6),
-        ],
       ),
       //
       // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -120,6 +107,7 @@ class StatusLabel extends StatelessWidget {
           ShadowText(
             toBeginningOfSentenceCase<String>(labelText ?? labelCode),
             color: kColor(context).secondary,
+            shadows: const [],
           ),
         ],
       ),

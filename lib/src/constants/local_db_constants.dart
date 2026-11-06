@@ -24,6 +24,7 @@ class DBKeys {
   static const String COLLECTION_ARRANGEMENT = "COLLECTION_ARRANGEMENT";
   static const String COLLECTION_CUSTOM_ORDER = "COLLECTION_CUSTOM_ORDER_";
   static const String STARTUP_TAB = "STARTUP_TAB";
+  static const String DEFAULT_COLLECTION_STATUS = "DEFAULT_COLLECTION_STATUS";
 
   static const String USER_IDENTITY = "USER_IDENTITY";
   static const String USER_SYNCED = "USER_SYNCED";

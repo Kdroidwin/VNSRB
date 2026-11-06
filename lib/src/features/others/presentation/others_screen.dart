@@ -9,12 +9,29 @@ import 'package:vndb_lite/src/util/responsive.dart';
 import 'package:vndb_lite/src/features/others/data/others_option_data.dart';
 import 'package:vndb_lite/src/features/others/domain/others_option.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
 class OthersScreen extends ConsumerWidget {
   const OthersScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    String japaneseTitle(OthersScreenOption option) => switch (option
+        .routeName) {
+      'bug' => '不具合を報告',
+      'auth' => 'アカウント同期',
+      'settings' => '設定',
+      'about' => 'アプリ情報',
+      _ => option.title,
+    };
+
+    String? japaneseSubtitle(OthersScreenOption option) => switch (option
+        .routeName) {
+      'bug' => 'タップするとGitHubを開きます。',
+      'auth' => 'VNDBアカウントにログイン／認証します。',
+      _ => option.subtitle,
+    };
+
     return NestedScrollView(
       floatHeaderSlivers: true,
       headerSliverBuilder: (_, __) => const [TabAppBar(route: AppRoute.others)],
@@ -27,7 +44,9 @@ class OthersScreen extends ConsumerWidget {
             ListTile(
               onTap: () {
                 if (otherOption.routeName == OthersOptionCode.bug.name) {
-                  launchUrlString("https://github.com/Daniel-C-J/vndb-lite/issues/new");
+                  launchUrlString(
+                    "https://github.com/Daniel-C-J/vndb-lite/issues/new",
+                  );
                   return;
                 }
 
@@ -39,11 +58,18 @@ class OthersScreen extends ConsumerWidget {
                 size: responsiveUI.own(0.06),
                 shadows: const [Shadow(color: Colors.black, blurRadius: 2)],
               ),
-              title: ShadowText(otherOption.title),
+              title: ShadowText(
+                appText(context, otherOption.title, japaneseTitle(otherOption)),
+              ),
               subtitle:
-                  (otherOption.subtitle != null)
+                  ((otherOption.subtitle ?? japaneseSubtitle(otherOption)) !=
+                          null)
                       ? ShadowText(
-                        otherOption.subtitle!,
+                        appText(
+                          context,
+                          otherOption.subtitle!,
+                          japaneseSubtitle(otherOption)!,
+                        ),
                         fontSize: responsiveUI.own(0.03),
                         color: kColor(context).tertiary.withAlpha(180),
                       )

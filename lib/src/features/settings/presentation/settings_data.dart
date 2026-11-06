@@ -22,6 +22,7 @@ import 'package:vndb_lite/src/features/settings/presentation/settings_data_state
 import 'package:vndb_lite/src/features/sync/presentation/auth_screen_controller.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
 import 'package:vndb_lite/src/util/alt_provider_reader.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 import 'package:vndb_lite/src/constants/local_db_constants.dart';
 import 'package:vndb_lite/src/core/local_db/shared_prefs.dart';
 
@@ -85,7 +86,11 @@ class _SettingsDataState extends ConsumerState<SettingsData>
       ).convert(ref.read(localCollectionRepoProvider).exportBackup());
       if (Platform.isLinux) {
         final selectedPath = await FilePicker.platform.saveFile(
-          dialogTitle: 'Export collection backup',
+          dialogTitle: appText(
+            context,
+            'Export collection backup',
+            'コレクションのバックアップを書き出す',
+          ),
           fileName: 'vnpockets-collection-backup.json',
           type: FileType.custom,
           allowedExtensions: ['json'],
@@ -96,7 +101,9 @@ class _SettingsDataState extends ConsumerState<SettingsData>
                 ? selectedPath
                 : '$selectedPath.json';
         await File(path).writeAsString(backupText);
-        feedbackSnackBar(text: 'Collection backup saved.');
+        feedbackSnackBar(
+          text: appText(context, 'Collection backup saved.', 'バックアップを保存しました。'),
+        );
         return;
       }
 
@@ -106,13 +113,30 @@ class _SettingsDataState extends ConsumerState<SettingsData>
       await SharePlus.instance.share(
         ShareParams(
           files: [XFile(file.path)],
-          text: 'VNPockets collection backup',
-          subject: 'VNPockets collection backup',
+          text: appText(
+            context,
+            'VNPockets collection backup',
+            'VNPockets コレクションバックアップ',
+          ),
+          subject: appText(
+            context,
+            'VNPockets collection backup',
+            'VNPockets コレクションバックアップ',
+          ),
         ),
       );
-      feedbackSnackBar(text: 'Choose Files or another app to save the backup.');
+      feedbackSnackBar(
+        text: appText(
+          context,
+          'Choose Files or another app to save the backup.',
+          '「ファイル」などを選んでバックアップを保存してください。',
+        ),
+      );
     } catch (_) {
-      feedbackSnackBar(text: 'Backup export failed.', icon: Icons.error);
+      feedbackSnackBar(
+        text: appText(context, 'Backup export failed.', 'バックアップを書き出せませんでした。'),
+        icon: Icons.error,
+      );
     }
   }
 
@@ -131,10 +155,20 @@ class _SettingsDataState extends ConsumerState<SettingsData>
           .importBackup(decoded);
       ref.invalidate(collectionContentControllerProvider);
       await _refreshApp(all: true);
-      feedbackSnackBar(text: '$count collection entries imported.');
+      feedbackSnackBar(
+        text: appText(
+          context,
+          '$count collection entries imported.',
+          '$count 件の作品を取り込みました。',
+        ),
+      );
     } catch (_) {
       feedbackSnackBar(
-        text: 'Import failed: choose a VNPockets backup file.',
+        text: appText(
+          context,
+          'Import failed: choose a VNPockets backup file.',
+          '取り込めませんでした。VNPockets のバックアップファイルを選んでください。',
+        ),
         icon: Icons.error,
       );
     }
@@ -205,7 +239,11 @@ class _SettingsDataState extends ConsumerState<SettingsData>
       final backupBytes = ZipEncoder().encodeBytes(archive);
       if (Platform.isLinux) {
         final selectedPath = await FilePicker.platform.saveFile(
-          dialogTitle: 'Export full VNPockets backup',
+          dialogTitle: appText(
+            context,
+            'Export full VNPockets backup',
+            'VNPockets 完全バックアップを書き出す',
+          ),
           fileName: 'vnpockets-full-backup.zip',
           type: FileType.custom,
           allowedExtensions: ['zip'],
@@ -216,7 +254,9 @@ class _SettingsDataState extends ConsumerState<SettingsData>
                 ? selectedPath
                 : '$selectedPath.zip';
         await File(path).writeAsBytes(backupBytes);
-        feedbackSnackBar(text: 'Full backup saved.');
+        feedbackSnackBar(
+          text: appText(context, 'Full backup saved.', '完全バックアップを保存しました。'),
+        );
         return;
       }
 
@@ -224,10 +264,20 @@ class _SettingsDataState extends ConsumerState<SettingsData>
       final file = File('${output.path}/vnpockets-full-backup.zip');
       await file.writeAsBytes(backupBytes);
       await SharePlus.instance.share(
-        ShareParams(files: [XFile(file.path)], text: 'VNPockets full backup'),
+        ShareParams(
+          files: [XFile(file.path)],
+          text: appText(context, 'VNPockets full backup', 'VNPockets 完全バックアップ'),
+        ),
       );
     } catch (_) {
-      feedbackSnackBar(text: 'Full backup export failed.', icon: Icons.error);
+      feedbackSnackBar(
+        text: appText(
+          context,
+          'Full backup export failed.',
+          '完全バックアップを書き出せませんでした。',
+        ),
+        icon: Icons.error,
+      );
     }
   }
 
@@ -294,9 +344,18 @@ class _SettingsDataState extends ConsumerState<SettingsData>
           );
       ref.invalidate(collectionContentControllerProvider);
       await _refreshApp(all: true);
-      feedbackSnackBar(text: 'Full backup imported.');
+      feedbackSnackBar(
+        text: appText(context, 'Full backup imported.', '完全バックアップを取り込みました。'),
+      );
     } catch (_) {
-      feedbackSnackBar(text: 'Full backup import failed.', icon: Icons.error);
+      feedbackSnackBar(
+        text: appText(
+          context,
+          'Full backup import failed.',
+          '完全バックアップを取り込めませんでした。',
+        ),
+        icon: Icons.error,
+      );
     }
   }
 
@@ -312,7 +371,7 @@ class _SettingsDataState extends ConsumerState<SettingsData>
     final hasConnection = ref.read(connectivityNotifierProvider);
     if (!hasConnection) {
       feedbackSnackBar(
-        text: 'Refresh failed.',
+        text: appText(context, 'Refresh failed.', '更新に失敗しました。'),
         iconColor: Colors.red,
         icon: Icons.warning,
       );
@@ -320,7 +379,10 @@ class _SettingsDataState extends ConsumerState<SettingsData>
     }
 
     ref.read(bottomProgressIndicatorProvider.notifier).show = true;
-    feedbackSnackBar(text: 'Refreshing...', icon: Icons.refresh);
+    feedbackSnackBar(
+      text: appText(context, 'Refreshing...', '更新しています…'),
+      icon: Icons.refresh,
+    );
 
     try {
       // This will redownload all collected vn phase01 and phase02 data.
@@ -331,17 +393,31 @@ class _SettingsDataState extends ConsumerState<SettingsData>
               feedbackSnackBar(
                 text:
                     (title.length > 15)
-                        ? '${title.substring(0, 14)}... refreshed. '
-                        : '$title refreshed. ',
+                        ? appText(
+                          context,
+                          '${title.substring(0, 14)}... refreshed. ',
+                          '${title.substring(0, 14)}… 更新しました。',
+                        )
+                        : appText(
+                          context,
+                          '$title refreshed. ',
+                          '$title を更新しました。',
+                        ),
               );
             },
           );
 
       await Future.delayed(const Duration(milliseconds: 2000));
-      feedbackSnackBar(text: 'Refreshed.', icon: Icons.refresh);
+      feedbackSnackBar(
+        text: appText(context, 'Refreshed.', '更新しました。'),
+        icon: Icons.refresh,
+      );
       //
     } catch (e) {
-      feedbackSnackBar(text: 'Refresh failed.', icon: Icons.error);
+      feedbackSnackBar(
+        text: appText(context, 'Refresh failed.', '更新に失敗しました。'),
+        icon: Icons.error,
+      );
       //
     } finally {
       // Using emergency ref in case the widget disposed.
@@ -356,15 +432,25 @@ class _SettingsDataState extends ConsumerState<SettingsData>
 
   Future<void> _deleteVns() async {
     await showSettingsDialog(
-      title:
-          "You are about to delete all visual novels in your collection. Are you sure?",
+      title: appText(
+        context,
+        'You are about to delete all visual novels in your collection. Are you sure?',
+        'コレクション内の作品をすべて削除します。よろしいですか？',
+      ),
       content: Padding(
         padding: EdgeInsets.symmetric(horizontal: responsiveUI.own(0.05)),
         child: ShadowText(
           (ref.read(bottomProgressIndicatorProvider))
-              ? 'Please wait until the current process is done.'
-              : 'If you already once sucessfully synced with the cloud (VNDB), the next time you sync, '
-                  'all VNs in your collection will finally be removed permanently.',
+              ? appText(
+                context,
+                'Please wait until the current process is done.',
+                '処理が終わるまでお待ちください。',
+              )
+              : appText(
+                context,
+                'If you already once successfully synced with the cloud (VNDB), the next time you sync, all VNs in your collection will finally be removed permanently.',
+                'VNDB と同期済みの場合、次回の同期時にコレクション内の作品も VNDB から完全に削除されます。',
+              ),
         ),
       ),
       yesOrNo: ref.read(bottomProgressIndicatorProvider) != true,
@@ -377,7 +463,9 @@ class _SettingsDataState extends ConsumerState<SettingsData>
         if (ref.read(bottomProgressIndicatorProvider)) return;
 
         final auth = ref.read(authScreenControllerProvider.notifier);
-        feedbackSnackBar(text: 'Removing VNs...');
+        feedbackSnackBar(
+          text: appText(context, 'Removing VNs...', '作品を削除しています…'),
+        );
 
         // If user already once successfully synchronized, then all of the current vns, the next
         // time user sync again, will all be removed in the cloud.
@@ -388,7 +476,13 @@ class _SettingsDataState extends ConsumerState<SettingsData>
         }
 
         await _refreshApp(all: true);
-        feedbackSnackBar(text: ' All VNs have been removed. ');
+        feedbackSnackBar(
+          text: appText(
+            context,
+            ' All VNs have been removed. ',
+            'すべての作品を削除しました。',
+          ),
+        );
       },
     );
   }
@@ -399,13 +493,25 @@ class _SettingsDataState extends ConsumerState<SettingsData>
 
   Future<void> _clearCache() async {
     await showSettingsDialog(
-      title: "Do you want to reset all data back to default?",
+      title: appText(
+        context,
+        'Do you want to reset all data back to default?',
+        'すべてのデータを初期状態に戻しますか？',
+      ),
       content: Padding(
         padding: EdgeInsets.symmetric(horizontal: responsiveUI.own(0.05)),
         child: ShadowText(
           (ref.read(bottomProgressIndicatorProvider))
-              ? 'Please wait until the current process is done.'
-              : 'You would have to restart the app for the whole default configurations to take effect.',
+              ? appText(
+                context,
+                'Please wait until the current process is done.',
+                '処理が終わるまでお待ちください。',
+              )
+              : appText(
+                context,
+                'You would have to restart the app for the whole default configurations to take effect.',
+                '初期設定を反映するにはアプリの再起動が必要です。',
+              ),
         ),
       ),
       yesOrNo: ref.read(bottomProgressIndicatorProvider) != true,
@@ -417,7 +523,9 @@ class _SettingsDataState extends ConsumerState<SettingsData>
         // If turns out there's an ongoing process, then dont remove auth.
         if (ref.read(bottomProgressIndicatorProvider)) return;
 
-        feedbackSnackBar(text: 'Resetting data...');
+        feedbackSnackBar(
+          text: appText(context, 'Resetting data...', 'データを初期化しています…'),
+        );
 
         // To immediately update the UI.
         await ref.read(settingsServiceProvider).removeAuth();
@@ -428,7 +536,7 @@ class _SettingsDataState extends ConsumerState<SettingsData>
         await _refreshApp(all: true, verbose: true);
 
         feedbackSnackBar(
-          text: 'Welcome to the default back!',
+          text: appText(context, 'Welcome to the default back!', '初期設定に戻しました。'),
           icon: Icons.waving_hand,
         );
       },
@@ -441,13 +549,21 @@ class _SettingsDataState extends ConsumerState<SettingsData>
 
   Future<void> _removeAuth() async {
     await showSettingsDialog(
-      title: "Revoke Authentication?",
+      title: appText(context, 'Revoke Authentication?', '認証を解除しますか？'),
       content: Padding(
         padding: EdgeInsets.symmetric(horizontal: responsiveUI.own(0.05)),
         child: ShadowText(
           (ref.read(bottomProgressIndicatorProvider))
-              ? 'Please wait until the current process is done.'
-              : 'Your data will remain as is as the latest synchronization sucessfully initiated.',
+              ? appText(
+                context,
+                'Please wait until the current process is done.',
+                '処理が終わるまでお待ちください。',
+              )
+              : appText(
+                context,
+                'Your data will remain as is as the latest synchronization successfully initiated.',
+                '最後に同期したデータはこの端末に残ります。',
+              ),
         ),
       ),
       yesOrNo: ref.read(bottomProgressIndicatorProvider) != true,
@@ -462,7 +578,13 @@ class _SettingsDataState extends ConsumerState<SettingsData>
         await ref.read(settingsServiceProvider).removeAuth();
         ref.invalidate(authScreenControllerProvider);
 
-        feedbackSnackBar(text: 'Authentication has been revoked.');
+        feedbackSnackBar(
+          text: appText(
+            context,
+            'Authentication has been revoked.',
+            '認証を解除しました。',
+          ),
+        );
       },
     );
   }
@@ -500,9 +622,17 @@ class _SettingsDataState extends ConsumerState<SettingsData>
                 padding: EdgeInsets.all(responsiveUI.own(0.02)),
                 onTap: () async => await _autoUpdateCheckSwitch(),
                 children: [
-                  ShadowText('Automatically check update at start '),
                   ShadowText(
-                    (settings.autoUpdate) ? ' ON' : ' OFF',
+                    appText(
+                      context,
+                      'Automatically check update at start ',
+                      '起動時に更新を確認：',
+                    ),
+                  ),
+                  ShadowText(
+                    settings.autoUpdate
+                        ? appText(context, ' ON', ' オン')
+                        : appText(context, ' OFF', ' オフ'),
                     fontWeight: FontWeight.bold,
                     color: (settings.autoUpdate) ? Colors.green : Colors.red,
                     shadows: [
@@ -530,7 +660,13 @@ class _SettingsDataState extends ConsumerState<SettingsData>
                 padding: EdgeInsets.all(responsiveUI.own(0.02)),
                 onTap: _refreshVns,
                 children: [
-                  ShadowText('Refresh all visual novel in collection'),
+                  ShadowText(
+                    appText(
+                      context,
+                      'Refresh all visual novels in collection',
+                      'コレクションの作品情報をすべて更新',
+                    ),
+                  ),
                 ],
               ),
 
@@ -542,7 +678,15 @@ class _SettingsDataState extends ConsumerState<SettingsData>
                 borderColor: kColor(context).secondary,
                 padding: EdgeInsets.all(responsiveUI.own(0.02)),
                 onTap: _exportCollectionBackup,
-                children: [ShadowText('Export collection backup')],
+                children: [
+                  ShadowText(
+                    appText(
+                      context,
+                      'Export collection backup',
+                      'コレクションをバックアップ',
+                    ),
+                  ),
+                ],
               ),
 
               SizedBox(height: responsiveUI.own(0.03)),
@@ -553,7 +697,11 @@ class _SettingsDataState extends ConsumerState<SettingsData>
                 borderColor: kColor(context).secondary,
                 padding: EdgeInsets.all(responsiveUI.own(0.02)),
                 onTap: _importCollectionBackup,
-                children: [ShadowText('Import collection backup')],
+                children: [
+                  ShadowText(
+                    appText(context, 'Import collection backup', 'コレクションを復元'),
+                  ),
+                ],
               ),
               SizedBox(height: responsiveUI.own(0.03)),
               CustomLabel(
@@ -564,7 +712,13 @@ class _SettingsDataState extends ConsumerState<SettingsData>
                 padding: EdgeInsets.all(responsiveUI.own(0.02)),
                 onTap: _exportFullBackup,
                 children: [
-                  ShadowText('Export full backup (settings & images)'),
+                  ShadowText(
+                    appText(
+                      context,
+                      'Export full backup (settings & images)',
+                      '完全バックアップを書き出す（設定・画像を含む）',
+                    ),
+                  ),
                 ],
               ),
               SizedBox(height: responsiveUI.own(0.03)),
@@ -576,7 +730,13 @@ class _SettingsDataState extends ConsumerState<SettingsData>
                 padding: EdgeInsets.all(responsiveUI.own(0.02)),
                 onTap: _importFullBackup,
                 children: [
-                  ShadowText('Import full backup (settings & images)'),
+                  ShadowText(
+                    appText(
+                      context,
+                      'Import full backup (settings & images)',
+                      '完全バックアップを読み込む（設定・画像を含む）',
+                    ),
+                  ),
                 ],
               ),
 
@@ -592,7 +752,15 @@ class _SettingsDataState extends ConsumerState<SettingsData>
                 highlightColor: const Color.fromARGB(180, 240, 70, 50),
                 padding: EdgeInsets.all(responsiveUI.own(0.02)),
                 onTap: _deleteVns,
-                children: [ShadowText('Remove all visual novel in collection')],
+                children: [
+                  ShadowText(
+                    appText(
+                      context,
+                      'Remove all visual novels in collection',
+                      'コレクションの作品をすべて削除',
+                    ),
+                  ),
+                ],
               ),
 
               //
@@ -607,7 +775,9 @@ class _SettingsDataState extends ConsumerState<SettingsData>
                 highlightColor: const Color.fromARGB(180, 240, 70, 50),
                 padding: EdgeInsets.all(responsiveUI.own(0.02)),
                 onTap: _clearCache,
-                children: [ShadowText('Reset all data')],
+                children: [
+                  ShadowText(appText(context, 'Reset all data', 'すべてのデータを初期化')),
+                ],
               ),
               //
               // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -622,7 +792,15 @@ class _SettingsDataState extends ConsumerState<SettingsData>
                   highlightColor: const Color.fromARGB(180, 240, 210, 50),
                   padding: EdgeInsets.all(responsiveUI.own(0.02)),
                   onTap: _removeAuth,
-                  children: [ShadowText('Revoke authentication (Logout)')],
+                  children: [
+                    ShadowText(
+                      appText(
+                        context,
+                        'Revoke authentication (Logout)',
+                        '認証を解除（ログアウト）',
+                      ),
+                    ),
+                  ],
                 ),
 
               //

@@ -5,6 +5,7 @@ import 'package:vndb_lite/src/features/collection_selection/presentation/dialogs
 import 'package:vndb_lite/src/features/collection_selection/presentation/fab/vn_detail_fab_state.dart';
 import 'package:vndb_lite/src/features/vn/domain/p1.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 import 'package:vndb_lite/src/features/vn_item/presentation/detail_non_summary/vn_record_state.dart';
 
 class VnDetailFab extends ConsumerWidget {
@@ -47,8 +48,13 @@ class VnDetailFab extends ConsumerWidget {
           elevation: 0,
           highlightElevation: 0,
           backgroundColor: Colors.transparent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(36)),
-          tooltip: (recordExist) ? 'Already in collection' : 'Add to collection',
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(36),
+          ),
+          tooltip:
+              recordExist
+                  ? appText(context, 'Already in collection', '登録済み')
+                  : appText(context, 'Add to collection', 'コレクションに追加'),
           onPressed: () async {
             await showVnSelectionDialog(p1: [p1], isGridView: false);
           },

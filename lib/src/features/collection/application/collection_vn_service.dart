@@ -24,12 +24,12 @@ Future<bool> validateVnAndSaveToLocal(Ref ref, String vnId) async {
     final result2b = value[2].data['results'];
 
     // Check the response whether there's an error or empty.
-    if (result1.isEmpty ||
-        result1 == null ||
-        result2a.isEmpty ||
+    if (result1 == null ||
+        result1.isEmpty ||
         result2a == null ||
-        result2b.isEmpty ||
-        result2b == null) {
+        result2a.isEmpty ||
+        result2b == null ||
+        result2b.isEmpty) {
       // TODO this might become a problem, maybe throw instead?
       return;
     }
@@ -49,9 +49,7 @@ Future<bool> validateVnAndSaveToLocal(Ref ref, String vnId) async {
 
     // Final check.
     await localVnRepo.refresh();
-    await Future.delayed(const Duration(milliseconds: 600), () {
-      if (localVnRepo.p1Exist(vnId) && localVnRepo.p2Exist(vnId)) valid = true;
-    });
+    valid = localVnRepo.p1Exist(vnId) && localVnRepo.p2Exist(vnId);
   });
 
   return valid;

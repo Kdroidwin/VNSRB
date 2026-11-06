@@ -35,7 +35,7 @@ class TabAppBar extends ConsumerWidget {
 
     return SliverAppBar(
       elevation: 0,
-      floating: true,
+      floating: route != AppRoute.collection,
       toolbarHeight: height,
       forceElevated: true,
       automaticallyImplyLeading: false,

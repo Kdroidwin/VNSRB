@@ -4,6 +4,7 @@ import 'package:vndb_lite/src/common_widgets/generic_shadowy_text.dart';
 import 'package:vndb_lite/src/util/responsive.dart';
 import 'package:vndb_lite/src/features/settings/presentation/components/settings_listview_scroll_items.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
 class SettingsItemPerRow extends ConsumerWidget {
   const SettingsItemPerRow({
@@ -33,7 +34,7 @@ class SettingsItemPerRow extends ConsumerWidget {
         children: [
           Column(
             children: [
-              ShadowText('Portrait'),
+              ShadowText(appText(context, 'Portrait', '縦向き')),
               SizedBox(height: responsiveUI.own(0.02)),
               Container(
                 width: responsiveUI.own(0.1),
@@ -65,7 +66,7 @@ class SettingsItemPerRow extends ConsumerWidget {
           ),
           Column(
             children: [
-              ShadowText('Landscape'),
+              ShadowText(appText(context, 'Landscape', '横向き')),
               SizedBox(height: responsiveUI.own(0.02)),
               Container(
                 width: responsiveUI.own(0.1),

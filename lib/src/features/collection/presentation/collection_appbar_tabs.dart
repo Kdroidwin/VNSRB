@@ -9,8 +9,10 @@ import 'package:vndb_lite/src/features/collection/presentation/collection_conten
 import 'package:vndb_lite/src/features/settings/presentation/settings_general_state.dart';
 
 import '../../../util/context_shortcut.dart';
+import '../../../util/app_text.dart';
 
-class CollectionAppBarTabs extends ConsumerWidget implements PreferredSizeWidget {
+class CollectionAppBarTabs extends ConsumerWidget
+    implements PreferredSizeWidget {
   const CollectionAppBarTabs({super.key});
 
   /// Global tab controller to maintain keep-Alive behaviour for the controller.
@@ -60,17 +62,25 @@ class CollectionAppBarTabs extends ConsumerWidget implements PreferredSizeWidget
                     ),
                     Consumer(
                       builder: (context, ref, child) {
-                        final vnItemGrids = ref.watch(collectionContentControllerProvider);
-                        final notifyCollection = ref.watch(collectionContentNotifierProvider);
+                        final vnItemGrids = ref.watch(
+                          collectionContentControllerProvider,
+                        );
+                        final notifyCollection = ref.watch(
+                          collectionContentNotifierProvider,
+                        );
 
                         SchedulerBinding.instance.addPostFrameCallback((_) {
                           if (notifyCollection) {
-                            ref.read(collectionContentNotifierProvider.notifier).end();
+                            ref
+                                .read(
+                                  collectionContentNotifierProvider.notifier,
+                                )
+                                .end();
                           }
                         });
 
                         return ShadowText(
-                          '${toBeginningOfSentenceCase<String>(statusCode)} '
+                          '${collectionStatusText(context, toBeginningOfSentenceCase<String>(statusCode))} '
                           '(${(vnItemGrids[statusCode] ?? []).length})',
                           fontSize: responsiveUI.own(0.038),
                         );
@@ -94,11 +104,15 @@ class CollectionTabConf extends StatefulWidget {
   State<CollectionTabConf> createState() => _CollectionTabConfState();
 }
 
-class _CollectionTabConfState extends State<CollectionTabConf> with SingleTickerProviderStateMixin {
+class _CollectionTabConfState extends State<CollectionTabConf>
+    with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    final controller = TabController(length: COLLECTION_STATUS_DATA.length, vsync: this);
+    final controller = TabController(
+      length: COLLECTION_STATUS_DATA.length,
+      vsync: this,
+    );
     CollectionAppBarTabs.controller = controller;
   }
 

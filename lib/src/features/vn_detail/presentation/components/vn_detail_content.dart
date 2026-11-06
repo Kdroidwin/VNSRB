@@ -2,7 +2,6 @@ import 'package:contentsize_tabbarview/contentsize_tabbarview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:vndb_lite/src/app.dart';
 import 'package:vndb_lite/src/common_widgets/generic_shadowy_text.dart';
 import 'package:vndb_lite/src/util/responsive.dart';
 import 'package:vndb_lite/src/features/collection_selection/presentation/fab/vn_detail_fab_state.dart';
@@ -27,7 +26,8 @@ class VnDetailsContent extends ConsumerStatefulWidget {
   }
 }
 
-class _VnDetailsContentState extends ConsumerState<VnDetailsContent> with TickerProviderStateMixin {
+class _VnDetailsContentState extends ConsumerState<VnDetailsContent>
+    with TickerProviderStateMixin {
   late final TabController _tabController;
   late AnimationController _animationController;
 
@@ -36,7 +36,7 @@ class _VnDetailsContentState extends ConsumerState<VnDetailsContent> with Ticker
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 300),
       vsync: this,
     )..forward();
 
@@ -83,9 +83,13 @@ class _VnDetailsContentState extends ConsumerState<VnDetailsContent> with Ticker
               // Tabs
               Container(
                 alignment: Alignment.center,
-                padding: EdgeInsets.symmetric(vertical: responsiveUI.own(0.045)),
+                padding: EdgeInsets.symmetric(
+                  vertical: responsiveUI.own(0.045),
+                ),
                 child: Container(
-                  width: MediaQuery.sizeOf(context).width - responsiveUI.own(0.045),
+                  width:
+                      MediaQuery.sizeOf(context).width -
+                      responsiveUI.own(0.045),
                   height: responsiveUI.own(0.075),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
@@ -119,9 +123,24 @@ class _VnDetailsContentState extends ConsumerState<VnDetailsContent> with Ticker
                         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                         // Tab headers
                         tabs: [
-                          Tab(child: ShadowText('General', color: kColor(context).tertiary)),
-                          Tab(child: ShadowText('Release', color: kColor(context).tertiary)),
-                          Tab(child: ShadowText('Relations', color: kColor(context).tertiary)),
+                          Tab(
+                            child: ShadowText(
+                              'General',
+                              color: kColor(context).tertiary,
+                            ),
+                          ),
+                          Tab(
+                            child: ShadowText(
+                              'Release',
+                              color: kColor(context).tertiary,
+                            ),
+                          ),
+                          Tab(
+                            child: ShadowText(
+                              'Relations',
+                              color: kColor(context).tertiary,
+                            ),
+                          ),
                         ],
                       ),
                     ],

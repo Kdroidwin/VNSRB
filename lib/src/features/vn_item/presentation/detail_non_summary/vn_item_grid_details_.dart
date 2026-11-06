@@ -15,11 +15,13 @@ class VnItemGridDetails extends StatelessWidget {
     required this.toggleVnDetailSummary,
     this.labelCode = 'title',
     this.withLabel = true,
+    this.collectionStatus,
   });
 
   final VnDataPhase01 p1;
   final String labelCode;
   final bool withLabel;
+  final String? collectionStatus;
   final VoidCallback toggleVnDetailSummary;
 
   @override
@@ -41,6 +43,7 @@ class VnItemGridDetails extends StatelessWidget {
         VnItemDetailStatusIndicator(
           id: p1.id,
           toggleVnDetailSummary: toggleVnDetailSummary,
+          forceStatus: collectionStatus,
         ),
         //
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

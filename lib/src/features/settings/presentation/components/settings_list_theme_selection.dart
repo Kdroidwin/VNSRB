@@ -2,13 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:vndb_lite/src/app.dart';
 import 'package:vndb_lite/src/common_widgets/generic_shadowy_text.dart';
 import 'package:vndb_lite/src/util/responsive.dart';
-import 'package:vndb_lite/src/features/settings/presentation/settings_theme_state.dart';
 import 'package:vndb_lite/src/features/theme/data/theme_data.dart';
 import 'package:vndb_lite/src/features/theme/theme_data_provider.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
 class ListThemeSelection extends ConsumerWidget {
   const ListThemeSelection({super.key, required this.refresh});
@@ -26,7 +25,11 @@ class ListThemeSelection extends ConsumerWidget {
             bottom: responsiveUI.own(0.03),
           ),
           child: ShadowText(
-            "You would have to restart the app for the configured change to take effect.",
+            appText(
+              context,
+              'You would have to restart the app for the configured change to take effect.',
+              '設定を反映するにはアプリの再起動が必要です。',
+            ),
           ),
         ),
         const Divider(indent: 0, height: 0, thickness: 0, endIndent: 0),
@@ -43,7 +46,8 @@ class ListThemeSelection extends ConsumerWidget {
                 for (ThemeCode themeCode in ThemeCode.values)
                   GestureDetector(
                     onTap: () async {
-                      ref.read(appThemeStateProvider.notifier).appTheme = themeCode;
+                      ref.read(appThemeStateProvider.notifier).appTheme =
+                          themeCode;
 
                       await refresh();
                       Navigator.of(context).pop();
@@ -62,12 +66,15 @@ class ListThemeSelection extends ConsumerWidget {
                         value: themeCode,
                         groupValue: ref.read(appThemeStateProvider),
                         onChanged: (val) async {
-                          ref.read(appThemeStateProvider.notifier).appTheme = themeCode;
+                          ref.read(appThemeStateProvider.notifier).appTheme =
+                              themeCode;
 
                           await refresh();
                           Navigator.of(context).pop();
                         },
-                        fillColor: WidgetStatePropertyAll(kColor(context).tertiary),
+                        fillColor: WidgetStatePropertyAll(
+                          kColor(context).tertiary,
+                        ),
                       ),
                     ),
                   ),

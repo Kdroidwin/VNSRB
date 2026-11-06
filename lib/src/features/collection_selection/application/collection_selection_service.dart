@@ -26,7 +26,9 @@ class VnSelectionService {
     final Map<String, VnRecord?> vnRecords = {};
 
     for (VnDataPhase01 selectedVn in p1) {
-      final VnRecord? vnInCollection = collection.getVnRecordFromId(selectedVn.id);
+      final VnRecord? vnInCollection = collection.getVnRecordFromId(
+        selectedVn.id,
+      );
       vnRecords[selectedVn.id] = vnInCollection;
     }
 
@@ -48,9 +50,15 @@ class VnSelectionService {
     final localVnRepo = ref.read(localVnRepoProvider);
 
     try {
-      // TODO watchout with this one [0], since it indirectly telling that downloading p2 data only supported by
-      // single selection record, not multiselection.
-      if (!localVnRepo.p2Exist(p1List[0].id)) await _downloadP2Data(p1List);
+      // P2 is supplementary metadata. A temporary VNDB outage should not block
+      // saving the collection record and the P1 data already available here.
+      if (p1List.any((p1) => !localVnRepo.p2Exist(p1.id))) {
+        try {
+          await _downloadP2Data(p1List);
+        } catch (_) {
+          // The collection record can still be saved; metadata can be fetched later.
+        }
+      }
       await _saveCollection(
         selection: selection,
         vnRecords: vnRecords,
@@ -185,18 +193,33 @@ class VnSelectionService {
     return latestRecord.added!;
   }
 
-  String? _getStartedTimeSelection(VnSelection selection, VnRecord? latestRecord) {
-    if (latestRecord != null && selection.started == null) return latestRecord.started;
+  String? _getStartedTimeSelection(
+    VnSelection selection,
+    VnRecord? latestRecord,
+  ) {
+    if (latestRecord != null && selection.started == null)
+      return latestRecord.started;
     return "${selection.started}";
   }
 
-  String? _getFinishedTimeSelection(VnSelection selection, VnRecord? latestRecord) {
-    if (latestRecord != null && selection.finished == null) return latestRecord.finished;
+  String? _getFinishedTimeSelection(
+    VnSelection selection,
+    VnRecord? latestRecord,
+  ) {
+    if (latestRecord != null && selection.finished == null)
+      return latestRecord.finished;
     return "${selection.finished}";
   }
 }
 
-@Riverpod(dependencies: [localVnRepo, localSyncRepo, fetchAndSaveP2Data, localCollectionRepo])
+@Riverpod(
+  dependencies: [
+    localVnRepo,
+    localSyncRepo,
+    fetchAndSaveP2Data,
+    localCollectionRepo,
+  ],
+)
 VnSelectionService vnSelectionService(Ref ref) {
   return VnSelectionService(ref);
 }

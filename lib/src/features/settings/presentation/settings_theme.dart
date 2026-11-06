@@ -14,6 +14,7 @@ import 'package:vndb_lite/src/features/settings/presentation/dialog/settings_dia
 import 'package:vndb_lite/src/features/settings/presentation/settings_theme_state.dart';
 import 'package:vndb_lite/src/features/theme/theme_data_provider.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 import 'package:vndb_lite/src/constants/local_db_constants.dart';
 import 'package:vndb_lite/src/core/local_db/shared_prefs.dart';
 
@@ -64,7 +65,7 @@ class _SettingsDataState extends ConsumerState<SettingsTheme>
 
   Future<void> _changeTheme() async {
     await showSettingsDialog(
-      title: 'Change App Theme',
+      title: appText(context, 'Change App Theme', 'アプリテーマの変更'),
       content: ListThemeSelection(refresh: _refreshApp),
     );
   }
@@ -122,20 +123,29 @@ class _SettingsDataState extends ConsumerState<SettingsTheme>
           (dialogContext) => StatefulBuilder(
             builder:
                 (context, setDialogState) => AlertDialog(
-                  title: const Text('AMOLED accent color'),
+                  title: Text(
+                    appText(context, 'AMOLED accent color', 'AMOLEDアクセントカラー'),
+                  ),
                   content: TextField(
                     controller: controller,
                     autofocus: true,
                     decoration: InputDecoration(
-                      labelText: 'Hex color',
+                      labelText: appText(context, 'Hex color', 'カラーコード'),
                       hintText: '#BB86FC',
-                      errorText: error,
+                      errorText:
+                          error == null
+                              ? null
+                              : appText(
+                                context,
+                                'Use a 6-digit color, e.g. #BB86FC',
+                                '6桁のカラーコードを入力してください（例: #BB86FC）',
+                              ),
                     ),
                   ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.of(dialogContext).pop(),
-                      child: const Text('Cancel'),
+                      child: Text(appText(context, 'Cancel', 'キャンセル')),
                     ),
                     FilledButton(
                       onPressed: () async {
@@ -158,7 +168,7 @@ class _SettingsDataState extends ConsumerState<SettingsTheme>
                           Navigator.of(dialogContext).pop();
                         }
                       },
-                      child: const Text('Apply'),
+                      child: Text(appText(context, 'Apply', '適用')),
                     ),
                   ],
                 ),
@@ -175,7 +185,7 @@ class _SettingsDataState extends ConsumerState<SettingsTheme>
     double tempFontSize = ref.read(settingsThemeStateProvider).fontSize;
 
     await showSettingsDialog(
-      title: 'Change Font Size',
+      title: appText(context, 'Change Font Size', '文字サイズの変更'),
       yesOrNo: true,
       yesFunction: () async {
         ref.read(settingsThemeStateProvider.notifier).fontSize = tempFontSize;
@@ -192,7 +202,11 @@ class _SettingsDataState extends ConsumerState<SettingsTheme>
                   bottom: responsiveUI.own(0.03),
                 ),
                 child: ShadowText(
-                  "You would have to restart the app for the configured change to take effect.",
+                  appText(
+                    ctx,
+                    'You would have to restart the app for the configured change to take effect.',
+                    '設定を反映するにはアプリの再起動が必要です。',
+                  ),
                 ),
               ),
               SizedBox(height: responsiveUI.own(0.03)),
@@ -236,12 +250,12 @@ class _SettingsDataState extends ConsumerState<SettingsTheme>
   //
 
   String _getUserFriendlyFontSize(double fontSize) {
-    if (fontSize <= -0.006) return "Tiny";
-    if (fontSize <= -0.004) return "Smaller";
-    if (fontSize <= -0.002) return "Small";
-    if (fontSize <= 0) return "Medium";
-    if (fontSize <= 0.002) return "Big";
-    return "Bigger";
+    if (fontSize <= -0.006) return appText(context, 'Tiny', '極小');
+    if (fontSize <= -0.004) return appText(context, 'Smaller', '小さめ');
+    if (fontSize <= -0.002) return appText(context, 'Small', '小');
+    if (fontSize <= 0) return appText(context, 'Medium', '標準');
+    if (fontSize <= 0.002) return appText(context, 'Big', '大');
+    return appText(context, 'Bigger', '大きめ');
   }
 
   //
@@ -321,7 +335,9 @@ class _SettingsDataState extends ConsumerState<SettingsTheme>
               SizedBox(height: responsiveUI.own(0.03)),
               SwitchListTile.adaptive(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('日本語のタイトルを表示'),
+                title: Text(
+                  japaneseUi ? '日本語のタイトルを表示' : 'Show Japanese titles',
+                ),
                 subtitle: Text(
                   japaneseUi
                       ? 'VNDB に登録されている場合、日本語タイトルを使用します'
@@ -332,7 +348,7 @@ class _SettingsDataState extends ConsumerState<SettingsTheme>
               ),
               SwitchListTile.adaptive(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('日本語UI'),
+                title: Text(japaneseUi ? '日本語UI' : 'Japanese UI'),
                 subtitle: Text(
                   japaneseUi
                       ? '対応している画面の日本語表示を有効にします'

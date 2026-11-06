@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vndb_lite/src/common_widgets/generic_shadowy_text.dart';
 import 'package:vndb_lite/src/features/sort_filter/data/languages_data.dart';
-import 'package:vndb_lite/src/util/delay.dart';
 import 'package:vndb_lite/src/util/responsive.dart';
 import 'package:vndb_lite/src/features/vn/domain/p1.dart';
 import 'package:vndb_lite/src/features/vn/domain/p2.dart';
@@ -17,7 +16,7 @@ class VnDetailReleasesLang extends StatelessWidget {
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   //
 
-  Future<Widget> get _flagWidgets async {
+  List<Widget> get _flagWidgets {
     final List<Widget> languageData = [];
 
     for (String language in (p2.languages ?? [])) {
@@ -31,8 +30,7 @@ class VnDetailReleasesLang extends StatelessWidget {
       languageData.add(_flagLangCode(language, txt: '(Machine Translation)'));
     }
 
-    await delay(true, 300);
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: languageData);
+    return languageData;
   }
 
   //
@@ -60,7 +58,11 @@ class VnDetailReleasesLang extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ShadowText('Languages', fontSize: responsiveUI.own(0.045), fontWeight: FontWeight.bold),
+        ShadowText(
+          'Languages',
+          fontSize: responsiveUI.own(0.045),
+          fontWeight: FontWeight.bold,
+        ),
         SizedBox(height: responsiveUI.own(0.01)),
         Row(
           children: [
@@ -72,26 +74,19 @@ class VnDetailReleasesLang extends StatelessWidget {
               color: kColor(context).secondary,
               shadows: [
                 Shadow(
-                  color: Color.alphaBlend(Colors.black.withOpacity(0.5), kColor(context).primary),
+                  color: Color.alphaBlend(
+                    Colors.black.withOpacity(0.5),
+                    kColor(context).primary,
+                  ),
                   blurRadius: 15,
                 ),
               ],
             ),
           ],
         ),
-        FutureBuilder(
-          future: _flagWidgets,
-          builder: (BuildContext context, AsyncSnapshot snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Padding(
-                padding: EdgeInsets.all(responsiveUI.own(0.3)),
-                child: const SizedBox.shrink(),
-              );
-            }
-
-            final flags = snapshot.data;
-            return flags;
-          },
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: _flagWidgets,
         ),
       ],
     );

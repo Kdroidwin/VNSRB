@@ -15,14 +15,11 @@ class VnItemDetailTitle extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: const BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Color.fromARGB(255, 0, 0, 0),
-              offset: Offset(0, 30),
-              spreadRadius: 20,
-              blurRadius: 35,
-            ),
-          ],
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.transparent, Color.fromARGB(190, 0, 0, 0)],
+          ),
         ),
         child: Text(
           title,
@@ -30,7 +27,11 @@ class VnItemDetailTitle extends StatelessWidget {
           softWrap: true,
           textAlign: TextAlign.center,
           overflow: TextOverflow.ellipsis,
-          style: styleText(fontSize: responsiveUI.normalSize, color: Colors.white),
+          style: styleText(
+            fontSize: responsiveUI.normalSize,
+            color: Colors.white,
+            shadows: const [],
+          ),
         ),
       ),
     );
@@ -56,14 +57,11 @@ class VnItemDetailTitlePlus extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: const BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Color.fromARGB(180, 0, 0, 0),
-              offset: Offset(0, 30),
-              spreadRadius: 20,
-              blurRadius: 35,
-            ),
-          ],
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.transparent, Color.fromARGB(190, 0, 0, 0)],
+          ),
         ),
         child: Padding(
           padding: const EdgeInsets.all(4.0),
@@ -84,7 +82,10 @@ class VnItemDetailTitlePlus extends StatelessWidget {
               ),
               GAP_H4,
               Text(
-                desc.replaceAll(RegExp(r'[\r\n]+'), " "), // Replace breaklines into just space.
+                desc.replaceAll(
+                  RegExp(r'[\r\n]+'),
+                  " ",
+                ), // Replace breaklines into just space.
                 maxLines: 3,
                 softWrap: true,
                 textAlign: TextAlign.center,

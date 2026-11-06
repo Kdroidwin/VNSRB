@@ -38,38 +38,53 @@ class CollectionSortFilterService {
       return;
     }
 
-    if (conf.reverse!) {
-      for (String statusName in COLLECTION_STATUS_DATA.keys) {
-        rawP1BasedOnStatus[statusName]!.sort(
-          (a, b) => b[sortBy].compareTo(a[sortBy]),
-        );
-      }
-      return;
-    }
-
     for (String statusName in COLLECTION_STATUS_DATA.keys) {
-      rawP1BasedOnStatus[statusName]!.sort(
-        (a, b) => a[sortBy].compareTo(b[sortBy]),
-      );
+      rawP1BasedOnStatus[statusName]!.sort((a, b) {
+        if (a[sortBy] == null || b[sortBy] == null) {
+          return _compareValues(a[sortBy], b[sortBy]);
+        }
+        final primary = _compareValues(a[sortBy], b[sortBy]);
+        final directed = conf.reverse! ? -primary : primary;
+        if (directed != 0) return directed;
+        return _compareValues(a['title'], b['title']);
+      });
     }
+  }
+
+  static int _compareValues(dynamic left, dynamic right) {
+    if (identical(left, right)) return 0;
+    if (left == null) return 1;
+    if (right == null) return -1;
+    if (left is num && right is num) return left.compareTo(right);
+    final leftText = left.toString();
+    final rightText = right.toString();
+    final leftNumber = num.tryParse(leftText);
+    final rightNumber = num.tryParse(rightText);
+    if (leftNumber != null && rightNumber != null) {
+      return leftNumber.compareTo(rightNumber);
+    }
+    final leftDate = DateTime.tryParse(leftText);
+    final rightDate = DateTime.tryParse(rightText);
+    if (leftDate != null && rightDate != null) {
+      return leftDate.compareTo(rightDate);
+    }
+    return leftText.toLowerCase().compareTo(rightText.toLowerCase());
   }
 
   /// This method filters all of the adapted vn data based on the given filter configuration.
   static Future<void> filterData(FilterData filter, SortData sort) async {
     final filterService = ref_.read(localFilterServiceProvider);
     final List<String> searchKeywords = _getSearchKeywords(filter.search);
+    final controller = ref_.read(collectionContentControllerProvider.notifier);
+    final usesFilter = isUsingFilter(filter);
 
     for (String statusName in COLLECTION_STATUS_DATA.keys) {
-      //
+      final matchingItems = <VnItemGrid>[];
       for (Map<String, dynamic> adaptedVnData
           in rawP1BasedOnStatus[statusName]!) {
         // If not using any filter, then simply ignore all the filter check.
-        if (!isUsingFilter(filter)) {
-          await _addToVnWidgetList(
-            adaptedVnData,
-            statusName: statusName,
-            sort: sort,
-          );
+        if (!usesFilter) {
+          matchingItems.add(_toVnWidget(adaptedVnData, sort));
           continue;
         }
 
@@ -82,20 +97,17 @@ class CollectionSortFilterService {
           ),
         };
 
-        final bool canContinue = await _canVnPassFilters(
+        final bool canContinue = _canVnPassFilters(
           filter,
           filterService,
           searchFilter,
           adaptedVnData,
         );
         if (canContinue) {
-          await _addToVnWidgetList(
-            adaptedVnData,
-            statusName: statusName,
-            sort: sort,
-          );
+          matchingItems.add(_toVnWidget(adaptedVnData, sort));
         }
       }
+      controller.add(statusCode: statusName, data: matchingItems);
     }
   }
 
@@ -152,12 +164,12 @@ class CollectionSortFilterService {
   //
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   //
-  static Future<bool> _canVnPassFilters(
+  static bool _canVnPassFilters(
     FilterData filter,
     LocalFilterService service,
     Map<String, dynamic> searchFilter,
     Map<String, dynamic> adaptedVnData,
-  ) async {
+  ) {
     //
     // Filter starts from the search query.
     if (service.searchFiltered(searchFilter)) {
@@ -193,27 +205,17 @@ class CollectionSortFilterService {
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   //
 
-  static Future<void> _addToVnWidgetList(
-    Map<String, dynamic> adaptedVnData, {
-    required String statusName,
-    required SortData sort,
-  }) async {
-    ref_
-        .read(collectionContentControllerProvider.notifier)
-        .add(
-          statusCode: statusName,
-          data: [
-            VnItemGrid(
-              key: UniqueKey(),
-              p1: VnDataPhase01.fromMap(adaptedVnData),
-              labelCode:
-                  sort.sort == SortableCode.custom.name ? '' : sort.sort ?? '',
-              isGridView: true,
-            ),
-          ],
-        );
-
-    return;
+  static VnItemGrid _toVnWidget(
+    Map<String, dynamic> adaptedVnData,
+    SortData sort,
+  ) {
+    return VnItemGrid(
+      key: ValueKey(adaptedVnData['id']),
+      p1: VnDataPhase01.fromMap(adaptedVnData),
+      labelCode: sort.sort == SortableCode.custom.name ? '' : sort.sort ?? '',
+      isGridView: true,
+      collectionStatus: adaptedVnData['status']?.toString(),
+    );
   }
 
   //

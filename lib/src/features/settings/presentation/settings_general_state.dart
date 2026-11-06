@@ -25,6 +25,7 @@ class SettingsGeneralState extends _$SettingsGeneralState {
       groupCollectionByDeveloper: _groupCollectionByDeveloper,
       showCollectionCoverDates: _showCollectionCoverDates,
       showCollectionDeveloperHeaders: _showCollectionDeveloperHeaders,
+      defaultCollectionStatus: _defaultCollectionStatus,
     );
   }
 
@@ -153,6 +154,15 @@ class SettingsGeneralState extends _$SettingsGeneralState {
           .getBool(DBKeys.SHOW_COLLECTION_DEVELOPER_HEADERS) ??
       true;
 
+  String get _defaultCollectionStatus {
+    final status = ref
+        .read(sharedPrefProvider)
+        .getString(DBKeys.DEFAULT_COLLECTION_STATUS);
+    return COLLECTION_STATUS_DATA.containsKey(status)
+        ? status!
+        : CollectionStatusCode.finished.name;
+  }
+
   set showChart(bool value) {
     final sharedPref = ref.read(sharedPrefProvider);
     sharedPref.setBool(DBKeys.SHOW_CHART_CONF, value);
@@ -243,5 +253,13 @@ class SettingsGeneralState extends _$SettingsGeneralState {
         .read(sharedPrefProvider)
         .setBool(DBKeys.SHOW_COLLECTION_DEVELOPER_HEADERS, value);
     state = state.copyWith(showCollectionDeveloperHeaders: value);
+  }
+
+  set defaultCollectionStatus(String value) {
+    if (!COLLECTION_STATUS_DATA.containsKey(value)) return;
+    ref
+        .read(sharedPrefProvider)
+        .setString(DBKeys.DEFAULT_COLLECTION_STATUS, value);
+    state = state.copyWith(defaultCollectionStatus: value);
   }
 }

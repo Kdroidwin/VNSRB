@@ -49,7 +49,10 @@ class MainOuterLayout extends StatelessWidget {
           return;
         }
 
-        return await VersionUpdateDialog.show(NavigationService.currentContext, ver);
+        return await VersionUpdateDialog.show(
+          NavigationService.currentContext,
+          ver,
+        );
       },
       onError: (e, st) async {
         _showVersionCheckSnackbar(success: false);
@@ -76,7 +79,10 @@ class MainOuterLayout extends StatelessWidget {
   }
 
   void _goToNextBranch(int index) {
-    navigationShell.goBranch(index, initialLocation: index == navigationShell.currentIndex);
+    navigationShell.goBranch(
+      index,
+      initialLocation: index == navigationShell.currentIndex,
+    );
   }
 
   //
@@ -87,7 +93,8 @@ class MainOuterLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     // return navigationShell;
 
-    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
 
     SchedulerBinding.instance.addPostFrameCallback((_) {
       // * BreakingChanges feature.
@@ -111,7 +118,9 @@ class MainOuterLayout extends StatelessWidget {
             Consumer(
               builder: (context, ref, child) {
                 final theme = ref.watch(appThemeStateProvider);
-                return GenericBackground(imagePath: theme.backgroundImgPath);
+                return RepaintBoundary(
+                  child: GenericBackground(imagePath: theme.backgroundImgPath),
+                );
               },
             ),
             //
@@ -165,7 +174,8 @@ class MainOuterLayout extends StatelessWidget {
           builder: (context, ref, child) {
             // Disappear when in multiselection mode.
             if (App.isInCollectionScreen) {
-              final isInMultiSelection = ref.watch(recordSelectedControllerProvider).isNotEmpty;
+              final isInMultiSelection =
+                  ref.watch(recordSelectedControllerProvider).isNotEmpty;
               if (isInMultiSelection) return const SizedBox.shrink();
             }
 

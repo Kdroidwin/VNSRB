@@ -4,6 +4,7 @@ import 'package:vndb_lite/src/common_widgets/custom_dialog_button.dart';
 import 'package:vndb_lite/src/common_widgets/generic_shadowy_text.dart';
 import 'package:vndb_lite/src/core/app/navigation.dart';
 import 'package:vndb_lite/src/util/responsive.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
 Future<void> confirmVnRemovalDialog(VoidCallback removeVn) {
   return showDialog(
@@ -16,7 +17,11 @@ Future<void> confirmVnRemovalDialog(VoidCallback removeVn) {
             Container(
               alignment: Alignment.centerLeft,
               child: ShadowText(
-                "Remove Visual Novel from collection?",
+                appText(
+                  context,
+                  'Remove Visual Novel from collection?',
+                  'この作品をコレクションから削除しますか？',
+                ),
                 fontSize: responsiveUI.catgTitle,
               ),
             ),
@@ -30,7 +35,7 @@ Future<void> confirmVnRemovalDialog(VoidCallback removeVn) {
                   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                   // Confirm button
                   CustomDialogButton(
-                    text: 'Yep',
+                    text: appText(context, 'Yep', '削除する'),
                     color: const Color.fromARGB(180, 255, 20, 0),
                     onPressed: removeVn,
                   ),
@@ -39,7 +44,7 @@ Future<void> confirmVnRemovalDialog(VoidCallback removeVn) {
                   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                   // Cancel button
                   CustomDialogButton(
-                    text: 'Cancel',
+                    text: appText(context, 'Cancel', 'キャンセル'),
                     color: Colors.transparent,
                     onPressed: Navigator.of(context).pop,
                   ),

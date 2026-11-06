@@ -9,6 +9,7 @@ import 'package:vndb_lite/src/features/collection_selection/presentation/dialogs
 import 'package:vndb_lite/src/features/vn/domain/p1.dart';
 import 'package:vndb_lite/src/features/vn_item/presentation/detail_non_summary/vn_record_state.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
 class MultiSelectFab extends ConsumerWidget {
   const MultiSelectFab({super.key});
@@ -43,11 +44,16 @@ class MultiSelectFab extends ConsumerWidget {
           heroTag: "multiSelection",
           elevation: 0,
           highlightElevation: 0,
-          tooltip: 'Process selected VNs',
+          tooltip: appText(context, 'Process selected VNs', '選択した作品を登録'),
           backgroundColor: Colors.transparent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(36)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(36),
+          ),
           onPressed: () async {
-            final p1List = await ref.read(recordSelectedControllerProvider.notifier).convertToP1();
+            final p1List =
+                await ref
+                    .read(recordSelectedControllerProvider.notifier)
+                    .convertToP1();
             await showVnSelectionDialog(p1: p1List, isGridView: true);
 
             // Turning off multiselection mode

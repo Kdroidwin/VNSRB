@@ -2,12 +2,11 @@
 import 'dart:ui';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:vndb_lite/src/features/collection/data/collection_status_data.dart';
 import 'package:vndb_lite/src/features/collection/domain/record.dart';
 import 'package:vndb_lite/src/features/collection_selection/application/collection_selection_service.dart';
 import 'package:vndb_lite/src/features/collection_selection/domain/vn_selection.dart';
-import 'package:vndb_lite/src/features/collection_selection/presentation/multiselection/record_selected_controller.dart';
 import 'package:vndb_lite/src/features/vn/domain/p1.dart';
+import 'package:vndb_lite/src/features/settings/presentation/settings_general_state.dart';
 
 part 'collection_selection_controller.g.dart';
 
@@ -19,7 +18,9 @@ class VnSelectionController extends _$VnSelectionController {
   @override
   VnSelection build() {
     ref.onDispose(() => _vnRecords.clear());
-    return VnSelection(status: CollectionStatusCode.playing.name, added: DateTime.now(), vote: 0);
+    final defaultStatus =
+        ref.read(settingsGeneralStateProvider).defaultCollectionStatus;
+    return VnSelection(status: defaultStatus, added: DateTime.now(), vote: 0);
   }
 
   //
@@ -78,14 +79,25 @@ class VnSelectionController extends _$VnSelectionController {
 
     // Default value changed to special mixed value if in multimode. The rest will
     // be null or dependent on each item's latest record.
-    state = state.copyWith(vote: -1, status: 'Mixed', started: null, finished: null);
+    final containsExistingRecord = _vnRecords.values.any(
+      (record) => record != null,
+    );
+    state = state.copyWith(
+      vote: -1,
+      status: containsExistingRecord ? 'Mixed' : state.status,
+      started: null,
+      finished: null,
+    );
   }
 
   //
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   //
 
-  void setToMultiselection(List<String> recordSelected, List<VnDataPhase01> p1List) {
+  void setToMultiselection(
+    List<String> recordSelected,
+    List<VnDataPhase01> p1List,
+  ) {
     for (VnDataPhase01 p1 in p1List) {
       if (recordSelected.contains(p1.id)) continue;
       recordSelected.add(p1.id);

@@ -17,6 +17,7 @@ class SettingsGeneralConf {
     required this.groupCollectionByDeveloper,
     required this.showCollectionCoverDates,
     required this.showCollectionDeveloperHeaders,
+    required this.defaultCollectionStatus,
   });
 
   final bool showCoverCensor;
@@ -31,6 +32,7 @@ class SettingsGeneralConf {
   final bool groupCollectionByDeveloper;
   final bool showCollectionCoverDates;
   final bool showCollectionDeveloperHeaders;
+  final String defaultCollectionStatus;
 
   SettingsGeneralConf copyWith({
     bool? showCoverCensor,
@@ -45,6 +47,7 @@ class SettingsGeneralConf {
     bool? groupCollectionByDeveloper,
     bool? showCollectionCoverDates,
     bool? showCollectionDeveloperHeaders,
+    String? defaultCollectionStatus,
   }) {
     return SettingsGeneralConf(
       showCoverCensor: showCoverCensor ?? this.showCoverCensor,
@@ -67,12 +70,14 @@ class SettingsGeneralConf {
           showCollectionCoverDates ?? this.showCollectionCoverDates,
       showCollectionDeveloperHeaders:
           showCollectionDeveloperHeaders ?? this.showCollectionDeveloperHeaders,
+      defaultCollectionStatus:
+          defaultCollectionStatus ?? this.defaultCollectionStatus,
     );
   }
 
   @override
   String toString() {
-    return 'SettingsGeneralConf(showCoverCensor: $showCoverCensor, showChart: $showChart, maxPreviewItem: $maxPreviewItem, maxItemPerRowPortrait: $maxItemPerRowPortrait, maxItemPerRowLandscape: $maxItemPerRowLandscape, homeSectionsArrangement: $homeSectionsArrangement, collectionStatusTabArrangement: $collectionStatusTabArrangement, startupTab: $startupTab, showCollectionItemLabels: $showCollectionItemLabels, groupCollectionByDeveloper: $groupCollectionByDeveloper, showCollectionCoverDates: $showCollectionCoverDates, showCollectionDeveloperHeaders: $showCollectionDeveloperHeaders)';
+    return 'SettingsGeneralConf(showCoverCensor: $showCoverCensor, showChart: $showChart, maxPreviewItem: $maxPreviewItem, maxItemPerRowPortrait: $maxItemPerRowPortrait, maxItemPerRowLandscape: $maxItemPerRowLandscape, homeSectionsArrangement: $homeSectionsArrangement, collectionStatusTabArrangement: $collectionStatusTabArrangement, startupTab: $startupTab, showCollectionItemLabels: $showCollectionItemLabels, groupCollectionByDeveloper: $groupCollectionByDeveloper, showCollectionCoverDates: $showCollectionCoverDates, showCollectionDeveloperHeaders: $showCollectionDeveloperHeaders, defaultCollectionStatus: $defaultCollectionStatus)';
   }
 
   @override
@@ -93,7 +98,9 @@ class SettingsGeneralConf {
         other.showCollectionItemLabels == showCollectionItemLabels &&
         other.groupCollectionByDeveloper == groupCollectionByDeveloper &&
         other.showCollectionCoverDates == showCollectionCoverDates &&
-        other.showCollectionDeveloperHeaders == showCollectionDeveloperHeaders;
+        other.showCollectionDeveloperHeaders ==
+            showCollectionDeveloperHeaders &&
+        other.defaultCollectionStatus == defaultCollectionStatus;
   }
 
   @override
@@ -109,6 +116,7 @@ class SettingsGeneralConf {
         showCollectionItemLabels.hashCode ^
         groupCollectionByDeveloper.hashCode ^
         showCollectionCoverDates.hashCode ^
-        showCollectionDeveloperHeaders.hashCode;
+        showCollectionDeveloperHeaders.hashCode ^
+        defaultCollectionStatus.hashCode;
   }
 }

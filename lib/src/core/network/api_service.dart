@@ -1,9 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../_core.dart';
-import '../exceptions/_exceptions.dart';
 
 part 'api_service.g.dart';
 
@@ -17,10 +14,7 @@ class ApiService {
 
   ApiService(this._dio) {
     _dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: _onRequest,
-        // onError: _onError,
-      ),
+      InterceptorsWrapper(onRequest: _onRequest, onError: _onError),
     );
   }
 
@@ -34,27 +28,48 @@ class ApiService {
   //   }
   // }
 
-  _onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
-    // Always check internet connection before doing any request.
-    final isConnected = await InternetConnection().hasInternetAccess;
+  void _onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    // Let Dio perform the actual request. A separate connectivity probe on every
+    // API call adds latency and can disagree with the API host's reachability.
+    handler.next(options);
+  }
 
-    if (isConnected) {
-      return handler.next(options);
+  Future<void> _onError(
+    DioException error,
+    ErrorInterceptorHandler handler,
+  ) async {
+    final request = error.requestOptions;
+    final retries = request.extra['api-retry-count'] as int? ?? 0;
+    final retryableType = switch (error.type) {
+      DioExceptionType.connectionTimeout ||
+      DioExceptionType.sendTimeout ||
+      DioExceptionType.receiveTimeout ||
+      DioExceptionType.connectionError => true,
+      _ => false,
+    };
+    final retryableStatus = (error.response?.statusCode ?? 0) >= 500;
+
+    if (request.method.toUpperCase() != 'POST' ||
+        retries >= 2 ||
+        (!retryableType && !retryableStatus) ||
+        CancelToken.isCancel(error)) {
+      handler.next(error);
+      return;
     }
 
-    // Will reject request if no connection.
-    return handler.reject(
-      DioException(
-        requestOptions: options,
-        response: Response(
-          requestOptions: options,
-          statusCode: const NoConnectionException().code,
-          statusMessage: const NoConnectionException().message,
+    await Future<void>.delayed(Duration(milliseconds: 250 * (retries + 1)));
+    try {
+      final response = await _dio.fetch<dynamic>(
+        request.copyWith(
+          extra: {...request.extra, 'api-retry-count': retries + 1},
         ),
-        error: const NoConnectionException(),
-        type: DioExceptionType.connectionTimeout,
-      ),
-    );
+      );
+      handler.resolve(response);
+    } on DioException catch (retryError) {
+      handler.next(retryError);
+    } catch (_) {
+      handler.next(error);
+    }
   }
 
   //
