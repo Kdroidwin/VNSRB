@@ -8,6 +8,7 @@ import 'package:vndb_lite/src/features/vn_detail/presentation/components/general
 import 'package:vndb_lite/src/features/vn_detail/presentation/components/general/vn_detail_general_tags.dart';
 
 import 'package:vndb_lite/src/util/context_shortcut.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
 class VnDetailsContentGeneral extends StatelessWidget {
   const VnDetailsContentGeneral({super.key, required this.p1, required this.p2});
@@ -15,10 +16,12 @@ class VnDetailsContentGeneral extends StatelessWidget {
   final VnDataPhase01 p1;
   final VnDataPhase02 p2;
 
-  String get _minimumAge {
+  String _minimumAge(BuildContext context) {
     final minage = p2.minage;
 
-    if (minage == null || minage.isEmpty) return 'Unknown';
+    if (minage == null || minage.isEmpty) {
+      return appText(context, 'Unknown', '不明');
+    }
     if (minage.length == 2) return '${minage[0]}/${minage[1]}';
     return '${minage[0]}';
   }
@@ -37,28 +40,28 @@ class VnDetailsContentGeneral extends StatelessWidget {
           //
           // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
           // Aliases
-          ShadowText('Aliases', fontSize: responsiveUI.own(0.045), fontWeight: FontWeight.bold),
+          ShadowText(appText(context, 'Aliases', '別名'), fontSize: responsiveUI.own(0.045), fontWeight: FontWeight.bold),
           SizedBox(height: responsiveUI.own(0.01)),
           ShadowText((p2.aliases!.isEmpty) ? '--' : p2.aliases!.join(' | ')),
           //
           // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
           // Age
           SizedBox(height: responsiveUI.own(0.05)),
-          ShadowText('Age', fontSize: responsiveUI.own(0.045), fontWeight: FontWeight.bold),
+          ShadowText(appText(context, 'Age rating', '年齢制限'), fontSize: responsiveUI.own(0.045), fontWeight: FontWeight.bold),
           SizedBox(height: responsiveUI.own(0.01)),
-          ShadowText('Minimum age: $_minimumAge'),
+          ShadowText('${appText(context, 'Minimum age', '最低年齢')}: ${_minimumAge(context)}'),
           //
           // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
           // Description
           SizedBox(height: responsiveUI.own(0.05)),
-          ShadowText('Description', fontSize: responsiveUI.own(0.045), fontWeight: FontWeight.bold),
+          ShadowText(appText(context, 'Description', '概要'), fontSize: responsiveUI.own(0.045), fontWeight: FontWeight.bold),
           SizedBox(height: responsiveUI.own(0.01)),
           ReadMoreText(
             p1.description ?? '--',
             trimLines: 6,
             trimMode: TrimMode.Line,
-            trimExpandedText: ' Show less',
-            trimCollapsedText: ' Show more',
+            trimExpandedText: ' ${appText(context, 'Show less', '閉じる')}',
+            trimCollapsedText: ' ${appText(context, 'Show more', '続きを読む')}',
             moreStyle: styleText(
               fontWeight: FontWeight.bold,
               fontSize: responsiveUI.normalSize,
@@ -87,13 +90,13 @@ class VnDetailsContentGeneral extends StatelessWidget {
           // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
           // Tags
           SizedBox(height: responsiveUI.own(0.05)),
-          ShadowText('Tags', fontSize: responsiveUI.own(0.045), fontWeight: FontWeight.bold),
+          ShadowText(appText(context, 'Tags', 'タグ'), fontSize: responsiveUI.own(0.045), fontWeight: FontWeight.bold),
           VnDetailGeneralTags(p2: p2),
           //
           // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
           // Screenshots
           SizedBox(height: responsiveUI.own(0.05)),
-          ShadowText('Screenshots', fontSize: responsiveUI.own(0.045), fontWeight: FontWeight.bold),
+          ShadowText(appText(context, 'Screenshots', 'スクリーンショット'), fontSize: responsiveUI.own(0.045), fontWeight: FontWeight.bold),
           VnDetailGeneralScreenshots(p2: p2),
           //
           // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

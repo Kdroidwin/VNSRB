@@ -5,6 +5,7 @@ import 'package:vndb_lite/src/features/vn/domain/p1.dart';
 import 'package:vndb_lite/src/features/vn/domain/p2.dart';
 import 'package:vndb_lite/src/features/vn_detail/presentation/components/release/vn_detail_releases_lang.dart';
 import 'package:vndb_lite/src/features/vn_detail/presentation/components/release/vn_detail_releases_platform.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
 class VnDetailsContentReleases extends StatelessWidget {
   const VnDetailsContentReleases({super.key, required this.p1, required this.p2});
@@ -24,7 +25,7 @@ class VnDetailsContentReleases extends StatelessWidget {
           // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
           // Release Date
           ShadowText(
-            'Release Date',
+            appText(context, 'Release Date', 'リリース日'),
             fontSize: responsiveUI.own(0.045),
             fontWeight: FontWeight.bold,
           ),

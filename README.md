@@ -1,16 +1,16 @@
 <a id="readme-top"></a>
 
 > [!WARNING]
-> 1) This app may contain explicit content, so viewer discretion is **strongly advised**. 
-> 2) Yes I still maintain this app, but not as often as in the past. This app will be keep maintained until 2026.
-> 3) This app is a fork of VNDB lite with enhanced functionality and partial Japanese language support.
+> 1) This app may contain explicit content, so viewer discretion is **strongly advised**.
+> 2) VNSRB is a community-maintained fork of the original VNDB Lite app.
+> 3) VNSRB is a fork of VNDB Lite with additional features and Japanese UI support.
 
 <!-- Banner -->
 <img src="./media/banner.png" align="center">
 
 <!-- Title & description -->
-<h1 align="center">[VNPockets]</h1>
-<p align="center">A lite, free, and open-source mobile version of your favorite website, vndb.org.</p>
+<h1 align="center">[VNSRB]</h1>
+<p align="center">A free, open-source visual novel collection browser for VNDB.org, built with Flutter.</p>
 
 <!-- Badges -->
 <div align="center">
@@ -18,8 +18,8 @@
         <img src="https://img.shields.io/badge/Platform-Flutter-02569B?logo=flutter"
         alt="Platform" />
     </a>
-    <img src="https://img.shields.io/github/license/Daniel-C-J/vndb-lite" alt="license">
-    <img src="https://img.shields.io/github/v/release/Daniel-C-J/vndb-lite" alt="release">
+    <img src="https://img.shields.io/github/license/Kdroidwin/VNPockets" alt="license">
+    <img src="https://img.shields.io/github/v/release/Kdroidwin/VNPockets" alt="release">
 </div>
 
 <br>
@@ -64,14 +64,14 @@ est. read time: <b>6.5 minutes</b>
 
 [Download the latest version here.](https://github.com/Kdroidwin/VNPockets/releases)
 
-N.B. - currently, this app only supports Android. I am unable to test the app for iOS, because I don't have any device from Apple. Contact me if you want to help me test VNDB Lite for iOS! :D
+VNSRB currently provides Android and Linux builds. Other Flutter targets may need additional testing.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 ## Disclaimer
 
-This project, **VNDB Lite**, is not an official app supported by [VNDB.org](https://vndb.org/) itself. It is simply a personal project that the developer found interesting, and that it was worthwhile to expand his competences and knowledge in mobile application development.
+VNSRB is an independent community fork of VNDB Lite. It is not affiliated with or endorsed by [VNDB.org](https://vndb.org/).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -97,7 +97,7 @@ It is a website that hosts a large public database of visual novels, and as the 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-### About VNDB Lite
+### About VNSRB
 
 > Please read the disclaimer above first.
 
@@ -107,7 +107,7 @@ This app is still in development. It is heavily inspired by Tachiyomi (a digital
 
 If you ever used Tachiyomi or some similar app, then I assure you that you will adapt rapidly to this app's interface.
 
-VNDB Lite is currently released for **Android only**, and it only supports **Android 5.0+**. 
+VNSRB currently provides **Android** and **Linux** builds. The Android app supports **Android 5.0+**.
 
 Currently, unfortunately, I have no iOS device to compile or even test the app. But as the framework (Flutter) itself is cross-platform, you can compile yourself the app from the source code for your own specific platform, and then test it.
 
@@ -121,9 +121,9 @@ As the name implies: this is a **lite** application, it does not cover all of th
 Here are the primary features:
 1. Up to 11 VNDB official themes (well, some of them suck, but these are the official themes, so don't blame me XD)
 2. Previews of VNs (based on the latest user collection, and top VNs)
-<br>[![Previews](https://img.icons8.com/ios-filled/50/000000/video.png)](https://github.com/Daniel-C-J/vndb-lite/raw/refs/heads/master/media/feature/preview.mkv)
+<br>[![Previews](https://img.icons8.com/ios-filled/50/000000/video.png)](https://github.com/Kdroidwin/VNPockets/raw/refs/heads/master/media/feature/preview.mkv)
 3. Advanced search
-<br>[![Previews](https://img.icons8.com/ios-filled/50/000000/video.png)](https://github.com/Daniel-C-J/vndb-lite/raw/refs/heads/master/media/feature/adv_search.mkv)
+<br>[![Previews](https://img.icons8.com/ios-filled/50/000000/video.png)](https://github.com/Kdroidwin/VNPockets/raw/refs/heads/master/media/feature/adv_search.mkv)
 4. Easy way to save VN selection and multi-selection
 <br><img src ="./media/feature/selection.png" width=150>
 5. A chart of VNDB's latest statistics (I know it's ugly, but at least it can **spin** XD)
@@ -133,35 +133,27 @@ Here are the primary features:
 <br><img src ="./media/feature/sync.png" width=150>
 8. Offline mode (for the VN details)
 <br><img src ="./media/feature/offline_mode.gif" width=150>
-9. Double-click to censor/uncensor cover 👀
-10. (งツ)ว And many more...!
+9. Custom themes, AMOLED black mode, and user-selected backgrounds and cover art.
+10. Japanese interface and Japanese title support.
+11. Drag-and-drop collection ordering, developer grouping, and collection backups.
+12. (งツ)ว And many more...!
 
 > [!WARNING]
-> VNDB Lite's synchronization feature does not support the following:
+> VNSRB's synchronization feature does not support the following:
 > 1. Custom status other than the built-in ones, i.e. `playing, finished, stalled, dropped, wishlist, blacklist`. Anything other than that will be considered invalid and will not be synchronized. (Yet)
 > 2. Decimal values for VN score. (It will eventually be rounded)
-> 3. A VN item which has multiple status on it, such as: `playing`, and `dropped`, is currently not going to be considered fully valid. Synchronization with VNDB Lite will only take **one** from the two. But any of the built-in status with `voted` is valid.
-> 4. ~~Saving the changes made from the VNDB server to the local storage once successfully synchronized. VNDB Lite's synchronization is local-oriented, so once the user synchronized his/her collection, any change from the VNDB server, such as **modifying** an already existing item, will not be tolerated, and will be over-written instead by the existing local ones instead whenever the user decides to synchronize again. The same thing happens when **deleting** an item from the VNDB server, once synchronizing again, if the item still exists in your local collection, then it will go back to the VNDB server (in the form of a backup). The only thing that is tolerated with VNDB server changes, is that **adding** a new item from the VNDB server, and that will be saved in the local collection.~~ Client-server semi-full synchronization is now supported starting from version 3.0.0
+> 3. A VN item which has multiple status on it, such as: `playing`, and `dropped`, is currently not going to be considered fully valid. Synchronization with VNSRB will only take **one** from the two. But any of the built-in status with `voted` is valid.
+> 4. ~~Saving the changes made from the VNDB server to the local storage once successfully synchronized. VNSRB's synchronization is local-oriented, so once the user synchronized his/her collection, any change from the VNDB server, such as **modifying** an already existing item, will not be tolerated, and will be over-written instead by the existing local ones instead whenever the user decides to synchronize again. The same thing happens when **deleting** an item from the VNDB server, once synchronizing again, if the item still exists in your local collection, then it will go back to the VNDB server (in the form of a backup). The only thing that is tolerated with VNDB server changes, is that **adding** a new item from the VNDB server, and that will be saved in the local collection.~~ Client-server semi-full synchronization is now supported starting from version 3.0.0
 > 5. The ability to immediately synchronize lots of VNs (approximately 60+ items) at once in a single synchronization. There are times when your VNDB.org collection VNs are not fully synchronized with the local collection after the first time synchronization, especially if you have lots of VNs in your VNDB.org collection. Make sure to try to synchronize again after some delay until it fully indexes all of your VNDB.org collection VNs within the local collection.
 >
 > **Consider changing your collection via vndb.org first to make sure that all of your VNs are valid when synchronizing using this app.**
 
 <br>
 
-TODOS:
-- BBCode
-- Better logic
-- Landscape mode optimization
-- Custom background
-- Detail screen UI update
-- Filter & sort mechanism
-- Better collection methods
-- VN review
-- VN note (Add note to a certain vn)
-- New VN releases news
+VNSRB is currently at version **4.0.0**. See the repository releases and Linux build guide for installation options.
 
 Dev note:
-- No, there will be no localizations. – =͟͟͞͞ =͟͟͞͞ ﾍ( ´Д`)ﾉ I can engrish
+- Japanese UI localization is available from Settings.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -170,7 +162,7 @@ Dev note:
 
 <img src="https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)">
 
-VNDB Lite mainly depends on these dependencies:
+VNSRB mainly depends on these dependencies:
 - [Riverpod](https://pub.dev/packages/riverpod)
 - [GoRouter](https://pub.dev/packages/go_router)
 - [Dio](https://pub.dev/packages/dio)
@@ -215,19 +207,19 @@ flutter doctor -v
 
 ### Installation
 
-1. Clone this repository 
+1. Clone this repository
 ```sh
-git clone https://github.com/Daniel-C-J/vndb-lite.git
+git clone https://github.com/Kdroidwin/VNPockets.git
 ```
 
 2. Open your terminal and `cd` to the root path of the repository, for example:
 ```sh
-cd vndb-lite
+cd VNPockets
 ```
 
-3. Type `flutter build --help` then head down to the `Available subcommands:` section, you'll be able to find the platform specific options to compile the app. 
+3. Type `flutter build --help` then head down to the `Available subcommands:` section, you'll be able to find the platform specific options to compile the app.
 ```sh
-flutter build --help 
+flutter build --help
 flutter build apk --release # This compiles the Android application.
 ```
 
@@ -236,12 +228,14 @@ flutter build apk --release # This compiles the Android application.
 start . # This opens Windows's file explorer to check out the output.
 ```
 
-5. And you're done! Congratulations 🎉!
+5. Build a Linux desktop release with `flutter build linux --release`; see [the Linux guide](./linux/README.md).
+
+6. And you're done! Congratulations 🎉!
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- USAGE EXAMPLES -->
-## Usage   
+## Usage
 
 While there is no real official documentation yet for this project, it is as simple as managing your own VNDB.org collection. So have fun, and experiment with it!
 
@@ -270,7 +264,7 @@ Distributed under terms of the [Apache-2.0 License](./LICENSE).
 <!-- CONTACT -->
 ## Contact
 
-Daniel CJ - dcj.dandy800@passinbox.com
+VNSRB contributors: [GitHub Issues](https://github.com/Kdroidwin/VNPockets/issues).
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -291,7 +285,7 @@ Daniel CJ - dcj.dandy800@passinbox.com
 - [micah686](https://vndb.org/u28821) - Helped suggesting having a backup repo. (Availability and thicker OSS solution matters)
 - [flat-gal-expert](https://vndb.org/u305047) - Or should I say linguistic expert to help this app's engrish.
 - [OG-Yorhel](https://vndb.org/u2) - Helped with synchronization logic!
-  
+
 And many others that helped me outside the code spectrum — your support is greatly appreciated! You rock!
-  
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

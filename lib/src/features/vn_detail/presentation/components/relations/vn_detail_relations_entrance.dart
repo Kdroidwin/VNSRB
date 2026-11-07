@@ -7,6 +7,7 @@ import 'package:vndb_lite/src/util/responsive.dart';
 import 'package:vndb_lite/src/features/vn/data/local_vn_repo.dart';
 import 'package:vndb_lite/src/features/vn_detail/application/vn_detail_relations._service.dart';
 import 'package:vndb_lite/src/features/vn_detail/presentation/components/relations/vn_detail_relations_content.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
 class VnDetailsContentRelationsEntrance extends ConsumerWidget {
   const VnDetailsContentRelationsEntrance({super.key, required this.vnId});
@@ -82,7 +83,11 @@ class VnDetailsContentRelationsEntrance extends ConsumerWidget {
                     if (p3 == null) {
                       return Center(
                         child: ShadowText(
-                          "There's nothing here currently :)",
+                          appText(
+                            context,
+                            "There's nothing here currently :)",
+                            '関連情報はありません。',
+                          ),
                           fontSize: responsiveUI.catgTitle,
                           color: Colors.red,
                         ),

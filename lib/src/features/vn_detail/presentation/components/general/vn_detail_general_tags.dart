@@ -15,6 +15,7 @@ import 'package:vndb_lite/src/features/vn/domain/p2.dart';
 import 'package:vndb_lite/src/routing/app_router.dart';
 import 'package:vndb_lite/src/features/search/presentation/search_screen_controller.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
 class VnDetailGeneralTags extends ConsumerStatefulWidget {
   const VnDetailGeneralTags({super.key, required this.p2});
@@ -94,7 +95,11 @@ class _VnDetailGeneralTagsState extends ConsumerState<VnDetailGeneralTags> {
     return Padding(
       padding: EdgeInsets.only(right: responsiveUI.own(0.02), bottom: responsiveUI.own(0.02)),
       child: Tooltip(
-        message: 'Search for VNs with "${tag.name}" tag.',
+        message: appText(
+          context,
+          'Search for VNs with "${tag.name}" tag.',
+          '「${tag.name}」タグの作品を検索',
+        ),
         child: CustomLabel(
           onTap: () async {
             // Search Configurations to search the corresponding vn tag.
@@ -176,14 +181,22 @@ class _VnDetailGeneralTagsState extends ConsumerState<VnDetailGeneralTags> {
       children: [
         Wrap(
           children: [
-            ShadowText('Spoiler level: '),
-            _tagsSpoilerButton(spoilerLevel: spoilerLimit[0], color: Colors.green, title: 'Low'),
+            ShadowText('${appText(context, 'Spoiler level', 'ネタバレ度')}: '),
+            _tagsSpoilerButton(
+              spoilerLevel: spoilerLimit[0],
+              color: Colors.green,
+              title: appText(context, 'Low', '低'),
+            ),
             _tagsSpoilerButton(
               spoilerLevel: spoilerLimit[1],
               color: const Color.fromARGB(255, 220, 200, 5),
-              title: 'Medium',
+              title: appText(context, 'Medium', '中'),
             ),
-            _tagsSpoilerButton(spoilerLevel: spoilerLimit[2], color: Colors.red, title: 'High'),
+            _tagsSpoilerButton(
+              spoilerLevel: spoilerLimit[2],
+              color: Colors.red,
+              title: appText(context, 'High', '高'),
+            ),
           ],
         ),
         SizedBox(height: responsiveUI.own(0.025)),

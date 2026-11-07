@@ -26,6 +26,8 @@ class SettingsGeneralState extends _$SettingsGeneralState {
       showCollectionCoverDates: _showCollectionCoverDates,
       showCollectionDeveloperHeaders: _showCollectionDeveloperHeaders,
       defaultCollectionStatus: _defaultCollectionStatus,
+      showNavigationLabelsOnTap: _showNavigationLabelsOnTap,
+      hideCollectionBarsOnScroll: _hideCollectionBarsOnScroll,
     );
   }
 
@@ -163,6 +165,18 @@ class SettingsGeneralState extends _$SettingsGeneralState {
         : CollectionStatusCode.finished.name;
   }
 
+  bool get _showNavigationLabelsOnTap =>
+      ref
+          .read(sharedPrefProvider)
+          .getBool(DBKeys.SHOW_NAVIGATION_LABELS_ON_TAP) ??
+      false;
+
+  bool get _hideCollectionBarsOnScroll =>
+      ref
+          .read(sharedPrefProvider)
+          .getBool(DBKeys.HIDE_COLLECTION_BARS_ON_SCROLL) ??
+      true;
+
   set showChart(bool value) {
     final sharedPref = ref.read(sharedPrefProvider);
     sharedPref.setBool(DBKeys.SHOW_CHART_CONF, value);
@@ -261,5 +275,19 @@ class SettingsGeneralState extends _$SettingsGeneralState {
         .read(sharedPrefProvider)
         .setString(DBKeys.DEFAULT_COLLECTION_STATUS, value);
     state = state.copyWith(defaultCollectionStatus: value);
+  }
+
+  set showNavigationLabelsOnTap(bool value) {
+    ref
+        .read(sharedPrefProvider)
+        .setBool(DBKeys.SHOW_NAVIGATION_LABELS_ON_TAP, value);
+    state = state.copyWith(showNavigationLabelsOnTap: value);
+  }
+
+  set hideCollectionBarsOnScroll(bool value) {
+    ref
+        .read(sharedPrefProvider)
+        .setBool(DBKeys.HIDE_COLLECTION_BARS_ON_SCROLL, value);
+    state = state.copyWith(hideCollectionBarsOnScroll: value);
   }
 }

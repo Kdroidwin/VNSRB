@@ -91,7 +91,7 @@ class _SettingsDataState extends ConsumerState<SettingsData>
             'Export collection backup',
             'コレクションのバックアップを書き出す',
           ),
-          fileName: 'vnpockets-collection-backup.json',
+          fileName: 'vnsrb-collection-backup.json',
           type: FileType.custom,
           allowedExtensions: ['json'],
         );
@@ -108,20 +108,20 @@ class _SettingsDataState extends ConsumerState<SettingsData>
       }
 
       final directory = await getTemporaryDirectory();
-      final file = File('${directory.path}/vnpockets-collection-backup.json');
+        final file = File('${directory.path}/vnsrb-collection-backup.json');
       await file.writeAsString(backupText);
       await SharePlus.instance.share(
         ShareParams(
           files: [XFile(file.path)],
           text: appText(
             context,
-            'VNPockets collection backup',
-            'VNPockets コレクションバックアップ',
+            'VNSRB collection backup',
+            'VNSRB コレクションバックアップ',
           ),
           subject: appText(
             context,
-            'VNPockets collection backup',
-            'VNPockets コレクションバックアップ',
+            'VNSRB collection backup',
+            'VNSRB コレクションバックアップ',
           ),
         ),
       );
@@ -166,8 +166,8 @@ class _SettingsDataState extends ConsumerState<SettingsData>
       feedbackSnackBar(
         text: appText(
           context,
-          'Import failed: choose a VNPockets backup file.',
-          '取り込めませんでした。VNPockets のバックアップファイルを選んでください。',
+          'Import failed: choose a VNSRB backup file.',
+          '取り込めませんでした。VNSRB のバックアップファイルを選んでください。',
         ),
         icon: Icons.error,
       );
@@ -188,6 +188,11 @@ class _SettingsDataState extends ConsumerState<SettingsData>
               key == DBKeys.COVER_CENSOR_CONF ||
               key == DBKeys.SHOW_CHART_CONF ||
               key == DBKeys.SHOW_COLLECTION_ITEM_LABELS ||
+              key == DBKeys.SHOW_COLLECTION_COVER_DATES ||
+              key == DBKeys.SHOW_COLLECTION_DEVELOPER_HEADERS ||
+              key == DBKeys.DEFAULT_COLLECTION_STATUS ||
+              key == DBKeys.SHOW_NAVIGATION_LABELS_ON_TAP ||
+              key == DBKeys.HIDE_COLLECTION_BARS_ON_SCROLL ||
               key == DBKeys.GROUP_COLLECTION_BY_DEVELOPER ||
               key == DBKeys.CUSTOM_FONT_SIZE_CONF ||
               key == DBKeys.MAX_PREVIEW_ITEMS_CONF ||
@@ -241,8 +246,8 @@ class _SettingsDataState extends ConsumerState<SettingsData>
         final selectedPath = await FilePicker.platform.saveFile(
           dialogTitle: appText(
             context,
-            'Export full VNPockets backup',
-            'VNPockets 完全バックアップを書き出す',
+            'Export full VNSRB backup',
+            'VNSRB 完全バックアップを書き出す',
           ),
           fileName: 'vnpockets-full-backup.zip',
           type: FileType.custom,
@@ -266,7 +271,7 @@ class _SettingsDataState extends ConsumerState<SettingsData>
       await SharePlus.instance.share(
         ShareParams(
           files: [XFile(file.path)],
-          text: appText(context, 'VNPockets full backup', 'VNPockets 完全バックアップ'),
+          text: appText(context, 'VNSRB full backup', 'VNSRB 完全バックアップ'),
         ),
       );
     } catch (_) {

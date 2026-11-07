@@ -10,6 +10,7 @@ import 'package:vndb_lite/src/features/vn/domain/p1.dart';
 import 'package:vndb_lite/src/features/vn_item/presentation/detail_non_summary/vn_record_state.dart';
 import 'package:vndb_lite/src/util/format_minutes.dart';
 import 'package:vndb_lite/src/features/settings/presentation/settings_general_state.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
 class VnItemDetailLabel extends ConsumerWidget {
   const VnItemDetailLabel({
@@ -21,7 +22,11 @@ class VnItemDetailLabel extends ConsumerWidget {
   final VnDataPhase01 p1;
   final String labelCode;
 
-  String _getLabelData(String label, {VnRecord? record}) {
+  String _getLabelData(
+    BuildContext context,
+    String label, {
+    VnRecord? record,
+  }) {
     final code = label.toLowerCase();
     if (code == SortableCode.title.name || code.isEmpty) return '';
     if (code == SortableCode.rating.name) {
@@ -49,16 +54,16 @@ class VnItemDetailLabel extends ConsumerWidget {
     }
 
     return switch (code) {
-      'orig' => 'Original',
-      'seq' => 'Sequel',
-      'preq' => 'Prequel',
-      'ser' => 'Same Series',
-      'set' => 'Same Setting',
-      'char' => 'Characters',
-      'fan' => 'Fandisc',
-      'side' => 'Side Story',
-      'alt' => 'Alternative',
-      _ => toBeginningOfSentenceCase<String>('Unknown'),
+      'orig' => appText(context, 'Original', '原作'),
+      'seq' => appText(context, 'Sequel', '続編'),
+      'preq' => appText(context, 'Prequel', '前編'),
+      'ser' => appText(context, 'Same Series', '同シリーズ'),
+      'set' => appText(context, 'Same Setting', '同じ世界観'),
+      'char' => appText(context, 'Characters', '登場人物'),
+      'fan' => appText(context, 'Fandisc', 'ファンディスク'),
+      'side' => appText(context, 'Side Story', '外伝'),
+      'alt' => appText(context, 'Alternative', '別バージョン'),
+      _ => appText(context, 'Unknown', '不明'),
     };
   }
 
@@ -106,7 +111,7 @@ class VnItemDetailLabel extends ConsumerWidget {
           (labelCode == SortableCode.collection.name && record != null)
               ? record.status
               : labelCode,
-      labelText: _getLabelData(labelCode, record: record),
+      labelText: _getLabelData(context, labelCode, record: record),
     );
   }
 }

@@ -33,7 +33,7 @@ class LocalNotificationService {
           iOS: initializationSettingsDarwin,
           macOS: initializationSettingsDarwin,
           linux: LinuxInitializationSettings(
-            defaultActionName: 'Open VNPockets',
+            defaultActionName: 'Open VNSRB',
           ),
         );
 

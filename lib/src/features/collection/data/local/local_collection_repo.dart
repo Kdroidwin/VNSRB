@@ -288,7 +288,7 @@ class LocalCollectionRepo {
   Future<int> importBackup(Map<String, dynamic> backup) async {
     if (backup['format'] != 'vnpockets-collection-backup' ||
         backup['records'] is! List) {
-      throw const FormatException('This is not a VNPockets collection backup.');
+      throw const FormatException('This is not a VNSRB collection backup.');
     }
     var count = 0;
     for (final raw in backup['records'] as List) {

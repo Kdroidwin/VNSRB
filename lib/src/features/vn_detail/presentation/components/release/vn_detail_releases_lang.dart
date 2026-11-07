@@ -5,6 +5,7 @@ import 'package:vndb_lite/src/util/responsive.dart';
 import 'package:vndb_lite/src/features/vn/domain/p1.dart';
 import 'package:vndb_lite/src/features/vn/domain/p2.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
 class VnDetailReleasesLang extends StatelessWidget {
   const VnDetailReleasesLang({super.key, required this.p1, required this.p2});
@@ -16,7 +17,7 @@ class VnDetailReleasesLang extends StatelessWidget {
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   //
 
-  List<Widget> get _flagWidgets {
+  List<Widget> _flagWidgets(BuildContext context) {
     final List<Widget> languageData = [];
 
     for (String language in (p2.languages ?? [])) {
@@ -27,7 +28,12 @@ class VnDetailReleasesLang extends StatelessWidget {
     }
 
     for (String language in (p2.mtl ?? [])) {
-      languageData.add(_flagLangCode(language, txt: '(Machine Translation)'));
+      languageData.add(
+        _flagLangCode(
+          language,
+          txt: appText(context, '(Machine Translation)', '(機械翻訳)'),
+        ),
+      );
     }
 
     return languageData;
@@ -59,7 +65,7 @@ class VnDetailReleasesLang extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ShadowText(
-          'Languages',
+          appText(context, 'Languages', '言語'),
           fontSize: responsiveUI.own(0.045),
           fontWeight: FontWeight.bold,
         ),
@@ -68,7 +74,7 @@ class VnDetailReleasesLang extends StatelessWidget {
           children: [
             _flagLangCode(p1.olang!),
             ShadowText(
-              ' (Origin)',
+              ' ${appText(context, '(Origin)', '(原語)')}',
               fontWeight: FontWeight.bold,
               fontSize: responsiveUI.normalSize,
               color: kColor(context).secondary,
@@ -86,7 +92,7 @@ class VnDetailReleasesLang extends StatelessWidget {
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: _flagWidgets,
+          children: _flagWidgets(context),
         ),
       ],
     );

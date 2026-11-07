@@ -11,9 +11,9 @@ class NetConsts {
 
   // Used for [VersionCheck].
   static const String URL_CHECK_VERSION =
-      "https://raw.githubusercontent.com/Daniel-C-J/vndb-lite/refs/heads/master/VERSION.json";
+      "https://raw.githubusercontent.com/Kdroidwin/VNPockets/refs/heads/master/VERSION.json";
   static const String URL_UPDATE_VERSION =
-      "https://github.com/Daniel-C-J/vndb-lite/releases/latest";
+      "https://github.com/Kdroidwin/VNPockets/releases/latest";
 
   // API base url.
   static const String BASE_URL = "https://api.vndb.org";

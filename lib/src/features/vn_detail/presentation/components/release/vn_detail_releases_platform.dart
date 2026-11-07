@@ -5,6 +5,7 @@ import 'package:vndb_lite/src/util/responsive.dart';
 import 'package:vndb_lite/src/features/sort_filter/data/platform_data.dart';
 import 'package:vndb_lite/src/features/vn/domain/p2.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
 class VnDetailReleasesPlatform extends StatelessWidget {
   const VnDetailReleasesPlatform({super.key, required this.p2});
@@ -15,7 +16,7 @@ class VnDetailReleasesPlatform extends StatelessWidget {
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   //
 
-  Widget get _platformWidgets {
+  Widget _platformWidgets(BuildContext context) {
     final List<Widget> platforms = [];
     bool hasOthers = false;
 
@@ -60,14 +61,18 @@ class VnDetailReleasesPlatform extends StatelessWidget {
       );
     }
 
-    return _getFinalPlatformWidget(platforms, hasOthers);
+    return _getFinalPlatformWidget(context, platforms, hasOthers);
   }
 
   //
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   //
 
-  Widget _getFinalPlatformWidget(List<Widget> platforms, bool hasOthers) {
+  Widget _getFinalPlatformWidget(
+    BuildContext context,
+    List<Widget> platforms,
+    bool hasOthers,
+  ) {
     if (platforms.isEmpty) {
       platforms.add(ShadowText('--'));
     }
@@ -77,7 +82,10 @@ class VnDetailReleasesPlatform extends StatelessWidget {
       platforms.add(
         Container(
           margin: EdgeInsets.only(right: responsiveUI.own(0.025), bottom: responsiveUI.own(0.025)),
-          child: CustomLabel(useBorder: false, children: [ShadowText('Others...')]),
+          child: CustomLabel(
+            useBorder: false,
+            children: [ShadowText(appText(context, 'Others...', 'その他'))],
+          ),
         ),
       );
     }
@@ -94,9 +102,9 @@ class VnDetailReleasesPlatform extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ShadowText('Platforms', fontSize: responsiveUI.own(0.045), fontWeight: FontWeight.bold),
+        ShadowText(appText(context, 'Platforms', '対応プラットフォーム'), fontSize: responsiveUI.own(0.045), fontWeight: FontWeight.bold),
         SizedBox(height: responsiveUI.own(0.01)),
-        _platformWidgets,
+        _platformWidgets(context),
       ],
     );
   }

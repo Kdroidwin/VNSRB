@@ -1,4 +1,4 @@
-# VNPockets for Linux
+# VNSRB for Linux
 
 The Linux desktop build is a native Flutter GTK application. From the project
 root, build a release bundle with:
@@ -34,6 +34,6 @@ After building the release bundle, install or download the official
 APPIMAGETOOL=/path/to/appimagetool-x86_64.AppImage linux/package-appimage.sh
 ```
 
-The script creates `build/appimage/VNPockets-<version>-x86_64.AppImage`.
+The script creates `build/appimage/VNSRB-<version>-x86_64.AppImage`.
 `appimagetool` also needs network access to fetch its Type 2 runtime unless
 `APPIMAGETOOL_RUNTIME_FILE` points to a local runtime file.

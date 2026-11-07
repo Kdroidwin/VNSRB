@@ -5,6 +5,7 @@ import 'package:vndb_lite/src/common_widgets/generic_shadowy_text.dart';
 import 'package:vndb_lite/src/util/responsive.dart';
 import 'package:vndb_lite/src/features/vn/domain/p3.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
 class VnDetailRelationsExtlinks extends StatefulWidget {
   const VnDetailRelationsExtlinks({super.key, required this.p3});
@@ -61,7 +62,9 @@ class _VnDetailRelationsExtlinksState extends State<VnDetailRelationsExtlinks> {
             setState(() => _showMoreLinks = !_showMoreLinks);
           },
           child: ShadowText(
-            (_showMoreLinks) ? 'Show Less' : 'Show More',
+            _showMoreLinks
+                ? appText(context, 'Show Less', '閉じる')
+                : appText(context, 'Show More', 'もっと見る'),
             fontWeight: FontWeight.bold,
             fontSize: responsiveUI.normalSize,
             color: kColor(context).secondary,
@@ -85,7 +88,7 @@ class _VnDetailRelationsExtlinksState extends State<VnDetailRelationsExtlinks> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ShadowText(
-          'External Links',
+          appText(context, 'External Links', '外部リンク'),
           fontSize: responsiveUI.own(0.045),
           fontWeight: FontWeight.bold,
         ),
@@ -94,11 +97,14 @@ class _VnDetailRelationsExtlinksState extends State<VnDetailRelationsExtlinks> {
           stream: _extLinks,
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return ShadowText('Loading...');
+              return ShadowText(appText(context, 'Loading...', '読み込み中…'));
             }
 
             if (snapshot.hasError) {
-              return ShadowText('Something went wrong.', color: Colors.red);
+              return ShadowText(
+                appText(context, 'Something went wrong.', '読み込みに失敗しました。'),
+                color: Colors.red,
+              );
             }
 
             return Column(crossAxisAlignment: CrossAxisAlignment.start, children: snapshot.data);

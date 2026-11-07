@@ -11,6 +11,7 @@ import 'package:vndb_lite/src/features/collection_selection/presentation/multise
 import 'package:vndb_lite/src/features/home/presentation/home_appbar.dart';
 import 'package:vndb_lite/src/features/collection_selection/presentation/multiselection/multiselection_appbar.dart';
 import 'package:vndb_lite/src/features/search/presentation/components/search_appbar.dart';
+import 'package:vndb_lite/src/features/settings/presentation/settings_general_state.dart';
 
 import '../../../../util/context_shortcut.dart';
 
@@ -25,6 +26,8 @@ class TabAppBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isInMultiselection = ref.watch(recordSelectedControllerProvider).isNotEmpty;
+    final hideCollectionBarsOnScroll =
+        ref.watch(settingsGeneralStateProvider).hideCollectionBarsOnScroll;
 
     // Hides search text field when changing screen.
     SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -56,7 +59,8 @@ class TabAppBar extends ConsumerWidget {
       ),
       backgroundColor: Colors.transparent,
       snap: (route != AppRoute.collection),
-      pinned: (route == AppRoute.collection),
+      pinned:
+          route == AppRoute.collection && !hideCollectionBarsOnScroll,
       title: Consumer(
         builder: (context, ref, child) {
           if (route == AppRoute.search) return const SizedBox.shrink();

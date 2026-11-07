@@ -69,6 +69,20 @@ class _SettingsGeneralState extends ConsumerState<SettingsGeneral>
         !showCoverCensor;
   }
 
+  void _navigationLabelsOnTapSwitch() {
+    final visible =
+        ref.read(settingsGeneralStateProvider).showNavigationLabelsOnTap;
+    ref.read(settingsGeneralStateProvider.notifier).showNavigationLabelsOnTap =
+        !visible;
+  }
+
+  void _collectionBarsOnScrollSwitch() {
+    final hidden =
+        ref.read(settingsGeneralStateProvider).hideCollectionBarsOnScroll;
+    ref.read(settingsGeneralStateProvider.notifier).hideCollectionBarsOnScroll =
+        !hidden;
+  }
+
   Future<void> _chooseStartupTab() async {
     final tabs = <String, String>{
       'home': appText(context, 'Home', 'ホーム'),
@@ -557,6 +571,35 @@ class _SettingsGeneralState extends ConsumerState<SettingsGeneral>
                 isSelected: false,
                 borderColor: kColor(context).secondary,
                 padding: EdgeInsets.all(responsiveUI.own(0.02)),
+                onTap: _collectionBarsOnScrollSwitch,
+                children: [
+                  ShadowText(
+                    appText(
+                      context,
+                      'Hide collection toolbar and status tabs while scrolling: ',
+                      'スクロール中にコレクション上部バーとステータスタブを隠す：',
+                    ),
+                  ),
+                  ShadowText(
+                    settings.hideCollectionBarsOnScroll
+                        ? appText(context, ' ON', ' オン')
+                        : appText(context, ' OFF', ' オフ'),
+                    fontWeight: FontWeight.bold,
+                    color:
+                        settings.hideCollectionBarsOnScroll
+                            ? Colors.green
+                            : Colors.red,
+                  ),
+                ],
+              ),
+
+              SizedBox(height: responsiveUI.own(0.03)),
+              CustomLabel(
+                useBorder: true,
+                borderRadius: 12,
+                isSelected: false,
+                borderColor: kColor(context).secondary,
+                padding: EdgeInsets.all(responsiveUI.own(0.02)),
                 onTap: _chooseStartupTab,
                 children: [
                   ShadowText(
@@ -568,6 +611,35 @@ class _SettingsGeneralState extends ConsumerState<SettingsGeneral>
                     'collection' => appText(context, 'Collection', 'コレクション'),
                     _ => appText(context, 'Others', 'その他'),
                   }, color: kColor(context).tertiary.withAlpha(180)),
+                ],
+              ),
+
+              SizedBox(height: responsiveUI.own(0.03)),
+              CustomLabel(
+                useBorder: true,
+                borderRadius: 12,
+                isSelected: false,
+                borderColor: kColor(context).secondary,
+                padding: EdgeInsets.all(responsiveUI.own(0.02)),
+                onTap: _navigationLabelsOnTapSwitch,
+                children: [
+                  ShadowText(
+                    appText(
+                      context,
+                      'Show tab label when selected: ',
+                      'タブ選択時に文字ラベルを表示：',
+                    ),
+                  ),
+                  ShadowText(
+                    settings.showNavigationLabelsOnTap
+                        ? appText(context, ' ON', ' オン')
+                        : appText(context, ' OFF', ' オフ'),
+                    fontWeight: FontWeight.bold,
+                    color:
+                        settings.showNavigationLabelsOnTap
+                            ? Colors.green
+                            : Colors.red,
+                  ),
                 ],
               ),
 

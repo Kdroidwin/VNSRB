@@ -10,6 +10,7 @@ import 'package:vndb_lite/src/features/vn/domain/others.dart';
 import 'package:vndb_lite/src/features/vn/domain/p3.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
 import 'package:vndb_lite/src/features/vn_item/presentation/vn_item_grid_.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
 class VnDetailRelationsRelation extends ConsumerStatefulWidget {
   const VnDetailRelationsRelation({super.key, required this.p3});
@@ -155,16 +156,16 @@ class _VnDetailRelationsRelationState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ShadowText(
-          'Related/Similar VNs',
+          appText(context, 'Related/Similar VNs', '関連作品・類似作品'),
           fontSize: responsiveUI.own(0.045),
           fontWeight: FontWeight.bold,
         ),
         Wrap(
           children: [
-            ShadowText('Relation: '),
+            ShadowText('${appText(context, 'Relation', '関係')}: '),
             _relationOfficialSwitchButton(
               color: kColor(context).secondary.withOpacity(0.7),
-              title: "Official-only",
+              title: appText(context, 'Official-only', '公式作品のみ'),
             ),
           ],
         ),

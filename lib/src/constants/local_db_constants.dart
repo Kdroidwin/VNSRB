@@ -25,6 +25,10 @@ class DBKeys {
   static const String COLLECTION_CUSTOM_ORDER = "COLLECTION_CUSTOM_ORDER_";
   static const String STARTUP_TAB = "STARTUP_TAB";
   static const String DEFAULT_COLLECTION_STATUS = "DEFAULT_COLLECTION_STATUS";
+  static const String SHOW_NAVIGATION_LABELS_ON_TAP =
+      "SHOW_NAVIGATION_LABELS_ON_TAP";
+  static const String HIDE_COLLECTION_BARS_ON_SCROLL =
+      "HIDE_COLLECTION_BARS_ON_SCROLL";
 
   static const String USER_IDENTITY = "USER_IDENTITY";
   static const String USER_SYNCED = "USER_SYNCED";

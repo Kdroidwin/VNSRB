@@ -13,6 +13,7 @@ import 'package:vndb_lite/src/features/vn_detail/presentation/components/general
 import 'package:vndb_lite/src/util/alt_provider_reader.dart';
 import 'package:vndb_lite/src/common_widgets/widget_zoom/widget_zoom.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
 class VnDetailGeneralScreenshots extends StatefulWidget {
   const VnDetailGeneralScreenshots({super.key, required this.p2});
@@ -100,16 +101,16 @@ class _VnDetailGeneralScreenshotsState extends State<VnDetailGeneralScreenshots>
         //
         Wrap(
           children: [
-            ShadowText('Content level: '),
+            ShadowText('${appText(context, 'Content level', '内容レベル')}: '),
             _screenshotContentButton(
               contentLevelExplicit: false,
               color: Colors.green,
-              title: 'Safe',
+              title: appText(context, 'Safe', '一般向け'),
             ),
             _screenshotContentButton(
               contentLevelExplicit: true,
               color: Colors.red,
-              title: 'Explicit',
+              title: appText(context, 'Explicit', '成人向け'),
             ),
           ],
         ),

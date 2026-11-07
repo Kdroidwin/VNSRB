@@ -46,7 +46,7 @@ NotificationDetails getSyncNotifDetail(SyncStatus status) {
       urgency: LinuxNotificationUrgency.normal,
       suppressSound: true,
       resident: status == SyncStatus.ongoing,
-      defaultActionName: 'Open VNPockets',
+      defaultActionName: 'Open VNSRB',
     ),
   );
 }

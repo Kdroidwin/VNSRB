@@ -13,6 +13,7 @@ import 'package:vndb_lite/src/features/vn_detail/presentation/components/header/
 import 'package:vndb_lite/src/features/vn_detail/presentation/components/relations/vn_detail_relations_entrance.dart';
 import 'package:vndb_lite/src/features/vn_detail/presentation/components/release/vn_detail_releases.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
 class VnDetailsContent extends ConsumerStatefulWidget {
   const VnDetailsContent({super.key, required this.p1, required this.p2});
@@ -125,19 +126,19 @@ class _VnDetailsContentState extends ConsumerState<VnDetailsContent>
                         tabs: [
                           Tab(
                             child: ShadowText(
-                              'General',
+                              appText(context, 'General', '作品情報'),
                               color: kColor(context).tertiary,
                             ),
                           ),
                           Tab(
                             child: ShadowText(
-                              'Release',
+                              appText(context, 'Release', 'リリース'),
                               color: kColor(context).tertiary,
                             ),
                           ),
                           Tab(
                             child: ShadowText(
-                              'Relations',
+                              appText(context, 'Relations', '関連作品'),
                               color: kColor(context).tertiary,
                             ),
                           ),

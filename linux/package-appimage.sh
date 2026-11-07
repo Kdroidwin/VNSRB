@@ -3,7 +3,7 @@ set -euo pipefail
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 bundle_dir="$project_root/build/linux/x64/release/bundle"
-appdir="$project_root/build/appimage/VNPockets.AppDir"
+appdir="$project_root/build/appimage/VNSRB.AppDir"
 output_dir="$project_root/build/appimage"
 appimage_tool="${APPIMAGETOOL:-appimagetool}"
 app_version="$(sed -n 's/^version: *\([^+]*\).*/\1/p' "$project_root/pubspec.yaml" | head -n 1)"
@@ -32,7 +32,7 @@ cp "$project_root/linux/appimage/vnpockets.desktop" "$appdir/vnpockets.desktop"
 ln -sf vnpockets.png "$appdir/.DirIcon"
 chmod +x "$appdir/AppRun"
 
-output="$output_dir/VNPockets-${app_version}-x86_64.AppImage"
+output="$output_dir/VNSRB-${app_version}-x86_64.AppImage"
 runtime_options=()
 if [[ -n "${APPIMAGETOOL_RUNTIME_FILE:-}" ]]; then
   runtime_options+=(--runtime-file "$APPIMAGETOOL_RUNTIME_FILE")
