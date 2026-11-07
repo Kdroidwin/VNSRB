@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:vndb_lite/src/app.dart';
 import 'package:vndb_lite/src/common_widgets/generic_shadowy_text.dart';
 import 'package:vndb_lite/src/util/responsive.dart';
 import 'package:vndb_lite/src/features/sort_filter/data/devstatus_data.dart';
@@ -24,11 +23,26 @@ class VnDetailsTopHeader extends StatelessWidget {
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   //
 
-  String get _developersName {
+  String _developersName(BuildContext context) {
     final List<String> result = p2.developers ?? [];
 
-    if (result.isEmpty) return 'Unknown';
-    return result.join(" & ");
+    if (result.isEmpty) {
+      return 'Unknown';
+    }
+    if (Localizations.localeOf(context).languageCode != 'ja') {
+      return result.join(' & ');
+    }
+    final originalNames = p2.developerOriginals;
+    if (originalNames == null || originalNames.isEmpty) {
+      return result.join(' & ');
+    }
+    return [
+      for (var index = 0; index < result.length; index++)
+        if (index < originalNames.length && originalNames[index].isNotEmpty)
+          originalNames[index]
+        else
+          result[index],
+    ].join(' & ');
   }
 
   //
@@ -71,7 +85,7 @@ class VnDetailsTopHeader extends StatelessWidget {
               // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
               // Dev names
               SizedBox(height: responsiveUI.own(0.01)),
-              ShadowText(_developersName),
+              ShadowText(_developersName(context)),
               //
               // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
               // Development status indicator

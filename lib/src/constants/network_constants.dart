@@ -23,7 +23,7 @@ class NetConsts {
       "votecount, olang, released, description";
 
   static const String P2a_FIELDS =
-      "aliases, length_minutes, devstatus, developers.name, screenshots.id, "
+      "aliases, length_minutes, devstatus, developers{id,name,original}, screenshots.id, "
       "screenshots.sexual, screenshots.violence, tags.id, tags.spoiler, tags.name, tags.rating, platforms, languages";
 
   static const String P2b_FIELDS = "minage, languages.mtl, languages.lang";

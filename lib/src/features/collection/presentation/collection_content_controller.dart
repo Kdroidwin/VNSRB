@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -12,6 +14,7 @@ import 'package:vndb_lite/src/features/collection/application/collection_sort_fi
 import 'package:vndb_lite/src/features/sort_filter/domain/filter_.dart';
 import 'package:vndb_lite/src/features/sort_filter/domain/sort_.dart';
 import 'package:vndb_lite/src/features/vn/data/local_vn_repo.dart';
+import 'package:vndb_lite/src/features/vn/data/remote_vn_repo.dart';
 import 'package:vndb_lite/src/features/vn/domain/others.dart';
 import 'package:vndb_lite/src/features/vn/domain/p1.dart';
 import 'package:vndb_lite/src/features/vn/domain/p2.dart';
@@ -42,10 +45,13 @@ class CollectionContentNotifier extends _$CollectionContentNotifier {
     localCollectionRepo,
     sharedPref,
     localVnRepo,
+    remoteVnRepo,
     validateVnAndSaveToLocal,
   ],
 )
 class CollectionContentController extends _$CollectionContentController {
+  bool _upgradingDeveloperNames = false;
+
   @override
   Map<String, List<VnItemGrid>> build() => {};
 
@@ -95,6 +101,7 @@ class CollectionContentController extends _$CollectionContentController {
 
       await CollectionSortFilterService.filterData(localFilter, localSort);
       ref.read(collectionContentNotifierProvider.notifier).ring();
+      if (!searchOnly) unawaited(_upgradeLegacyDeveloperNames());
       //
     } catch (e) {
       // TODO snackbar telling something's wrong.
@@ -110,6 +117,87 @@ class CollectionContentController extends _$CollectionContentController {
     }
 
     return;
+  }
+
+  /// Adds VNDB's original-script developer names to older cached collection
+  /// entries. The refresh runs after the collection is already visible.
+  Future<void> _upgradeLegacyDeveloperNames() async {
+    if (_upgradingDeveloperNames) return;
+
+    final legacyEntries = [
+      for (final entries in rawP1BasedOnStatus.values)
+        for (final entry in entries)
+          if (entry['devsOriginal'] == null &&
+              entry['devs'] is List &&
+              (entry['devs'] as List).isNotEmpty)
+            entry,
+    ];
+    if (legacyEntries.isEmpty) return;
+
+    _upgradingDeveloperNames = true;
+    var updated = false;
+    try {
+      final localVnRepo = ref.read(localVnRepoProvider);
+      final remoteVnRepo = ref.read(remoteVnRepoProvider);
+      final ids =
+          legacyEntries.map((entry) => entry['id'] as String).toSet().toList();
+
+      for (var start = 0; start < ids.length; start += 100) {
+        final end = (start + 100 < ids.length) ? start + 100 : ids.length;
+        final chunk = ids.sublist(start, end);
+        final response = await remoteVnRepo.fetchDeveloperNames(chunk);
+        final dynamic results = response.data['results'];
+        if (results is! List) continue;
+
+        for (final result in results) {
+          if (result is! Map) continue;
+          final data = Map<String, dynamic>.from(result);
+          final id = data['id']?.toString();
+          final developers = data['developers'];
+          if (id == null || developers is! List || developers.isEmpty) {
+            continue;
+          }
+
+          final names = <String>[];
+          final originals = <String>[];
+          for (final developer in developers) {
+            if (developer is! Map) continue;
+            final name = developer['name']?.toString() ?? '';
+            if (name.isEmpty) continue;
+            names.add(name);
+            final original = developer['original']?.toString();
+            originals.add(
+              (original == null || original.isEmpty) ? name : original,
+            );
+          }
+          if (names.isEmpty) continue;
+
+          final cached = await localVnRepo.getP2(id);
+          if (cached == null || cached.developerOriginals != null) continue;
+          final refreshed = cached.copyWith(
+            developers: names,
+            developerOriginals: originals,
+          );
+          await localVnRepo.saveVnContent(refreshed);
+
+          for (final entry in legacyEntries.where(
+            (entry) => entry['id'] == id,
+          )) {
+            entry['devs'] = names;
+            entry['devsOriginal'] = originals;
+          }
+          updated = true;
+        }
+      }
+
+      if (updated) ref.read(collectionContentNotifierProvider.notifier).ring();
+    } catch (error) {
+      // Keep the collection usable offline; retry the migration next time it
+      // is loaded.
+      debugPrint('Could not refresh VNDB original developer names: $error');
+    } finally {
+      _upgradingDeveloperNames = false;
+    }
   }
 
   //
@@ -239,6 +327,7 @@ class CollectionContentController extends _$CollectionContentController {
       aliases: p2.aliases!,
       length_minutes: p2.length_minutes!,
       devs: p2.developers!,
+      devsOriginal: p2.developerOriginals,
       devstatus: p2.devstatus!,
       languages: p2.languages!,
       minage: p2.minage!,

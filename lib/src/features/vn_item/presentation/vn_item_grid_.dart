@@ -11,10 +11,11 @@ import 'package:vndb_lite/src/features/vn/domain/p1.dart';
 import 'package:vndb_lite/src/app.dart';
 import 'package:vndb_lite/src/features/vn_item/presentation/detail_non_summary/vn_item_grid_details_.dart';
 import 'package:vndb_lite/src/features/vn_item/presentation/detail_summary/vn_item_grid_details_summary.dart';
-import 'package:vndb_lite/src/features/vn_item/presentation/vn_item_grid_cover_censor_notifier.dart';
 import 'package:vndb_lite/src/routing/app_router.dart';
 import 'package:vndb_lite/src/features/settings/presentation/settings_general_state.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
+
+final Set<String> _openingVnDetails = <String>{};
 
 // ignore: must_be_immutable
 class VnItemGrid extends ConsumerWidget {
@@ -44,15 +45,20 @@ class VnItemGrid extends ConsumerWidget {
   //
 
   Future<void> _enterVnDetailScreen(BuildContext context) async {
+    if (!_openingVnDetails.add(_vnId)) return;
     if (!App.isInVnDetailScreen) {
       App.currentRootRoute = App.currentRoute;
     }
 
-    await context.pushNamed(
-      AppRoute.vnDetail.name,
-      pathParameters: {"vnId": _vnId, "parent": App.currentRootRoute},
-      extra: p1,
-    );
+    try {
+      await context.pushNamed(
+        AppRoute.vnDetail.name,
+        pathParameters: {"vnId": _vnId, "parent": App.currentRootRoute},
+        extra: p1,
+      );
+    } finally {
+      _openingVnDetails.remove(_vnId);
+    }
   }
 
   //
@@ -60,24 +66,6 @@ class VnItemGrid extends ConsumerWidget {
   //
 
   Future<void> _vnOnTap(WidgetRef ref, BuildContext context) async {
-    final blurId = _vnId + labelCode + App.currentRoute;
-    final savedBlurState = ref.read(
-      vnItemGridCoverCensorNotifierProvider(blurId),
-    );
-    final settings = ref.read(settingsGeneralStateProvider);
-    final image = p1.image;
-    final isCensored =
-        settings.showCoverCensor &&
-        (savedBlurState ??
-            ((image?.sexual ?? 0) >= 1 || (image?.violence ?? 0) >= 1));
-    if (isCensored) {
-      // Match VNDB's cover interaction: a tap reveals a censored cover first.
-      ref
-          .read(vnItemGridCoverCensorNotifierProvider(blurId).notifier)
-          .set(false);
-      return;
-    }
-
     if (!App.isInCollectionScreen) return await _enterVnDetailScreen(context);
 
     // Checks whether multiselection mode is off or not.
@@ -118,22 +106,6 @@ class VnItemGrid extends ConsumerWidget {
   //
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   //
-
-  void _vnOnDoubleTap(WidgetRef ref) async {
-    final blurId = _vnId + labelCode + App.currentRoute;
-    final notifier = ref.read(
-      vnItemGridCoverCensorNotifierProvider(blurId).notifier,
-    );
-    final savedBlurState = ref.read(
-      vnItemGridCoverCensorNotifierProvider(blurId),
-    );
-    final image = p1.image;
-    final isCensored =
-        ref.read(settingsGeneralStateProvider).showCoverCensor &&
-        (savedBlurState ??
-            ((image?.sexual ?? 0) >= 1 || (image?.violence ?? 0) >= 1));
-    notifier.set(!isCensored);
-  }
 
   //
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -180,7 +152,6 @@ class VnItemGrid extends ConsumerWidget {
                   splashColor: colorPlaceHolder,
                   onTap: () => _vnOnTap(ref, context),
                   onLongPress: () => _vnOnLongPress(ref),
-                  onDoubleTap: () => _vnOnDoubleTap(ref),
                 ),
               ),
             ),

@@ -158,7 +158,7 @@ class CollectionSortFilterService {
     if (_isSearchingForDevs(searchQuery!)) return "${vnData['devs']}";
     if (_isSearchingForTags(searchQuery)) return "${vnData['tags']}";
 
-    return "${vnData['title']} ${vnData['aliases']}";
+    return "${vnData['title']} ${vnData['japaneseTitle']} ${vnData['aliases']}";
   }
 
   //

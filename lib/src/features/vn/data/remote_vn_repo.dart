@@ -30,6 +30,22 @@ class RemoteVnRepo {
     );
   }
 
+  /// Fetches original and English developer names for cached VN records.
+  Future<Response> fetchDeveloperNames(
+    List<String> vnIds, {
+    CancelToken? cancelToken,
+  }) async {
+    return await _apiService.post(
+      url: vnEndpoint,
+      data: GenericPost(
+        filters: ["id", "in", vnIds],
+        fields: "id, developers{id,name,original}",
+        results: vnIds.length,
+      ).toMap(),
+      cancelToken: cancelToken,
+    );
+  }
+
   Future<Response> fetchP2bData(String vnId, {CancelToken? cancelToken}) async {
     return await _apiService.post(
       url: releaseEndpoint,

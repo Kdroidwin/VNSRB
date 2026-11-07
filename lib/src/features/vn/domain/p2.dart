@@ -9,6 +9,7 @@ class VnDataPhase02 implements VnDataPhase {
   const VnDataPhase02({
     required this.id,
     this.developers,
+    this.developerOriginals,
     this.devstatus,
     this.length_minutes,
     this.aliases,
@@ -22,6 +23,9 @@ class VnDataPhase02 implements VnDataPhase {
 
   final String id;
   final List<String>? developers;
+
+  /// Original-script company names aligned with [developers].
+  final List<String>? developerOriginals;
   final int? devstatus;
   final int? length_minutes;
   final List<String>? aliases;
@@ -35,6 +39,7 @@ class VnDataPhase02 implements VnDataPhase {
   VnDataPhase02 copyWith({
     String? id,
     List<String>? developers,
+    List<String>? developerOriginals,
     int? devstatus,
     int? length_minutes,
     List<String>? aliases,
@@ -48,6 +53,7 @@ class VnDataPhase02 implements VnDataPhase {
     return VnDataPhase02(
       id: id ?? this.id,
       developers: developers ?? this.developers,
+      developerOriginals: developerOriginals ?? this.developerOriginals,
       devstatus: devstatus ?? this.devstatus,
       length_minutes: length_minutes ?? this.length_minutes,
       aliases: aliases ?? this.aliases,
@@ -64,6 +70,7 @@ class VnDataPhase02 implements VnDataPhase {
     return <String, dynamic>{
       'id': id,
       'developers': developers,
+      'developerOriginals': developerOriginals,
       'devstatus': devstatus,
       'length_minutes': length_minutes,
       'aliases': aliases,
@@ -94,6 +101,7 @@ class VnDataPhase02 implements VnDataPhase {
                   (val ?? "")
             ]
           : [],
+      developerOriginals: _getDeveloperOriginals(data),
       mtl: (data['mtl'] != null) ? [for (String val in data['mtl']) val] : [],
       //
       minage: (data['minage'] != null) ? [for (int val in data['minage']) val] : [],
@@ -133,6 +141,27 @@ class VnDataPhase02 implements VnDataPhase {
             ]
           : [],
     );
+  }
+
+  static List<String>? _getDeveloperOriginals(Map<String, dynamic> data) {
+    final stored = data['developerOriginals'];
+    if (stored is List) return [for (final value in stored) value.toString()];
+
+    final developers = data['developers'];
+    if (developers is! List || !developers.any((value) => value is Map)) {
+      return null;
+    }
+    final originals = <String>[];
+    for (final value in developers) {
+      if (value is Map) {
+        final original = value['original']?.toString();
+        final name = value['name']?.toString() ?? '';
+        originals.add(original?.isNotEmpty == true ? original! : name);
+      } else {
+        originals.add(value.toString());
+      }
+    }
+    return originals;
   }
 
   static String _getScreenshotUrl(Map<String, dynamic> screenshot) {
@@ -188,7 +217,7 @@ class VnDataPhase02 implements VnDataPhase {
 
   @override
   String toString() {
-    return 'VnDataPhase02(id: $id, developers: $developers, devstatus: $devstatus, length_minutes: $length_minutes, aliases: $aliases, minage: $minage, tags: $tags, screenshots: $screenshots, languages: $languages, mtl: $mtl, platforms: $platforms)';
+    return 'VnDataPhase02(id: $id, developers: $developers, developerOriginals: $developerOriginals, devstatus: $devstatus, length_minutes: $length_minutes, aliases: $aliases, minage: $minage, tags: $tags, screenshots: $screenshots, languages: $languages, mtl: $mtl, platforms: $platforms)';
   }
 
   @override
@@ -198,6 +227,7 @@ class VnDataPhase02 implements VnDataPhase {
 
     return other.id == id &&
         listEquals(other.developers, developers) &&
+        listEquals(other.developerOriginals, developerOriginals) &&
         other.devstatus == devstatus &&
         other.length_minutes == length_minutes &&
         listEquals(other.aliases, aliases) &&
@@ -213,6 +243,7 @@ class VnDataPhase02 implements VnDataPhase {
   int get hashCode {
     return id.hashCode ^
         developers.hashCode ^
+        developerOriginals.hashCode ^
         devstatus.hashCode ^
         length_minutes.hashCode ^
         aliases.hashCode ^

@@ -48,6 +48,48 @@ class _VnDetailScreenState extends ConsumerState<VnDetailScreen>
       vsync: this,
     )..forward();
     _refreshMissingCover();
+    _refreshLegacyDeveloperNames();
+  }
+
+  Future<void> _refreshLegacyDeveloperNames() async {
+    try {
+      final localRepo = ref.read(localVnRepoProvider);
+      final cached = await localRepo.getP2(_vnId);
+      if (cached == null ||
+          cached.developerOriginals != null ||
+          (cached.developers?.isEmpty ?? true)) {
+        return;
+      }
+
+      final response = await ref.read(remoteVnRepoProvider).fetchDeveloperNames(
+        [_vnId],
+      );
+      final dynamic results = response.data['results'];
+      if (results is! List || results.isEmpty || results.first is! Map) return;
+
+      final result = Map<String, dynamic>.from(results.first as Map);
+      final developers = result['developers'];
+      if (developers is! List) return;
+
+      final names = <String>[];
+      final originals = <String>[];
+      for (final developer in developers) {
+        if (developer is! Map) continue;
+        final name = developer['name']?.toString() ?? '';
+        if (name.isEmpty) continue;
+        names.add(name);
+        final original = developer['original']?.toString();
+        originals.add((original == null || original.isEmpty) ? name : original);
+      }
+      if (names.isEmpty) return;
+
+      await localRepo.saveVnContent(
+        cached.copyWith(developers: names, developerOriginals: originals),
+      );
+      if (mounted) ref.invalidate(getP2Provider(_vnId));
+    } catch (_) {
+      // The cached detail stays available if the metadata refresh fails.
+    }
   }
 
   bool _hasUsableCover(VnDataPhase01 data) {

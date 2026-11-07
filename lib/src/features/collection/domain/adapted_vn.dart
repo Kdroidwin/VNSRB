@@ -15,6 +15,7 @@ class AdaptedVnData {
     required this.vote,
     required this.aliases,
     required this.devs,
+    this.devsOriginal,
     required this.devstatus,
     required this.languages,
     required this.minage,
@@ -39,6 +40,7 @@ class AdaptedVnData {
   // Filter
   final List<String> aliases;
   final List<String> devs;
+  final List<String>? devsOriginal;
   final int devstatus;
   final List<String> languages;
   // final String olang; // P1
@@ -57,6 +59,7 @@ class AdaptedVnData {
     int? vote,
     List<String>? aliases,
     List<String>? devs,
+    List<String>? devsOriginal,
     int? devstatus,
     List<String>? languages,
     List<int>? minage,
@@ -74,6 +77,7 @@ class AdaptedVnData {
       vote: vote ?? this.vote,
       aliases: aliases ?? this.aliases,
       devs: devs ?? this.devs,
+      devsOriginal: devsOriginal ?? this.devsOriginal,
       devstatus: devstatus ?? this.devstatus,
       languages: languages ?? this.languages,
       minage: minage ?? this.minage,
@@ -94,6 +98,7 @@ class AdaptedVnData {
       'vote': vote,
       'aliases': aliases,
       'devs': devs,
+      'devsOriginal': devsOriginal,
       'devstatus': devstatus,
       'languages': languages,
       'minage': minage,
@@ -104,7 +109,7 @@ class AdaptedVnData {
 
   @override
   String toString() {
-    return 'AdaptedVnData(id: $id, status: $status, p1: $p1, title: $title, started: $started, added: $added, length_minutes: $length_minutes, vote: $vote, aliases: $aliases, devs: $devs, devstatus: $devstatus, languages: $languages, minage: $minage, tags: $tags, platforms: $platforms)';
+    return 'AdaptedVnData(id: $id, status: $status, p1: $p1, title: $title, started: $started, added: $added, length_minutes: $length_minutes, vote: $vote, aliases: $aliases, devs: $devs, devsOriginal: $devsOriginal, devstatus: $devstatus, languages: $languages, minage: $minage, tags: $tags, platforms: $platforms)';
   }
 
   @override
@@ -122,6 +127,7 @@ class AdaptedVnData {
         other.vote == vote &&
         listEquals(other.aliases, aliases) &&
         listEquals(other.devs, devs) &&
+        listEquals(other.devsOriginal, devsOriginal) &&
         other.devstatus == devstatus &&
         listEquals(other.languages, languages) &&
         listEquals(other.minage, minage) &&
@@ -141,6 +147,7 @@ class AdaptedVnData {
         vote.hashCode ^
         aliases.hashCode ^
         devs.hashCode ^
+        devsOriginal.hashCode ^
         devstatus.hashCode ^
         languages.hashCode ^
         minage.hashCode ^

@@ -84,6 +84,7 @@ final class CollectionContentControllerProvider
           localCollectionRepoProvider,
           sharedPrefProvider,
           localVnRepoProvider,
+          remoteVnRepoProvider,
           validateVnAndSaveToLocalProvider,
         ],
         $allTransitiveDependencies: const <ProviderOrFamily>{
@@ -104,13 +105,12 @@ final class CollectionContentControllerProvider
   static const $allTransitiveDependencies2 =
       LocalCollectionRepoProvider.$allTransitiveDependencies1;
   static const $allTransitiveDependencies3 = localVnRepoProvider;
-  static const $allTransitiveDependencies4 = validateVnAndSaveToLocalProvider;
+  static const $allTransitiveDependencies4 = remoteVnRepoProvider;
   static const $allTransitiveDependencies5 =
-      ValidateVnAndSaveToLocalProvider.$allTransitiveDependencies0;
+      RemoteVnRepoProvider.$allTransitiveDependencies0;
   static const $allTransitiveDependencies6 =
-      ValidateVnAndSaveToLocalProvider.$allTransitiveDependencies1;
-  static const $allTransitiveDependencies7 =
-      ValidateVnAndSaveToLocalProvider.$allTransitiveDependencies2;
+      RemoteVnRepoProvider.$allTransitiveDependencies1;
+  static const $allTransitiveDependencies7 = validateVnAndSaveToLocalProvider;
 
   @override
   String debugGetCreateSourceHash() => _$collectionContentControllerHash();
@@ -131,7 +131,7 @@ final class CollectionContentControllerProvider
 }
 
 String _$collectionContentControllerHash() =>
-    r'ebe672a5990874953d5b67a88d12691ddf8c221a';
+    r'c2b68e17ccd2c8377e122876d28d18da992e0648';
 
 abstract class _$CollectionContentController
     extends $Notifier<Map<String, List<VnItemGrid>>> {
