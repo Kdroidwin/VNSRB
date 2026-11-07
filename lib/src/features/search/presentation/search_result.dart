@@ -35,14 +35,6 @@ class SearchResult extends ConsumerWidget {
     }
   }
 
-  void _forceUpdateUI() {
-    SchedulerBinding.instance.addPersistentFrameCallback((_) {
-      if (!App.isInSearchScreen) return;
-      ref_.read(searchResultNotifierProvider.notifier).ring();
-      ref_.read(searchResultNotifierProvider.notifier).end();
-    });
-  }
-
   static bool _innerControllerInitialized = false;
 
   @override
@@ -59,10 +51,6 @@ class SearchResult extends ConsumerWidget {
     final settings = ref.watch(settingsGeneralStateProvider);
     final outerSearchResult = ref.watch(searchScreenControllerProvider);
     final innerSearchResult = ref.watch(searchResultControllerProvider);
-
-    // ? To forcefully update the widget
-    final searchNotify = ref.watch(searchResultNotifierProvider);
-    if (searchNotify && context.mounted) _forceUpdateUI();
 
     return ScrollableWrapper(
       withScrollBar: true,
@@ -94,10 +82,15 @@ class SearchResult extends ConsumerWidget {
             ),
           ),
           if (outerSearchResult.length > 1) ...[
-            for (Widget result in outerSearchResult.sublist(1, outerSearchResult.length))
+            for (Widget result in outerSearchResult.sublist(
+              1,
+              outerSearchResult.length,
+            ))
               SliverToBoxAdapter(child: result),
           ],
-          SliverToBoxAdapter(child: SizedBox(height: MainOuterLayout.bottomPadding)),
+          SliverToBoxAdapter(
+            child: SizedBox(height: MainOuterLayout.bottomPadding),
+          ),
         ],
       ),
     );

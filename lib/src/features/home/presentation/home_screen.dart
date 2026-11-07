@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:vndb_lite/src/common_widgets/bbcode.dart';
 import 'package:vndb_lite/src/constants/_constants.dart';
 import 'package:vndb_lite/src/features/_base/presentation/main_outer_layout.dart';
 import 'package:vndb_lite/src/features/_base/presentation/other_parts/main_inner_layout.dart';
@@ -47,6 +46,7 @@ class HomeScreen extends ConsumerWidget {
           GAP_H12,
         ],
     ];
+    final contentWidgets = [...frontWidgets, ...additionalWidgets];
 
     // return CustomScrollView(slivers: [SliverAppBar(), SliverToBoxAdapter(child: Container())]);
 
@@ -60,10 +60,8 @@ class HomeScreen extends ConsumerWidget {
           shrinkWrap: false,
           clipBehavior: Clip.none,
           padding: EdgeInsets.only(bottom: MainOuterLayout.bottomPadding),
-          itemCount: frontWidgets.length + additionalWidgets.length,
-          itemBuilder: (context, index) {
-            return [...frontWidgets, ...additionalWidgets][index];
-          },
+          itemCount: contentWidgets.length,
+          itemBuilder: (context, index) => contentWidgets[index],
         ),
       ),
     );

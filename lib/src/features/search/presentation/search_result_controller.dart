@@ -40,9 +40,10 @@ class SearchResultController extends _$SearchResultController {
   final double limit = responsiveUI.own(0.7);
 
   void fromP1(List<VnDataPhase01> p1List, String labelCode) {
+    final addedItems = <VnItemGrid>[];
     for (VnDataPhase01 p1 in p1List) {
       if (!vnId.add(p1.id)) continue;
-      state.add(
+      addedItems.add(
         VnItemGrid(
           key: Key(p1.id),
           p1: p1,
@@ -51,6 +52,7 @@ class SearchResultController extends _$SearchResultController {
         ),
       );
     }
+    if (addedItems.isNotEmpty) state = [...state, ...addedItems];
   }
 
   void handleNextResult(double currentPosition, double maxPosition) {

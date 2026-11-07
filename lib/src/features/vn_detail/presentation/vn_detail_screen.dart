@@ -200,6 +200,7 @@ class _VnDetailScreenState extends ConsumerState<VnDetailScreen>
         errorWidget: (context, url, error) => const GenericErrorImage(),
         cacheKey: "BG-${_p1.id}",
         cacheManager: (isNotSearch) ? CustomCacheManager() : null,
+        memCacheWidth: 1400,
         // High quality to make the pixels smooth when censor mode is on.
         filterQuality: (isCensor) ? FilterQuality.high : FilterQuality.medium,
         maxHeightDiskCache: (isCensor) ? 35 : 1400,
@@ -222,28 +223,30 @@ class _VnDetailScreenState extends ConsumerState<VnDetailScreen>
         backgroundColor: kColor(context).primary.withOpacity(0.3),
         body: Stack(
           children: [
-            GenericBackground(
-              useGradientOverlay: true,
-              imageWidget: FadeTransition(
-                opacity: _animationController.drive(
-                  CurveTween(curve: Curves.ease),
-                ),
-                child: ShaderMask(
-                  blendMode: BlendMode.dstIn,
-                  shaderCallback: (rect) {
-                    return const LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Color.fromARGB(140, 0, 0, 0),
-                        Color.fromARGB(70, 0, 0, 0),
-                        Colors.transparent,
-                      ],
-                    ).createShader(
-                      Rect.fromLTRB(0, 0, rect.width, rect.height),
-                    );
-                  },
-                  child: _imgCover(isCensor: _coverNeedCensor),
+            RepaintBoundary(
+              child: GenericBackground(
+                useGradientOverlay: true,
+                imageWidget: FadeTransition(
+                  opacity: _animationController.drive(
+                    CurveTween(curve: Curves.ease),
+                  ),
+                  child: ShaderMask(
+                    blendMode: BlendMode.dstIn,
+                    shaderCallback: (rect) {
+                      return const LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Color.fromARGB(140, 0, 0, 0),
+                          Color.fromARGB(70, 0, 0, 0),
+                          Colors.transparent,
+                        ],
+                      ).createShader(
+                        Rect.fromLTRB(0, 0, rect.width, rect.height),
+                      );
+                    },
+                    child: _imgCover(isCensor: _coverNeedCensor),
+                  ),
                 ),
               ),
             ),
@@ -267,7 +270,7 @@ class _VnDetailScreenState extends ConsumerState<VnDetailScreen>
                       top: responsiveUI.own(0.03),
                       bottom: responsiveUI.own(0.24),
                     ),
-                    child: VnDetailsEntrance(p1: _p1),
+                    child: RepaintBoundary(child: VnDetailsEntrance(p1: _p1)),
                   ),
                 ),
               ),
