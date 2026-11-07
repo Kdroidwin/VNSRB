@@ -24,21 +24,7 @@ class CollectionContent extends ConsumerStatefulWidget {
 }
 
 class _CollectionContentState extends ConsumerState<CollectionContent> {
-  late final ScrollController _scrollController;
-
   String get statusName => widget.statusName;
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController = ScrollController(keepScrollOffset: true);
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
 
   void _forceUpdateUI() {
     ref.read(collectionContentNotifierProvider.notifier).end();
@@ -143,58 +129,53 @@ class _CollectionContentState extends ConsumerState<CollectionContent> {
     });
 
     return ScrollableWrapper(
-      withScrollBar: false,
-      child: Scrollbar(
-        controller: _scrollController,
-        interactive: true,
-        child: CustomScrollView(
-          key: PageStorageKey<String>('collection-$statusName'),
-          controller: _scrollController,
-          primary: false,
-          physics: const AlwaysScrollableScrollPhysics(),
-          // controller: (App.isInCollectionScreen) ? controller : null,
-          // shrinkWrap: false,
-          // physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            if (content.isEmpty)
-              const SliverToBoxAdapter(
-                child: Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(36),
-                    child: GenericLocalEmptyWidget(),
-                  ),
+      withScrollBar: true,
+      child: CustomScrollView(
+        key: PageStorageKey<String>('collection-$statusName'),
+        // NestedScrollView supplies an inner controller through the
+        // PrimaryScrollController. Using a separate controller here keeps
+        // collection gestures from collapsing the outer SliverAppBar.
+        primary: true,
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          if (content.isEmpty)
+            const SliverToBoxAdapter(
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.all(36),
+                  child: GenericLocalEmptyWidget(),
                 ),
-              )
-            else if (groupByDeveloper) ...[
-              for (final group in developerGroups.entries) ...[
-                if (settings.showCollectionDeveloperHeaders)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        left: responsiveUI.own(0.04),
-                        right: responsiveUI.own(0.04),
-                        top: responsiveUI.own(0.05),
-                      ),
-                      child: Text(
-                        group.key,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
+              ),
+            )
+          else if (groupByDeveloper) ...[
+            for (final group in developerGroups.entries) ...[
+              if (settings.showCollectionDeveloperHeaders)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      left: responsiveUI.own(0.04),
+                      right: responsiveUI.own(0.04),
+                      top: responsiveUI.own(0.05),
+                    ),
+                    child: Text(
+                      group.key,
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),
-                grid(group.value),
-              ],
-            ] else
-              grid(content, allowReorder: true),
-            SliverToBoxAdapter(
-              child: SizedBox(
-                height:
-                    MainOuterLayout.bottomPadding +
-                    MediaQuery.paddingOf(context).bottom +
-                    64,
-              ),
+                ),
+              grid(group.value),
+            ],
+          ] else
+            grid(content, allowReorder: true),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height:
+                  MainOuterLayout.bottomPadding +
+                  MediaQuery.paddingOf(context).bottom +
+                  64,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
