@@ -6,6 +6,7 @@ import 'package:go_transitions/go_transitions.dart' show GoTransitions;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vndb_lite/src/features/search/presentation/components/search_predefined.dart';
 import 'package:vndb_lite/src/features/sort_filter/data/languages_data.dart';
@@ -123,6 +124,21 @@ class App extends ConsumerWidget {
       restorationScopeId: "app",
       onGenerateTitle: (context) => AppInfo.TITLE,
       debugShowCheckedModeBanner: false,
+      builder: (context, child) {
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          sized: false,
+          value: SystemUiOverlayStyle(
+            systemNavigationBarColor: Colors.transparent,
+            systemNavigationBarDividerColor: Colors.transparent,
+            systemNavigationBarIconBrightness:
+                theme.brightness == Brightness.dark
+                    ? Brightness.light
+                    : Brightness.dark,
+            systemNavigationBarContrastEnforced: false,
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
       //
       // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       //

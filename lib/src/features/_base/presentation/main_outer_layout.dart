@@ -105,6 +105,7 @@ class MainOuterLayout extends StatelessWidget {
     });
 
     return SafeArea(
+      bottom: false,
       child: Scaffold(
         extendBody: true,
         extendBodyBehindAppBar: true,

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:go_transitions/go_transitions.dart';
@@ -47,6 +48,14 @@ class AppStartup {
 
   /// Core app initializations.
   Future<void> _initializeApp() async {
+    if (Platform.isAndroid) {
+      try {
+        await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      } catch (error) {
+        debugPrint('Edge-to-edge system bars unavailable: $error');
+      }
+    }
+
     // Setting and getting general informations and configurations.
     await AppInfo.init(const PackageInfoWrapper());
 

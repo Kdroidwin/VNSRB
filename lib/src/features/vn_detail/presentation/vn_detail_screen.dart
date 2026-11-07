@@ -173,6 +173,7 @@ class _VnDetailScreenState extends ConsumerState<VnDetailScreen>
   @override
   Widget build(BuildContext context) {
     return SafeArea(
+      bottom: false,
       child: Scaffold(
         extendBody: true,
         extendBodyBehindAppBar: true,

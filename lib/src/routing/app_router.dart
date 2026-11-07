@@ -114,9 +114,35 @@ GoRouter goRouter(Ref ref) {
       GoRoute(
         path: '/:parent/vnDetail/:vnId',
         name: AppRoute.vnDetail.name,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final p1 = state.extra as VnDataPhase01;
-          return VnDetailScreen(p1: p1);
+          return CustomTransitionPage<void>(
+            key: state.pageKey,
+            child: VnDetailScreen(p1: p1),
+            transitionDuration: const Duration(milliseconds: 180),
+            reverseTransitionDuration: const Duration(milliseconds: 160),
+            transitionsBuilder: (
+              context,
+              animation,
+              secondaryAnimation,
+              child,
+            ) {
+              final easedAnimation = CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+              );
+              return FadeTransition(
+                opacity: easedAnimation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.025),
+                    end: Offset.zero,
+                  ).animate(easedAnimation),
+                  child: child,
+                ),
+              );
+            },
+          );
         },
       ),
       GoRoute(
