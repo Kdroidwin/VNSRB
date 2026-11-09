@@ -12,6 +12,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - None.
 
+## [4.0.2] - 2026-11-09
+
+### Fixed
+
+- Saving collection entries before fetching optional VNDB metadata.
+- Keeping collection entries visible when VNDB metadata is unavailable.
+- Restoring cached VN data from collection backups for offline use.
+- Refreshing collection contents after add and remove actions.
+- Handling Linux backup picker errors without silently exiting the import flow.
+
 ## [4.0.1] - 2026-11-09
 
 ### Added

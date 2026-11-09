@@ -15,7 +15,9 @@ import 'package:vndb_lite/src/features/collection_selection/presentation/multise
 import 'package:vndb_lite/src/features/collection_selection/presentation/collection_selection_controller.dart';
 import 'package:vndb_lite/src/features/collection_selection/presentation/dialog_components/footer_button_state.dart';
 import 'package:vndb_lite/src/features/collection_selection/presentation/dialogs/remove_dialog.dart';
+import 'package:vndb_lite/src/features/collection/presentation/collection_content_controller.dart';
 import 'package:vndb_lite/src/features/home/application/home_preview_service.dart';
+import 'package:vndb_lite/src/features/sort_filter/presentation/local/local_sort_filter_controller.dart';
 import 'package:vndb_lite/src/features/vn/domain/p1.dart';
 import 'package:vndb_lite/src/features/vn_item/presentation/detail_non_summary/vn_record_state.dart';
 import 'package:vndb_lite/src/util/alt_provider_reader.dart';
@@ -57,10 +59,11 @@ class VnSelectionDialogFooter extends ConsumerWidget {
 
   Future<void> _notifyCollectionPreview() async {
     ref_.invalidate(homePreviewServiceProvider);
-
-    // The home preview reads P1 directly from local storage. Rebuilding the
-    // entire collection here caused unnecessary metadata requests and jank;
-    // the collection screen refreshes its own content when opened.
+    final filterData = ref_.read(localFilterControllerProvider);
+    final sortData = ref_.read(localSortControllerProvider);
+    await ref_
+        .read(collectionContentControllerProvider.notifier)
+        .separateVNsByStatus(filterData, sortData);
   }
 
   //

@@ -275,15 +275,29 @@ class LocalCollectionRepo {
   Future<void> saveCustomOrder(String status, List<String> ids) => _sharedPref
       .setStringList('${DBKeys.COLLECTION_CUSTOM_ORDER}$status', ids);
 
-  Map<String, dynamic> exportBackup() => {
-    'format': 'vnpockets-collection-backup',
-    'version': 1,
-    'records': rawAllRecords,
-    'customOrders': {
-      for (final status in CollectionStatusCode.values)
-        status.name: getCustomOrder(status.name),
-    },
-  };
+  Map<String, dynamic> exportBackup() {
+    final records = rawAllRecords;
+    final cachedVnData = <String, Map<String, String>>{};
+    for (final rawRecord in records) {
+      final id = VnRecord.fromJson(rawRecord).id;
+      final p1 = _sharedPref.getString('${DBKeys.P1}$id');
+      final p2 = _sharedPref.getString('${DBKeys.P2}$id');
+      if (p1 != null || p2 != null) {
+        cachedVnData[id] = {if (p1 != null) 'p1': p1, if (p2 != null) 'p2': p2};
+      }
+    }
+
+    return {
+      'format': 'vnpockets-collection-backup',
+      'version': 2,
+      'records': records,
+      'vnData': cachedVnData,
+      'customOrders': {
+        for (final status in CollectionStatusCode.values)
+          status.name: getCustomOrder(status.name),
+      },
+    };
+  }
 
   Future<int> importBackup(Map<String, dynamic> backup) async {
     if (backup['format'] != 'vnpockets-collection-backup' ||
@@ -291,12 +305,32 @@ class LocalCollectionRepo {
       throw const FormatException('This is not a VNSRB collection backup.');
     }
     var count = 0;
+    final importedIds = <String>{};
     for (final raw in backup['records'] as List) {
-      if (raw is String) {
-        await saveVnRecord(VnRecord.fromJson(raw));
-        count++;
+      final VnRecord? record = switch (raw) {
+        String value => VnRecord.fromJson(value),
+        Map value => VnRecord.fromMap(Map<String, dynamic>.from(value)),
+        _ => null,
+      };
+      if (record == null) continue;
+      await saveVnRecord(record);
+      importedIds.add(record.id);
+      count++;
+    }
+
+    final vnData = backup['vnData'];
+    if (vnData is Map) {
+      for (final entry in vnData.entries) {
+        final id = entry.key;
+        final data = entry.value;
+        if (id is! String || !importedIds.contains(id) || data is! Map) {
+          continue;
+        }
+        await _restoreCachedVnData(id, 1, data['p1']);
+        await _restoreCachedVnData(id, 2, data['p2']);
       }
     }
+
     final orders = backup['customOrders'];
     if (orders is Map) {
       for (final status in CollectionStatusCode.values) {
@@ -310,6 +344,24 @@ class LocalCollectionRepo {
       }
     }
     return count;
+  }
+
+  Future<void> _restoreCachedVnData(
+    String vnId,
+    int phase,
+    dynamic value,
+  ) async {
+    if (value is! String) return;
+    try {
+      final decoded = jsonDecode(value);
+      if (decoded is! Map || decoded['id'] != vnId) return;
+      await _sharedPref.setString(
+        '${phase == 1 ? DBKeys.P1 : DBKeys.P2}$vnId',
+        value,
+      );
+    } catch (_) {
+      // Invalid or older cache data does not prevent restoring collection records.
+    }
   }
 
   //

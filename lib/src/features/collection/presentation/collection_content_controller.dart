@@ -95,7 +95,7 @@ class CollectionContentController extends _$CollectionContentController {
       if (dbCollection.isEmpty) return;
 
       if (!searchOnly) {
-        await _adaptingRawData(localFilter);
+        await _adaptingRawData();
         await CollectionSortFilterService.sortData(localSort);
         await localCollectionRepo.refreshCollection();
       }
@@ -252,10 +252,8 @@ class CollectionContentController extends _$CollectionContentController {
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   //
 
-  Future<void> _adaptingRawData(FilterData conf) async {
+  Future<void> _adaptingRawData() async {
     final localCollectionRepo = ref.read(localCollectionRepoProvider);
-    final networkInfo = ref.read(connectivityNotifierProvider);
-    final localVnRepo = ref.read(localVnRepoProvider);
 
     for (VnRecord vnRecord in await localCollectionRepo.getAllRecords()) {
       final String vnId = vnRecord.id;
@@ -267,27 +265,10 @@ class CollectionContentController extends _$CollectionContentController {
         continue;
       }
 
-      // Checks whether either p1 or p2 data is null for the corresponding vn.
-      if (!localVnRepo.p1Exist(vnId) || !localVnRepo.p2Exist(vnId)) {
-        bool isConnected = false;
-
-        final valid = await ref.read(
-          validateVnAndSaveToLocalProvider(vnId).future,
-        );
-        isConnected = networkInfo;
-
-        // Skip the loop. Ignore the current record.
-        if (!valid) {
-          // Will delete current vn record, if even with internet connection access, the corresponding
-          // vn is not valid.
-          if (isConnected) {
-            await localCollectionRepo.removeVnRecord(vnId);
-          }
-          continue;
-        }
-      }
-
-      // Clustering each vn item collection record by its status.
+      // Cached VNDB metadata is optional for collection records. Imports can come
+      // from another device, and transient network errors must never hide or
+      // delete a user's saved entry. The detail page can fetch missing metadata
+      // later; getAdaptedVnData supplies safe display defaults in the meantime.
       final AdaptedVnData vnData = await getAdaptedVnData(vnRecord);
       rawP1BasedOnStatus[statusName]!.add(vnData.toMap());
     }
@@ -313,8 +294,22 @@ class CollectionContentController extends _$CollectionContentController {
   Future<AdaptedVnData> getAdaptedVnData(VnRecord vnRecord) async {
     final localVnRepo = ref.read(localVnRepoProvider);
 
-    final VnDataPhase01 p1 = (await localVnRepo.getP1(vnRecord.id))!;
-    final VnDataPhase02 p2 = (await localVnRepo.getP2(vnRecord.id))!;
+    final p1 =
+        await localVnRepo.getP1(vnRecord.id) ??
+        VnDataPhase01(id: vnRecord.id, title: vnRecord.title);
+    final p2 =
+        await localVnRepo.getP2(vnRecord.id) ??
+        VnDataPhase02(
+          id: vnRecord.id,
+          developers: const [],
+          aliases: const [],
+          devstatus: -1,
+          length_minutes: 0,
+          minage: const [],
+          tags: const [],
+          languages: const [],
+          platforms: const [],
+        );
 
     final AdaptedVnData adaptedData = AdaptedVnData(
       id: vnRecord.id,
@@ -325,16 +320,16 @@ class CollectionContentController extends _$CollectionContentController {
       vote: vnRecord.vote,
       // Using full p1, since at the end of the filtering process, it will be used by VnItemrid.
       p1: p1,
-      aliases: p2.aliases!,
-      length_minutes: p2.length_minutes!,
-      devs: p2.developers!,
+      aliases: p2.aliases ?? const [],
+      length_minutes: p2.length_minutes ?? 0,
+      devs: p2.developers ?? const [],
       devsOriginal: p2.developerOriginals,
       devsOverride: ref.read(developerNameOverrideProvider)[vnRecord.id],
-      devstatus: p2.devstatus!,
-      languages: p2.languages!,
-      minage: p2.minage!,
-      tags: [for (VnTag tag in p2.tags!) tag.name!],
-      platforms: p2.platforms!,
+      devstatus: p2.devstatus ?? -1,
+      languages: p2.languages ?? const [],
+      minage: p2.minage ?? const [],
+      tags: [for (VnTag tag in p2.tags ?? const []) tag.name ?? ''],
+      platforms: p2.platforms ?? const [],
     );
 
     // Uncomment either one below for optimization.

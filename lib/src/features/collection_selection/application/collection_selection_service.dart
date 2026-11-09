@@ -50,15 +50,6 @@ class VnSelectionService {
     final localVnRepo = ref.read(localVnRepoProvider);
 
     try {
-      // P2 is supplementary metadata. A temporary VNDB outage should not block
-      // saving the collection record and the P1 data already available here.
-      if (p1List.any((p1) => !localVnRepo.p2Exist(p1.id))) {
-        try {
-          await _downloadP2Data(p1List);
-        } catch (_) {
-          // The collection record can still be saved; metadata can be fetched later.
-        }
-      }
       await _saveCollection(
         selection: selection,
         vnRecords: vnRecords,
@@ -66,6 +57,21 @@ class VnSelectionService {
         saveRefresh: saveRefresh,
       );
       whenSuccess();
+
+      // Save the user's record before requesting optional metadata. This keeps
+      // the confirmation responsive and preserves the item when VNDB is slow or
+      // unreachable. The collection screen can render it from P1 plus defaults.
+      final missingP2 = [
+        for (final p1 in p1List)
+          if (!localVnRepo.p2Exist(p1.id)) p1,
+      ];
+      if (missingP2.isNotEmpty) {
+        try {
+          await _downloadP2Data(missingP2);
+        } catch (_) {
+          // Metadata can be fetched when the user opens the VN detail later.
+        }
+      }
     } catch (err, st) {
       whenErr(err, st);
     }
@@ -151,7 +157,7 @@ class VnSelectionService {
       // ! This is the only way to add record from directly the app.
       final tempList = localCollection.getAddedViaAppNotBySync();
       tempList.add(saveVnRecord.id);
-      localCollection.setAddedViaAppNotBySync(tempList.toSet().toList());
+      await localCollection.setAddedViaAppNotBySync(tempList.toSet().toList());
 
       await localCollection.saveVnRecord(saveVnRecord);
       saveRefresh(p1.id);
@@ -234,15 +240,20 @@ Future<void> confirmSelection(
   required Function(Object, StackTrace) whenErr,
   required void Function(String) saveRefresh,
 }) async {
-  final vnSelectionService = ref.watch(vnSelectionServiceProvider);
-  return await vnSelectionService.confirmSelection(
-    p1List: p1List,
-    vnRecords: vnRecords,
-    selection: selection,
-    whenSuccess: whenSuccess,
-    whenErr: whenErr,
-    saveRefresh: saveRefresh,
-  );
+  final keepAlive = ref.keepAlive();
+  try {
+    final vnSelectionService = ref.watch(vnSelectionServiceProvider);
+    return await vnSelectionService.confirmSelection(
+      p1List: p1List,
+      vnRecords: vnRecords,
+      selection: selection,
+      whenSuccess: whenSuccess,
+      whenErr: whenErr,
+      saveRefresh: saveRefresh,
+    );
+  } finally {
+    keepAlive.close();
+  }
 }
 
 @Riverpod(dependencies: [vnSelectionService])

@@ -142,13 +142,22 @@ class _SettingsDataState extends ConsumerState<SettingsData>
   }
 
   Future<void> _importCollectionBackup() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['json'],
-    );
-    final path = result?.files.single.path;
-    if (path == null) return;
     try {
+      final result = await FilePicker.platform.pickFiles(
+        dialogTitle: appText(
+          context,
+          'Import collection backup',
+          'コレクションのバックアップを読み込む',
+        ),
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+        lockParentWindow: true,
+      );
+      if (result == null || result.files.isEmpty) return;
+      final path = result.files.first.path;
+      if (path == null || path.isEmpty) {
+        throw const FormatException('The selected file has no local path.');
+      }
       final decoded = jsonDecode(await File(path).readAsString());
       if (decoded is! Map<String, dynamic>) throw const FormatException();
       final count = await ref
@@ -289,13 +298,22 @@ class _SettingsDataState extends ConsumerState<SettingsData>
   }
 
   Future<void> _importFullBackup() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['zip'],
-    );
-    final path = result?.files.single.path;
-    if (path == null) return;
     try {
+      final result = await FilePicker.platform.pickFiles(
+        dialogTitle: appText(
+          context,
+          'Import full VNSRB backup',
+          'VNSRB 完全バックアップを読み込む',
+        ),
+        type: FileType.custom,
+        allowedExtensions: ['zip'],
+        lockParentWindow: true,
+      );
+      if (result == null || result.files.isEmpty) return;
+      final path = result.files.first.path;
+      if (path == null || path.isEmpty) {
+        throw const FormatException('The selected file has no local path.');
+      }
       final archive = ZipDecoder().decodeBytes(await File(path).readAsBytes());
       final manifestFile = archive.findFile('backup.json');
       if (manifestFile == null) throw const FormatException();

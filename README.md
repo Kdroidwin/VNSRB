@@ -150,7 +150,7 @@ Here are the primary features:
 
 <br>
 
-VNSRB is currently at version **4.0.1**. See the repository releases and Linux build guide for installation options.
+VNSRB is currently at version **4.0.2**. See the repository releases and Linux build guide for installation options.
 
 Dev note:
 - Japanese UI localization is available from Settings.
