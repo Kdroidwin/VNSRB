@@ -18,6 +18,7 @@ import 'package:vndb_lite/src/features/vn/data/remote_vn_repo.dart';
 import 'package:vndb_lite/src/features/vn/domain/others.dart';
 import 'package:vndb_lite/src/features/vn/domain/p1.dart';
 import 'package:vndb_lite/src/features/vn/domain/p2.dart';
+import 'package:vndb_lite/src/features/vn/domain/developer_name_override_provider.dart';
 import 'package:vndb_lite/src/features/vn_item/presentation/vn_item_grid_.dart';
 
 part 'collection_content_controller.g.dart';
@@ -328,6 +329,7 @@ class CollectionContentController extends _$CollectionContentController {
       length_minutes: p2.length_minutes!,
       devs: p2.developers!,
       devsOriginal: p2.developerOriginals,
+      devsOverride: ref.read(developerNameOverrideProvider)[vnRecord.id],
       devstatus: p2.devstatus!,
       languages: p2.languages!,
       minage: p2.minage!,

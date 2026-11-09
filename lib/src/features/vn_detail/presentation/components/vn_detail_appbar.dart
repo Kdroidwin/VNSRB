@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -14,9 +15,14 @@ import 'package:vndb_lite/src/routing/app_router.dart';
 import 'package:vndb_lite/src/constants/local_db_constants.dart';
 import 'package:vndb_lite/src/core/local_db/shared_prefs.dart';
 import 'package:vndb_lite/src/features/vn/domain/p1.dart';
+import 'package:vndb_lite/src/features/vn/domain/developer_name_override_provider.dart';
+import 'package:vndb_lite/src/features/vn/data/local_vn_repo.dart';
 import 'package:vndb_lite/src/util/alt_provider_reader.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
-class VnDetailAppBar extends StatelessWidget {
+enum _DeveloperNameEditAction { save, reset }
+
+class VnDetailAppBar extends ConsumerWidget {
   const VnDetailAppBar({super.key, required this.p1});
 
   final VnDataPhase01 p1;
@@ -42,8 +48,97 @@ class VnDetailAppBar extends StatelessWidget {
       .read(sharedPrefProvider)
       .remove('${DBKeys.CUSTOM_COVER_PATH}${p1.id}');
 
+  Future<void> _editDeveloperName(BuildContext context, WidgetRef ref) async {
+    final isJapanese = Localizations.localeOf(context).languageCode == 'ja';
+    final overrides = ref.read(developerNameOverrideProvider);
+    final existingOverride = overrides[p1.id];
+    var initialName = existingOverride ?? '';
+    if (existingOverride == null) {
+      try {
+        final p2 = await ref.read(localVnRepoProvider).getP2(p1.id);
+        final developers = p2?.developers ?? [];
+        if (isJapanese && p2?.developerOriginals != null) {
+          final originals = p2!.developerOriginals!;
+          initialName = [
+            for (var index = 0; index < developers.length; index++)
+              if (index < originals.length && originals[index].isNotEmpty)
+                originals[index]
+              else
+                developers[index],
+          ].join(' & ');
+        } else {
+          initialName = developers.join(' & ');
+        }
+      } catch (_) {
+        // The user can still enter a name when cached VN details are absent.
+      }
+    }
+    if (!context.mounted) return;
+
+    final controller = TextEditingController(text: initialName);
+    try {
+      final action = await showDialog<_DeveloperNameEditAction>(
+        context: context,
+        builder:
+            (dialogContext) => AlertDialog(
+              title: Text(appText(context, 'Edit developer name', 'メーカー名を編集')),
+              content: TextField(
+                controller: controller,
+                autofocus: true,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: InputDecoration(
+                  labelText: appText(context, 'Developer name', 'メーカー名'),
+                  hintText: appText(
+                    context,
+                    'Enter a preferred display name',
+                    '表示するメーカー名を入力',
+                  ),
+                ),
+                onSubmitted:
+                    (_) => Navigator.of(
+                      dialogContext,
+                    ).pop(_DeveloperNameEditAction.save),
+              ),
+              actions: [
+                if (existingOverride != null)
+                  TextButton(
+                    onPressed:
+                        () => Navigator.of(
+                          dialogContext,
+                        ).pop(_DeveloperNameEditAction.reset),
+                    child: Text(appText(context, 'Reset', '元に戻す')),
+                  ),
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: Text(appText(context, 'Cancel', 'キャンセル')),
+                ),
+                FilledButton(
+                  onPressed:
+                      () => Navigator.of(
+                        dialogContext,
+                      ).pop(_DeveloperNameEditAction.save),
+                  child: Text(appText(context, 'Save', '保存')),
+                ),
+              ],
+            ),
+      );
+
+      if (action == _DeveloperNameEditAction.save) {
+        await ref
+            .read(developerNameOverrideProvider.notifier)
+            .setName(p1.id, controller.text);
+      } else if (action == _DeveloperNameEditAction.reset) {
+        await ref
+            .read(developerNameOverrideProvider.notifier)
+            .setName(p1.id, null);
+      }
+    } finally {
+      controller.dispose();
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final vnUrl = Uri.parse('https://vndb.org/${p1.id}');
 
     return SliverAppBar(
@@ -141,6 +236,23 @@ class VnDetailAppBar extends StatelessWidget {
                   child: Text('Remove custom cover image'),
                 ),
               ],
+        ),
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: responsiveUI.own(0.012)),
+          decoration: BoxDecoration(
+            color: kColor(context).primary.withOpacity(0.75),
+            borderRadius: BorderRadius.circular(60),
+          ),
+          child: IconButton(
+            tooltip: appText(context, 'Edit developer name', 'メーカー名を編集'),
+            padding: EdgeInsets.all(responsiveUI.own(0.034)),
+            onPressed: () => _editDeveloperName(context, ref),
+            icon: Icon(
+              Icons.edit_outlined,
+              size: responsiveUI.standardIcon,
+              color: kColor(context).tertiary,
+            ),
+          ),
         ),
         //
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

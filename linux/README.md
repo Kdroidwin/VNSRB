@@ -11,7 +11,7 @@ flutter build linux --release
 Run it with:
 
 ```sh
-build/linux/x64/release/bundle/vnpockets
+build/linux/x64/release/bundle/vnsrb
 ```
 
 For distribution, copy the entire `build/linux/x64/release/bundle` directory;

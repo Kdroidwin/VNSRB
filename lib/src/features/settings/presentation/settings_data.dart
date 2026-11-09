@@ -19,6 +19,7 @@ import 'package:vndb_lite/src/features/collection/presentation/collection_conten
 import 'package:vndb_lite/src/features/settings/presentation/components/settings_snackbar.dart';
 import 'package:vndb_lite/src/features/settings/presentation/dialog/settings_dialog.dart';
 import 'package:vndb_lite/src/features/settings/presentation/settings_data_state.dart';
+import 'package:vndb_lite/src/features/vn/domain/developer_name_override_provider.dart';
 import 'package:vndb_lite/src/features/sync/presentation/auth_screen_controller.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
 import 'package:vndb_lite/src/util/alt_provider_reader.dart';
@@ -108,7 +109,7 @@ class _SettingsDataState extends ConsumerState<SettingsData>
       }
 
       final directory = await getTemporaryDirectory();
-        final file = File('${directory.path}/vnsrb-collection-backup.json');
+      final file = File('${directory.path}/vnsrb-collection-backup.json');
       await file.writeAsString(backupText);
       await SharePlus.instance.share(
         ShareParams(
@@ -200,7 +201,8 @@ class _SettingsDataState extends ConsumerState<SettingsData>
               key == DBKeys.MAX_ITEMS_PER_ROW_LANDSCAPE_CONF ||
               key == DBKeys.HOME_ARRANGEMENT ||
               key == DBKeys.COLLECTION_ARRANGEMENT ||
-              key == DBKeys.STARTUP_TAB,
+              key == DBKeys.STARTUP_TAB ||
+              key.startsWith(DBKeys.DEVELOPER_NAME_OVERRIDE),
         ))
           key: prefs.get(key),
       };
@@ -325,6 +327,7 @@ class _SettingsDataState extends ConsumerState<SettingsData>
             await prefs.setStringList(key, value.whereType<String>().toList());
         }
       }
+      ref.invalidate(developerNameOverrideProvider);
       final background = manifest['backgroundFile'];
       if (background is String)
         await prefs.setString(

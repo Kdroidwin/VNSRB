@@ -12,6 +12,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - None.
 
+## [4.0.1] - 2026-11-09
+
+### Added
+
+- User-editable developer names, available from the visual novel detail toolbar.
+- Linux AppImage packaging.
+
+### Changed
+
+- Localized vote count, rating, and play time labels for Japanese UI.
+- Included developer name overrides in full backups and collection developer search.
+
 ## [3.6.0] - 2025-08-18
 
 ### Added

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:vndb_lite/src/app.dart';
 import 'package:vndb_lite/src/common_widgets/generic_shadowy_text.dart';
 import 'package:vndb_lite/src/util/responsive.dart';
 import 'package:vndb_lite/src/features/vn/domain/p1.dart';
 import 'package:vndb_lite/src/features/vn/domain/p2.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
 import 'package:vndb_lite/src/util/format_minutes.dart';
+import 'package:vndb_lite/src/util/app_text.dart';
 
 class VnDetailsBottomHeader extends ConsumerWidget {
   const VnDetailsBottomHeader({super.key, required this.p1, required this.p2});
@@ -28,7 +28,11 @@ class VnDetailsBottomHeader extends ConsumerWidget {
 
   Widget _getRatingIcons(double thisVnRating) {
     if (thisVnRating == 0) {
-      return Icon(Icons.star_outline, size: responsiveUI.own(0.05), color: kColor().secondary);
+      return Icon(
+        Icons.star_outline,
+        size: responsiveUI.own(0.05),
+        color: kColor().secondary,
+      );
     }
 
     final Widget starIcon = Icon(
@@ -40,7 +44,11 @@ class VnDetailsBottomHeader extends ConsumerWidget {
 
     for (int ratingValue in _ratingStar.keys) {
       if (thisVnRating >= ratingValue) {
-        return Wrap(children: [for (int i = 0; i < _ratingStar[ratingValue]!; i++) starIcon]);
+        return Wrap(
+          children: [
+            for (int i = 0; i < _ratingStar[ratingValue]!; i++) starIcon,
+          ],
+        );
       }
     }
 
@@ -73,7 +81,7 @@ class VnDetailsBottomHeader extends ConsumerWidget {
           Flexible(
             child: Column(
               children: [
-                ShadowText('Vote'),
+                ShadowText(appText(context, 'Vote count', '投票数')),
                 Wrap(
                   alignment: WrapAlignment.start,
                   crossAxisAlignment: WrapCrossAlignment.center,
@@ -105,7 +113,7 @@ class VnDetailsBottomHeader extends ConsumerWidget {
           Flexible(
             child: Column(
               children: [
-                ShadowText('Rating'),
+                ShadowText(appText(context, 'Rating', '平均評価')),
                 Wrap(
                   alignment: WrapAlignment.center,
                   children: [
@@ -137,7 +145,7 @@ class VnDetailsBottomHeader extends ConsumerWidget {
           Flexible(
             child: Column(
               children: [
-                ShadowText('Play Time'),
+                ShadowText(appText(context, 'Play Time', 'プレイ時間')),
                 Wrap(
                   children: [
                     Padding(

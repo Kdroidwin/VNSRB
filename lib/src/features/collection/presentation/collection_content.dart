@@ -5,6 +5,7 @@ import 'package:vndb_lite/src/common_widgets/generic_local_empty_content.dart';
 import 'package:vndb_lite/src/features/_base/presentation/main_outer_layout.dart';
 import 'package:vndb_lite/src/features/_base/presentation/other_parts/main_inner_layout.dart';
 import 'package:vndb_lite/src/features/collection/presentation/collection_content_controller.dart';
+import 'package:vndb_lite/src/features/vn/domain/developer_name_override_provider.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
 import 'package:vndb_lite/src/util/responsive.dart';
 import 'package:vndb_lite/src/features/settings/presentation/settings_general_state.dart';
@@ -32,6 +33,7 @@ class _CollectionContentState extends ConsumerState<CollectionContent> {
   @override
   Widget build(BuildContext context) {
     final settings = ref.watch(settingsGeneralStateProvider);
+    final developerOverrides = ref.watch(developerNameOverrideProvider);
 
     final content =
         ref.watch(collectionContentControllerProvider)[statusName] ?? [];
@@ -50,8 +52,12 @@ class _CollectionContentState extends ConsumerState<CollectionContent> {
         final raw = rawById[item.p1.id];
         final developers = raw?['devs'] as List<dynamic>?;
         final originalNames = raw?['devsOriginal'] as List<dynamic>?;
+        final developerOverride =
+            developerOverrides[item.p1.id] ?? raw?['devsOverride'] as String?;
         final displayNames =
-            Localizations.localeOf(context).languageCode == 'ja' &&
+            developerOverride?.isNotEmpty == true
+                ? [developerOverride]
+                : Localizations.localeOf(context).languageCode == 'ja' &&
                     originalNames != null
                 ? originalNames
                 : developers;

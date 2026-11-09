@@ -8,6 +8,7 @@ import 'package:vndb_lite/src/features/sort_filter/domain/filter_.dart';
 import 'package:vndb_lite/src/features/sort_filter/domain/sort_.dart';
 import 'package:vndb_lite/src/features/sort_filter/data/sortable_data.dart';
 import 'package:vndb_lite/src/features/vn/domain/p1.dart';
+import 'package:vndb_lite/src/features/vn/domain/developer_name_override_provider.dart';
 import 'package:vndb_lite/src/features/vn_item/presentation/vn_item_grid_.dart';
 import 'package:vndb_lite/src/util/alt_provider_reader.dart';
 
@@ -155,7 +156,12 @@ class CollectionSortFilterService {
     Map<String, dynamic> vnData,
   ) {
     if (_isSearchingForAll(searchQuery)) return " ";
-    if (_isSearchingForDevs(searchQuery!)) return "${vnData['devs']}";
+    if (_isSearchingForDevs(searchQuery!)) {
+      final override =
+          ref_.read(developerNameOverrideProvider)[vnData['id']] ??
+          vnData['devsOverride'];
+      return "${vnData['devs']} ${vnData['devsOriginal']} $override";
+    }
     if (_isSearchingForTags(searchQuery)) return "${vnData['tags']}";
 
     return "${vnData['title']} ${vnData['japaneseTitle']} ${vnData['aliases']}";

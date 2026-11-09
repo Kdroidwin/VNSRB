@@ -16,6 +16,7 @@ class AdaptedVnData {
     required this.aliases,
     required this.devs,
     this.devsOriginal,
+    this.devsOverride,
     required this.devstatus,
     required this.languages,
     required this.minage,
@@ -41,6 +42,7 @@ class AdaptedVnData {
   final List<String> aliases;
   final List<String> devs;
   final List<String>? devsOriginal;
+  final String? devsOverride;
   final int devstatus;
   final List<String> languages;
   // final String olang; // P1
@@ -60,6 +62,7 @@ class AdaptedVnData {
     List<String>? aliases,
     List<String>? devs,
     List<String>? devsOriginal,
+    String? devsOverride,
     int? devstatus,
     List<String>? languages,
     List<int>? minage,
@@ -78,6 +81,7 @@ class AdaptedVnData {
       aliases: aliases ?? this.aliases,
       devs: devs ?? this.devs,
       devsOriginal: devsOriginal ?? this.devsOriginal,
+      devsOverride: devsOverride ?? this.devsOverride,
       devstatus: devstatus ?? this.devstatus,
       languages: languages ?? this.languages,
       minage: minage ?? this.minage,
@@ -99,6 +103,7 @@ class AdaptedVnData {
       'aliases': aliases,
       'devs': devs,
       'devsOriginal': devsOriginal,
+      'devsOverride': devsOverride,
       'devstatus': devstatus,
       'languages': languages,
       'minage': minage,
@@ -109,7 +114,7 @@ class AdaptedVnData {
 
   @override
   String toString() {
-    return 'AdaptedVnData(id: $id, status: $status, p1: $p1, title: $title, started: $started, added: $added, length_minutes: $length_minutes, vote: $vote, aliases: $aliases, devs: $devs, devsOriginal: $devsOriginal, devstatus: $devstatus, languages: $languages, minage: $minage, tags: $tags, platforms: $platforms)';
+    return 'AdaptedVnData(id: $id, status: $status, p1: $p1, title: $title, started: $started, added: $added, length_minutes: $length_minutes, vote: $vote, aliases: $aliases, devs: $devs, devsOriginal: $devsOriginal, devsOverride: $devsOverride, devstatus: $devstatus, languages: $languages, minage: $minage, tags: $tags, platforms: $platforms)';
   }
 
   @override
@@ -128,6 +133,7 @@ class AdaptedVnData {
         listEquals(other.aliases, aliases) &&
         listEquals(other.devs, devs) &&
         listEquals(other.devsOriginal, devsOriginal) &&
+        other.devsOverride == devsOverride &&
         other.devstatus == devstatus &&
         listEquals(other.languages, languages) &&
         listEquals(other.minage, minage) &&
@@ -148,6 +154,7 @@ class AdaptedVnData {
         aliases.hashCode ^
         devs.hashCode ^
         devsOriginal.hashCode ^
+        devsOverride.hashCode ^
         devstatus.hashCode ^
         languages.hashCode ^
         minage.hashCode ^

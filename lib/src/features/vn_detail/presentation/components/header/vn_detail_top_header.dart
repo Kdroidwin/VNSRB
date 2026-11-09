@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vndb_lite/src/common_widgets/generic_shadowy_text.dart';
 import 'package:vndb_lite/src/util/responsive.dart';
 import 'package:vndb_lite/src/features/sort_filter/data/devstatus_data.dart';
 import 'package:vndb_lite/src/features/vn/domain/p1.dart';
 import 'package:vndb_lite/src/features/vn/domain/p2.dart';
+import 'package:vndb_lite/src/features/vn/domain/developer_name_override_provider.dart';
 import 'package:vndb_lite/src/features/vn_detail/presentation/components/header/vn_detail_top_header_cover.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
 
-class VnDetailsTopHeader extends StatelessWidget {
+class VnDetailsTopHeader extends ConsumerWidget {
   const VnDetailsTopHeader({
     super.key,
     required this.p1,
@@ -23,7 +25,8 @@ class VnDetailsTopHeader extends StatelessWidget {
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   //
 
-  String _developersName(BuildContext context) {
+  String _developersName(BuildContext context, String? override) {
+    if (override?.trim().isNotEmpty == true) return override!.trim();
     final List<String> result = p2.developers ?? [];
 
     if (result.isEmpty) {
@@ -50,7 +53,8 @@ class VnDetailsTopHeader extends StatelessWidget {
   //
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final developerOverride = ref.watch(developerNameOverrideProvider)[p1.id];
     return Row(
       children: [
         VnDetailTopHeaderCover(
@@ -85,7 +89,7 @@ class VnDetailsTopHeader extends StatelessWidget {
               // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
               // Dev names
               SizedBox(height: responsiveUI.own(0.01)),
-              ShadowText(_developersName(context)),
+              ShadowText(_developersName(context, developerOverride)),
               //
               // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
               // Development status indicator
