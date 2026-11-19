@@ -32,7 +32,9 @@ class _AuthButtonState extends ConsumerState<AuthConfirmButton>
 
     _offsetAnimation = _animationController
         .drive(CurveTween(curve: Curves.ease))
-        .drive(Tween<Offset>(begin: const Offset(0, -1.5), end: const Offset(0, 0)));
+        .drive(
+          Tween<Offset>(begin: const Offset(0, -1.5), end: const Offset(0, 0)),
+        );
   }
 
   @override
@@ -49,7 +51,9 @@ class _AuthButtonState extends ConsumerState<AuthConfirmButton>
     ref.read(authButtonStateProvider.notifier).state = ButtonState.loading;
 
     try {
-      final response = await ref.read(authScreenControllerProvider.notifier).authenticate(token);
+      final response = await ref
+          .read(authScreenControllerProvider.notifier)
+          .authenticate(token);
 
       // Notify change when success.
       if (response.data['permissions'].contains('listread') &&
@@ -76,12 +80,22 @@ class _AuthButtonState extends ConsumerState<AuthConfirmButton>
       return;
       //
     } catch (err) {
+      //
+      if (err is DioException) {
+        if (err.type == DioExceptionType.badResponse) {
+          ref.invalidate(authTokenFieldServerErrorStateProvider);
+          ref.read(authTokenFieldServerErrorStateProvider.notifier).error =
+              'Invalid authentication token';
+
+          ref.read(authButtonStateProvider.notifier).state =
+              ButtonState.inactive;
+          return;
+        }
+      }
       ref.invalidate(authTokenFieldServerErrorStateProvider);
       if (err is DioException) {
         ref.read(authTokenFieldServerErrorStateProvider.notifier).error =
-            err.type == DioExceptionType.badResponse
-                ? 'Invalid authentication token'
-                : 'Unable to connect. Please try again later.';
+            'Unable to connect. Please try again later.';
       } else {
         ref.read(authTokenFieldServerErrorStateProvider.notifier).error =
             'Secure credential storage is unavailable. Configure a desktop keyring and try again.';
@@ -96,7 +110,8 @@ class _AuthButtonState extends ConsumerState<AuthConfirmButton>
 
   @override
   Widget build(BuildContext context) {
-    final userSuccessfullyAuthed = ref.watch(authScreenControllerProvider) != null;
+    final userSuccessfullyAuthed =
+        ref.watch(authScreenControllerProvider) != null;
     final buttonState = ref.watch(authButtonStateProvider);
     final showAuthField = ref.watch(showAuthTokenFieldStateProvider);
     final tokenFieldValue = ref.watch(authTokenFieldStateProvider);
@@ -106,7 +121,9 @@ class _AuthButtonState extends ConsumerState<AuthConfirmButton>
       child: CustomDialogButton(
         text: (userSuccessfullyAuthed) ? "Change" : "Confirm",
         textColor: kColor(context).primary,
-        textShadow: const [Shadow(color: Color.fromARGB(120, 0, 0, 0), blurRadius: 1)],
+        textShadow: const [
+          Shadow(color: Color.fromARGB(120, 0, 0, 0), blurRadius: 1),
+        ],
         color: kColor(context).tertiary,
         padding: EdgeInsets.symmetric(
           horizontal: responsiveUI.own(0.045),

@@ -19,6 +19,7 @@ class SettingsGeneralConf {
     required this.showCollectionDeveloperHeaders,
     required this.defaultCollectionStatus,
     required this.showNavigationLabelsOnTap,
+    required this.floatingBottomNavigation,
     required this.hideCollectionBarsOnScroll,
   });
 
@@ -36,6 +37,7 @@ class SettingsGeneralConf {
   final bool showCollectionDeveloperHeaders;
   final String defaultCollectionStatus;
   final bool showNavigationLabelsOnTap;
+  final bool floatingBottomNavigation;
   final bool hideCollectionBarsOnScroll;
 
   SettingsGeneralConf copyWith({
@@ -53,6 +55,7 @@ class SettingsGeneralConf {
     bool? showCollectionDeveloperHeaders,
     String? defaultCollectionStatus,
     bool? showNavigationLabelsOnTap,
+    bool? floatingBottomNavigation,
     bool? hideCollectionBarsOnScroll,
   }) {
     return SettingsGeneralConf(
@@ -80,6 +83,8 @@ class SettingsGeneralConf {
           defaultCollectionStatus ?? this.defaultCollectionStatus,
       showNavigationLabelsOnTap:
           showNavigationLabelsOnTap ?? this.showNavigationLabelsOnTap,
+      floatingBottomNavigation:
+          floatingBottomNavigation ?? this.floatingBottomNavigation,
       hideCollectionBarsOnScroll:
           hideCollectionBarsOnScroll ?? this.hideCollectionBarsOnScroll,
     );
@@ -87,7 +92,7 @@ class SettingsGeneralConf {
 
   @override
   String toString() {
-    return 'SettingsGeneralConf(showCoverCensor: $showCoverCensor, showChart: $showChart, maxPreviewItem: $maxPreviewItem, maxItemPerRowPortrait: $maxItemPerRowPortrait, maxItemPerRowLandscape: $maxItemPerRowLandscape, homeSectionsArrangement: $homeSectionsArrangement, collectionStatusTabArrangement: $collectionStatusTabArrangement, startupTab: $startupTab, showCollectionItemLabels: $showCollectionItemLabels, groupCollectionByDeveloper: $groupCollectionByDeveloper, showCollectionCoverDates: $showCollectionCoverDates, showCollectionDeveloperHeaders: $showCollectionDeveloperHeaders, defaultCollectionStatus: $defaultCollectionStatus, showNavigationLabelsOnTap: $showNavigationLabelsOnTap, hideCollectionBarsOnScroll: $hideCollectionBarsOnScroll)';
+    return 'SettingsGeneralConf(showCoverCensor: $showCoverCensor, showChart: $showChart, maxPreviewItem: $maxPreviewItem, maxItemPerRowPortrait: $maxItemPerRowPortrait, maxItemPerRowLandscape: $maxItemPerRowLandscape, homeSectionsArrangement: $homeSectionsArrangement, collectionStatusTabArrangement: $collectionStatusTabArrangement, startupTab: $startupTab, showCollectionItemLabels: $showCollectionItemLabels, groupCollectionByDeveloper: $groupCollectionByDeveloper, showCollectionCoverDates: $showCollectionCoverDates, showCollectionDeveloperHeaders: $showCollectionDeveloperHeaders, defaultCollectionStatus: $defaultCollectionStatus, showNavigationLabelsOnTap: $showNavigationLabelsOnTap, floatingBottomNavigation: $floatingBottomNavigation, hideCollectionBarsOnScroll: $hideCollectionBarsOnScroll)';
   }
 
   @override
@@ -112,6 +117,7 @@ class SettingsGeneralConf {
             showCollectionDeveloperHeaders &&
         other.defaultCollectionStatus == defaultCollectionStatus &&
         other.showNavigationLabelsOnTap == showNavigationLabelsOnTap &&
+        other.floatingBottomNavigation == floatingBottomNavigation &&
         other.hideCollectionBarsOnScroll == hideCollectionBarsOnScroll;
   }
 
@@ -131,6 +137,7 @@ class SettingsGeneralConf {
         showCollectionDeveloperHeaders.hashCode ^
         defaultCollectionStatus.hashCode ^
         showNavigationLabelsOnTap.hashCode ^
+        floatingBottomNavigation.hashCode ^
         hideCollectionBarsOnScroll.hashCode;
   }
 }

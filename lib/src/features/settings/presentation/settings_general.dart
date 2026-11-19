@@ -76,6 +76,13 @@ class _SettingsGeneralState extends ConsumerState<SettingsGeneral>
         !visible;
   }
 
+  void _floatingBottomNavigationSwitch() {
+    final enabled =
+        ref.read(settingsGeneralStateProvider).floatingBottomNavigation;
+    ref.read(settingsGeneralStateProvider.notifier).floatingBottomNavigation =
+        !enabled;
+  }
+
   void _collectionBarsOnScrollSwitch() {
     final hidden =
         ref.read(settingsGeneralStateProvider).hideCollectionBarsOnScroll;
@@ -637,6 +644,35 @@ class _SettingsGeneralState extends ConsumerState<SettingsGeneral>
                     fontWeight: FontWeight.bold,
                     color:
                         settings.showNavigationLabelsOnTap
+                            ? Colors.green
+                            : Colors.red,
+                  ),
+                ],
+              ),
+
+              SizedBox(height: responsiveUI.own(0.03)),
+              CustomLabel(
+                useBorder: true,
+                borderRadius: 12,
+                isSelected: false,
+                borderColor: kColor(context).secondary,
+                padding: EdgeInsets.all(responsiveUI.own(0.02)),
+                onTap: _floatingBottomNavigationSwitch,
+                children: [
+                  ShadowText(
+                    appText(
+                      context,
+                      'Floating bottom navigation: ',
+                      'フローティング型ボトムナビゲーション：',
+                    ),
+                  ),
+                  ShadowText(
+                    settings.floatingBottomNavigation
+                        ? appText(context, ' ON', ' オン')
+                        : appText(context, ' OFF', ' オフ'),
+                    fontWeight: FontWeight.bold,
+                    color:
+                        settings.floatingBottomNavigation
                             ? Colors.green
                             : Colors.red,
                   ),

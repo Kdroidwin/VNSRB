@@ -5,7 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
 ## [Unreleased]
+
+### Added
+
+- None.
+
+## [4.1.0] - 2026-11-19
+
+### Added
+
+- Added a floating Material bottom navigation bar, enabled by default, with a setting to restore the traditional bar.
 
 ### Security
 
@@ -13,7 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Migrated VNDB authentication tokens from preferences to Android Keystore and the Linux desktop keyring.
 - Excluded app data from Android cloud and device-transfer backups.
 - Redacted authentication tokens from identity serialization and debug output.
-- Added ZIP size, entry-count, decompressed-size, path, header-consistency, and overlap checks for full-backup imports.
+- Added ZIP size, entry-count, decompressed-size, path, and encryption checks for full-backup imports.
+- Validated ZIP local headers, rejected overlapping entries and unsupported ZIP64/data-descriptor records, and lowered import resource ceilings.
 - Validated collection records and allowlisted full-backup settings before applying them.
 - Prevented authentication requests from following redirects and removed sync exception logs that could contain authorization headers.
 
