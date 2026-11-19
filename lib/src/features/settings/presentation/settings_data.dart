@@ -19,13 +19,138 @@ import 'package:vndb_lite/src/features/collection/presentation/collection_conten
 import 'package:vndb_lite/src/features/settings/presentation/components/settings_snackbar.dart';
 import 'package:vndb_lite/src/features/settings/presentation/dialog/settings_dialog.dart';
 import 'package:vndb_lite/src/features/settings/presentation/settings_data_state.dart';
+import 'package:vndb_lite/src/features/home/data/preview_sections_data.dart';
+import 'package:vndb_lite/src/features/theme/data/theme_data.dart';
+import 'package:vndb_lite/src/features/collection/data/collection_status_data.dart';
 import 'package:vndb_lite/src/features/vn/domain/developer_name_override_provider.dart';
+import 'package:vndb_lite/src/features/settings/application/full_backup_zip_guard.dart';
 import 'package:vndb_lite/src/features/sync/presentation/auth_screen_controller.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
 import 'package:vndb_lite/src/util/alt_provider_reader.dart';
 import 'package:vndb_lite/src/util/app_text.dart';
 import 'package:vndb_lite/src/constants/local_db_constants.dart';
 import 'package:vndb_lite/src/core/local_db/shared_prefs.dart';
+
+const _backupBooleanSettings = <String>{
+  DBKeys.JAPANESE_TITLES_CONF,
+  DBKeys.JAPANESE_UI_CONF,
+  DBKeys.COVER_CENSOR_CONF,
+  DBKeys.SHOW_CHART_CONF,
+  DBKeys.SHOW_COLLECTION_ITEM_LABELS,
+  DBKeys.GROUP_COLLECTION_BY_DEVELOPER,
+  DBKeys.SHOW_COLLECTION_DEVELOPER_HEADERS,
+  DBKeys.SHOW_COLLECTION_COVER_DATES,
+  DBKeys.SHOW_NAVIGATION_LABELS_ON_TAP,
+  DBKeys.HIDE_COLLECTION_BARS_ON_SCROLL,
+};
+
+const _backupSettings = <String>{
+  ..._backupBooleanSettings,
+  DBKeys.THEME_CONF,
+  DBKeys.AMOLED_ACCENT_COLOR,
+  DBKeys.DEFAULT_COLLECTION_STATUS,
+  DBKeys.STARTUP_TAB,
+  DBKeys.CUSTOM_FONT_SIZE_CONF,
+  DBKeys.MAX_PREVIEW_ITEMS_CONF,
+  DBKeys.MAX_ITEMS_PER_ROW_PORTRAIT_CONF,
+  DBKeys.MAX_ITEMS_PER_ROW_LANDSCAPE_CONF,
+  DBKeys.HOME_ARRANGEMENT,
+  DBKeys.COLLECTION_ARRANGEMENT,
+};
+
+Map<String, Object> _validatedBackupSettings(dynamic rawSettings) {
+  if (rawSettings == null) return {};
+  if (rawSettings is! Map || rawSettings.length > 50000) {
+    throw const FormatException('Invalid backup settings.');
+  }
+
+  final safe = <String, Object>{};
+  for (final entry in rawSettings.entries) {
+    final key = entry.key;
+    final value = entry.value;
+    if (key is! String) continue;
+
+    if (key.startsWith(DBKeys.DEVELOPER_NAME_OVERRIDE)) {
+      final vnId = key.substring(DBKeys.DEVELOPER_NAME_OVERRIDE.length);
+      if (RegExp(r'^v[0-9]{1,10}$').hasMatch(vnId) &&
+          value is String &&
+          value.trim().isNotEmpty &&
+          value.length <= 128 &&
+          !value.contains(RegExp(r'[\x00-\x1f\x7f]'))) {
+        safe[key] = value.trim();
+      }
+      continue;
+    }
+    if (!_backupSettings.contains(key)) continue;
+
+    if (_backupBooleanSettings.contains(key)) {
+      if (value is bool) safe[key] = value;
+    } else if (key == DBKeys.THEME_CONF) {
+      if (value is String &&
+          ThemeCode.values.any((theme) => theme.name == value)) {
+        safe[key] = value;
+      }
+    } else if (key == DBKeys.AMOLED_ACCENT_COLOR) {
+      if (value is String && RegExp(r'^#[0-9a-fA-F]{6}$').hasMatch(value)) {
+        safe[key] = value;
+      }
+    } else if (key == DBKeys.DEFAULT_COLLECTION_STATUS) {
+      if (value is String && COLLECTION_STATUS_DATA.containsKey(value)) {
+        safe[key] = value;
+      }
+    } else if (key == DBKeys.STARTUP_TAB) {
+      if (value is String &&
+          const {'home', 'search', 'collection', 'others'}.contains(value)) {
+        safe[key] = value;
+      }
+    } else if (key == DBKeys.CUSTOM_FONT_SIZE_CONF) {
+      if (value is num && value.isFinite && value >= -0.006 && value <= 0.004) {
+        safe[key] = value.toDouble();
+      }
+    } else if (key == DBKeys.MAX_PREVIEW_ITEMS_CONF) {
+      if (value is int && value >= 1 && value <= 500) safe[key] = value;
+    } else if (key == DBKeys.MAX_ITEMS_PER_ROW_PORTRAIT_CONF) {
+      if (value is int && value >= 2 && value <= 20) safe[key] = value;
+    } else if (key == DBKeys.MAX_ITEMS_PER_ROW_LANDSCAPE_CONF) {
+      if (value is int && value >= 4 && value <= 20) safe[key] = value;
+    } else if (key == DBKeys.HOME_ARRANGEMENT) {
+      final valid =
+          HomeSectionsCode.values.map((section) => section.name).toSet();
+      if (value is List &&
+          value.length == valid.length &&
+          value.every((item) => item is String && valid.contains(item)) &&
+          value.toSet().length == valid.length) {
+        safe[key] = value.cast<String>().toList();
+      }
+    } else if (key == DBKeys.COLLECTION_ARRANGEMENT) {
+      final valid =
+          CollectionStatusCode.values.map((status) => status.name).toSet();
+      if (value is List &&
+          value.length == valid.length &&
+          value.every((item) => item is String && valid.contains(item)) &&
+          value.toSet().length == valid.length) {
+        safe[key] = value.cast<String>().toList();
+      }
+    }
+  }
+  return safe;
+}
+
+String _requireBackupMediaName(dynamic value, Set<String> archiveEntries) {
+  if (value is! String ||
+      value.isEmpty ||
+      value.length > 180 ||
+      value == '.' ||
+      value == '..' ||
+      value.contains('/') ||
+      value.contains('\\') ||
+      value.contains(':') ||
+      value.contains(RegExp(r'[\x00-\x1f\x7f]')) ||
+      !archiveEntries.contains('media/$value')) {
+    throw const FormatException('Backup references a missing or unsafe image.');
+  }
+  return value;
+}
 
 class SettingsData extends ConsumerStatefulWidget {
   const SettingsData({super.key});
@@ -158,7 +283,13 @@ class _SettingsDataState extends ConsumerState<SettingsData>
       if (path == null || path.isEmpty) {
         throw const FormatException('The selected file has no local path.');
       }
-      final decoded = jsonDecode(await File(path).readAsString());
+      final backupFile = File(path);
+      if (await backupFile.length() > 128 * 1024 * 1024) {
+        throw const FormatException(
+          'Collection backup exceeds the size limit.',
+        );
+      }
+      final decoded = jsonDecode(await backupFile.readAsString());
       if (decoded is! Map<String, dynamic>) throw const FormatException();
       final count = await ref
           .read(localCollectionRepoProvider)
@@ -226,14 +357,25 @@ class _SettingsDataState extends ConsumerState<SettingsData>
         'customCovers': customCovers,
       };
       final media = manifest['media'] as Map<String, String>;
+      var expandedMediaBytes = 0;
       for (final file in docs.listSync().whereType<File>()) {
         final name = file.uri.pathSegments.last;
         if (!name.startsWith('vnpockets_background.') &&
             !name.startsWith('vnpockets_cover_'))
           continue;
+        final length = file.lengthSync();
+        if (archive.files.length >= FullBackupZipGuard.maxEntries - 1 ||
+            length > FullBackupZipGuard.maxEntryBytes ||
+            expandedMediaBytes >
+                FullBackupZipGuard.maxTotalExpandedBytes - length) {
+          throw const FormatException(
+            'Full backup media exceeds the supported size limits.',
+          );
+        }
+        expandedMediaBytes += length;
         final archiveName = 'media/$name';
         archive.addFile(
-          ArchiveFile(archiveName, file.lengthSync(), file.readAsBytesSync()),
+          ArchiveFile(archiveName, length, file.readAsBytesSync()),
         );
         media[name] = archiveName;
       }
@@ -249,10 +391,22 @@ class _SettingsDataState extends ConsumerState<SettingsData>
       final manifestBytes = utf8.encode(
         const JsonEncoder.withIndent('  ').convert(manifest),
       );
+      if (manifestBytes.length > FullBackupZipGuard.maxManifestBytes ||
+          expandedMediaBytes >
+              FullBackupZipGuard.maxTotalExpandedBytes - manifestBytes.length) {
+        throw const FormatException(
+          'Full backup exceeds the supported size limits.',
+        );
+      }
       archive.addFile(
         ArchiveFile('backup.json', manifestBytes.length, manifestBytes),
       );
       final backupBytes = ZipEncoder().encodeBytes(archive);
+      if (backupBytes.length > FullBackupZipGuard.maxArchiveBytes) {
+        throw const FormatException(
+          'Full backup archive exceeds the size limit.',
+        );
+      }
       if (Platform.isLinux) {
         final selectedPath = await FilePicker.platform.saveFile(
           dialogTitle: appText(
@@ -314,60 +468,148 @@ class _SettingsDataState extends ConsumerState<SettingsData>
       if (path == null || path.isEmpty) {
         throw const FormatException('The selected file has no local path.');
       }
-      final archive = ZipDecoder().decodeBytes(await File(path).readAsBytes());
+      final backupFile = File(path);
+      final archiveSize = await backupFile.length();
+      if (archiveSize > FullBackupZipGuard.maxArchiveBytes) {
+        throw const FormatException(
+          'Full backup archive exceeds the size limit.',
+        );
+      }
+      final archiveBytes = await backupFile.readAsBytes();
+      final declaredEntries = FullBackupZipGuard.inspect(archiveBytes);
+      final archive = ZipDecoder().decodeBytes(archiveBytes);
       final manifestFile = archive.findFile('backup.json');
-      if (manifestFile == null) throw const FormatException();
-      final manifest = jsonDecode(
-        utf8.decode(manifestFile.content as List<int>),
-      );
-      if (manifest is! Map || manifest['format'] != 'vnpockets-full-backup') {
+      if (manifestFile == null ||
+          !manifestFile.isFile ||
+          manifestFile.size != declaredEntries['backup.json']) {
+        throw const FormatException('Missing backup manifest.');
+      }
+      final manifestBytes = manifestFile.readBytes();
+      if (manifestBytes == null ||
+          manifestBytes.length > FullBackupZipGuard.maxManifestBytes) {
+        throw const FormatException('Backup manifest exceeds the size limit.');
+      }
+      final decodedManifest = jsonDecode(utf8.decode(manifestBytes));
+      if (decodedManifest is! Map ||
+          decodedManifest['format'] != 'vnpockets-full-backup' ||
+          (decodedManifest['version'] != null &&
+              decodedManifest['version'] != 1)) {
         throw const FormatException();
       }
-      final docs = await getApplicationDocumentsDirectory();
-      for (final file in archive.files.where(
-        (file) => file.name.startsWith('media/'),
-      )) {
-        await File(
-          '${docs.path}/${file.name.split('/').last}',
-        ).writeAsBytes(file.content as List<int>);
+      final manifest = Map<String, dynamic>.from(decodedManifest);
+      final collectionData = manifest['collection'];
+      if (collectionData is! Map) {
+        throw const FormatException('Invalid collection backup data.');
       }
-      final prefs = ref.read(sharedPrefProvider);
-      final settings = manifest['settings'];
-      if (settings is Map) {
-        for (final entry in settings.entries) {
+      final collection = Map<String, dynamic>.from(collectionData);
+      LocalCollectionRepo.recordsFromBackup(collection);
+      final safeSettings = _validatedBackupSettings(manifest['settings']);
+
+      final archiveEntryNames = declaredEntries.keys.toSet();
+      final rawCovers = manifest['customCovers'];
+      if (rawCovers != null &&
+          (rawCovers is! Map || rawCovers.length > 50000)) {
+        throw const FormatException('Invalid custom cover list.');
+      }
+      final restoredCoverNames = <String, String>{};
+      if (rawCovers is Map) {
+        for (final entry in rawCovers.entries) {
           if (entry.key is! String) continue;
           final key = entry.key as String;
-          final value = entry.value;
-          if (value is bool) await prefs.setBool(key, value);
-          if (value is int) await prefs.setInt(key, value);
-          if (value is String) await prefs.setString(key, value);
-          if (value is List)
-            await prefs.setStringList(key, value.whereType<String>().toList());
+          if (!key.startsWith(DBKeys.CUSTOM_COVER_PATH)) continue;
+          final vnId = key.substring(DBKeys.CUSTOM_COVER_PATH.length);
+          if (!RegExp(r'^v[0-9]{1,10}$').hasMatch(vnId)) continue;
+          restoredCoverNames[key] = _requireBackupMediaName(
+            entry.value,
+            archiveEntryNames,
+          );
         }
       }
-      ref.invalidate(developerNameOverrideProvider);
-      final background = manifest['backgroundFile'];
-      if (background is String)
-        await prefs.setString(
-          DBKeys.CUSTOM_BACKGROUND_PATH,
-          '${docs.path}/$background',
-        );
-      final covers = manifest['customCovers'];
-      if (covers is Map) {
-        for (final entry in covers.entries) {
-          if (entry.key is String && entry.value is String) {
-            await prefs.setString(
-              entry.key as String,
-              '${docs.path}/${entry.value}',
-            );
+
+      final backgroundValue = manifest['backgroundFile'];
+      final backgroundName =
+          backgroundValue == null
+              ? null
+              : _requireBackupMediaName(backgroundValue, archiveEntryNames);
+
+      final rawMedia = manifest['media'];
+      if (rawMedia != null &&
+          (rawMedia is! Map ||
+              rawMedia.length > FullBackupZipGuard.maxEntries)) {
+        throw const FormatException('Invalid backup media index.');
+      }
+      if (rawMedia is Map) {
+        for (final entry in rawMedia.entries) {
+          if (entry.key is! String || entry.value is! String) continue;
+          final name = entry.key as String;
+          final archivePath = entry.value as String;
+          if (_requireBackupMediaName(name, archiveEntryNames) != name ||
+              archivePath != 'media/$name') {
+            throw const FormatException('Unsafe backup media index.');
           }
         }
       }
-      await ref
-          .read(localCollectionRepoProvider)
-          .importBackup(
-            Map<String, dynamic>.from(manifest['collection'] as Map),
-          );
+
+      final docs = await getApplicationDocumentsDirectory();
+      final requiredMedia = <String>{
+        if (backgroundName != null) backgroundName,
+        ...restoredCoverNames.values,
+      };
+      final restoreId = DateTime.now().microsecondsSinceEpoch.toString();
+      final staging = Directory('${docs.path}/.vnsrb_restore_$restoreId');
+      await staging.create();
+      final restoredMediaPaths = <String, String>{};
+      try {
+        for (final name in requiredMedia) {
+          final archivePath = 'media/$name';
+          final archiveFile = archive.findFile(archivePath);
+          final expectedSize = declaredEntries[archivePath];
+          if (archiveFile == null ||
+              !archiveFile.isFile ||
+              expectedSize == null ||
+              archiveFile.size != expectedSize) {
+            throw const FormatException('Backup image is missing or invalid.');
+          }
+          final content = archiveFile.readBytes();
+          if (content == null || content.length != expectedSize) {
+            throw const FormatException('Backup image data is incomplete.');
+          }
+          final outputName = '${restoreId}_$name';
+          await File(
+            '${staging.path}/$outputName',
+          ).writeAsBytes(content, flush: true);
+          restoredMediaPaths[name] = '${docs.path}/$outputName';
+        }
+
+        for (final path in restoredMediaPaths.values) {
+          final name = path.split('/').last;
+          await File('${staging.path}/$name').rename(path);
+        }
+      } finally {
+        if (await staging.exists()) await staging.delete(recursive: true);
+      }
+
+      final prefs = ref.read(sharedPrefProvider);
+      for (final entry in safeSettings.entries) {
+        final key = entry.key;
+        final value = entry.value;
+        if (value is bool) await prefs.setBool(key, value);
+        if (value is int) await prefs.setInt(key, value);
+        if (value is double) await prefs.setDouble(key, value);
+        if (value is String) await prefs.setString(key, value);
+        if (value is List<String>) await prefs.setStringList(key, value);
+      }
+      ref.invalidate(developerNameOverrideProvider);
+      if (backgroundName != null) {
+        await prefs.setString(
+          DBKeys.CUSTOM_BACKGROUND_PATH,
+          restoredMediaPaths[backgroundName]!,
+        );
+      }
+      for (final entry in restoredCoverNames.entries) {
+        await prefs.setString(entry.key, restoredMediaPaths[entry.value]!);
+      }
+      await ref.read(localCollectionRepoProvider).importBackup(collection);
       ref.invalidate(collectionContentControllerProvider);
       await _refreshApp(all: true);
       feedbackSnackBar(

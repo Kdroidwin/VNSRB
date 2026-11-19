@@ -81,8 +81,8 @@ class SyncService {
       // 5. Success
       _successfullySynchronized(whenDownloadingAndSaving);
       //
-    } catch (e) {
-      debugPrint(e.toString());
+    } catch (_) {
+      // Do not log request exceptions; they may contain Authorization headers.
 
       // * If error, clean only the data in memory, not the persistent ones in local storage.
       // * Because it still reflects the changes made by the user from the app.

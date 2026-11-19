@@ -55,7 +55,7 @@ class _AuthButtonState extends ConsumerState<AuthConfirmButton>
       if (response.data['permissions'].contains('listread') &&
           response.data['permissions'].contains('listwrite')) {
         // ref.invalidate(authScreenControllerProvider);
-        ref
+        await ref
             .read(authScreenControllerProvider.notifier)
             .userIdentityFromResponse(response.data, token);
         ref.read(authButtonStateProvider.notifier).state = ButtonState.active;
@@ -76,17 +76,17 @@ class _AuthButtonState extends ConsumerState<AuthConfirmButton>
       return;
       //
     } catch (err) {
-      //
+      ref.invalidate(authTokenFieldServerErrorStateProvider);
       if (err is DioException) {
-        if (err.type == DioExceptionType.badResponse) {
-          ref.invalidate(authTokenFieldServerErrorStateProvider);
-          ref.read(authTokenFieldServerErrorStateProvider.notifier).error =
-              'Invalid authentication token';
-
-          ref.read(authButtonStateProvider.notifier).state = ButtonState.inactive;
-          return;
-        }
+        ref.read(authTokenFieldServerErrorStateProvider.notifier).error =
+            err.type == DioExceptionType.badResponse
+                ? 'Invalid authentication token'
+                : 'Unable to connect. Please try again later.';
+      } else {
+        ref.read(authTokenFieldServerErrorStateProvider.notifier).error =
+            'Secure credential storage is unavailable. Configure a desktop keyring and try again.';
       }
+      ref.read(authButtonStateProvider.notifier).state = ButtonState.inactive;
     }
   }
 

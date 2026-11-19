@@ -6,4 +6,3 @@ export 'local_db/hive_adapters.dart';
 export 'network/api_service.dart';
 export 'network/connectivity_service.dart';
 export 'network/dio_factory.dart';
-export 'network/http_override.dart';

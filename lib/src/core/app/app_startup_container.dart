@@ -2,6 +2,7 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vndb_lite/src/features/sync/data/local/local_sync_repo.dart';
 
 import '../_core.dart';
 import '../exceptions/_exceptions.dart';
@@ -34,7 +35,7 @@ extension AppStartupContainer on AppStartup {
     // * Services
     // final service = SomeFakeService();
 
-    return ProviderContainer(
+    final container = ProviderContainer(
       retry: (retryCount, error) {
         return null;
       },
@@ -48,5 +49,7 @@ extension AppStartupContainer on AppStartup {
       ],
       observers: const [AsyncErrorLogger()],
     );
+    await container.read(localSyncRepoProvider).initialize();
+    return container;
   }
 }

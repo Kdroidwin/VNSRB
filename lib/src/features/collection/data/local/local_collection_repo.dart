@@ -17,6 +17,10 @@ part 'local_collection_repo.g.dart';
 class LocalCollectionRepo {
   const LocalCollectionRepo(this._sharedPref, this._localHomeRepo);
 
+  static const _maxBackupRecords = 50000;
+  static const _maxRecordBytes = 65536;
+  static const _maxCachedVnBytes = 4 * 1024 * 1024;
+
   final SharedPreferences _sharedPref;
   final LocalHomeRepoImpl _localHomeRepo;
 
@@ -300,22 +304,10 @@ class LocalCollectionRepo {
   }
 
   Future<int> importBackup(Map<String, dynamic> backup) async {
-    if (backup['format'] != 'vnpockets-collection-backup' ||
-        backup['records'] is! List) {
-      throw const FormatException('This is not a VNSRB collection backup.');
-    }
-    var count = 0;
-    final importedIds = <String>{};
-    for (final raw in backup['records'] as List) {
-      final VnRecord? record = switch (raw) {
-        String value => VnRecord.fromJson(value),
-        Map value => VnRecord.fromMap(Map<String, dynamic>.from(value)),
-        _ => null,
-      };
-      if (record == null) continue;
+    final records = recordsFromBackup(backup);
+    final importedIds = records.map((record) => record.id).toSet();
+    for (final record in records) {
       await saveVnRecord(record);
-      importedIds.add(record.id);
-      count++;
     }
 
     final vnData = backup['vnData'];
@@ -338,12 +330,127 @@ class LocalCollectionRepo {
         if (values is List) {
           await saveCustomOrder(
             status.name,
-            values.whereType<String>().toList(),
+            values.whereType<String>().where(importedIds.contains).toList(),
           );
         }
       }
     }
-    return count;
+    return records.length;
+  }
+
+  /// Performs side-effect-free structural validation before a full archive
+  /// import starts writing files or preferences.
+  static List<VnRecord> recordsFromBackup(Map<String, dynamic> backup) {
+    if (backup['format'] != 'vnpockets-collection-backup' ||
+        backup['records'] is! List) {
+      throw const FormatException('This is not a VNSRB collection backup.');
+    }
+    final version = backup['version'];
+    if (version != null && (version is! int || version < 1 || version > 2)) {
+      throw const FormatException('Unsupported collection backup version.');
+    }
+
+    final rawRecords = backup['records'] as List;
+    if (rawRecords.length > _maxBackupRecords) {
+      throw const FormatException('Collection backup has too many entries.');
+    }
+    final recordsById = <String, VnRecord>{};
+    for (final raw in rawRecords) {
+      try {
+        if (raw is String && raw.length <= _maxRecordBytes) {
+          final record = VnRecord.fromJson(raw);
+          _validateRecord(record);
+          recordsById[record.id] = record;
+        } else if (raw is Map) {
+          final record = VnRecord.fromMap(Map<String, dynamic>.from(raw));
+          _validateRecord(record);
+          recordsById[record.id] = record;
+        } else {
+          throw const FormatException('Invalid collection entry.');
+        }
+      } catch (_) {
+        throw const FormatException('Invalid collection entry in backup.');
+      }
+    }
+
+    _validateCachedVnData(backup['vnData'], recordsById.keys.toSet());
+    _validateCustomOrders(backup['customOrders']);
+    return recordsById.values.toList(growable: false);
+  }
+
+  static void _validateRecord(VnRecord record) {
+    final validStatus = CollectionStatusCode.values.any(
+      (status) => status.name == record.status,
+    );
+    if (!RegExp(r'^v[0-9]{1,10}$').hasMatch(record.id) ||
+        record.title.trim().isEmpty ||
+        record.title.length > 4096 ||
+        !validStatus ||
+        record.vote < -1 ||
+        record.vote > 10 ||
+        (record.notes?.length ?? 0) > 8192 ||
+        (record.added?.length ?? 0) > 128 ||
+        (record.started?.length ?? 0) > 128 ||
+        (record.finished?.length ?? 0) > 128 ||
+        (record.lastmod?.length ?? 0) > 128) {
+      throw const FormatException('Invalid collection entry values.');
+    }
+  }
+
+  static void _validateCachedVnData(dynamic rawData, Set<String> recordIds) {
+    if (rawData == null) return;
+    if (rawData is! Map || rawData.length > _maxBackupRecords) {
+      throw const FormatException('Invalid cached VN data.');
+    }
+    for (final entry in rawData.entries) {
+      if (entry.key is! String ||
+          !recordIds.contains(entry.key) ||
+          entry.value is! Map) {
+        throw const FormatException('Invalid cached VN data entry.');
+      }
+      final data = entry.value as Map;
+      if (data.keys.any((key) => key != 'p1' && key != 'p2')) {
+        throw const FormatException('Unknown cached VN data.');
+      }
+      for (final phase in const ['p1', 'p2']) {
+        final value = data[phase];
+        if (value == null) continue;
+        if (value is! String || value.length > _maxCachedVnBytes) {
+          throw const FormatException('Cached VN data exceeds limits.');
+        }
+        try {
+          final decoded = jsonDecode(value);
+          if (decoded is! Map || decoded['id'] != entry.key) {
+            throw const FormatException('Cached VN ID does not match.');
+          }
+        } on FormatException {
+          rethrow;
+        } catch (_) {
+          throw const FormatException('Invalid cached VN data.');
+        }
+      }
+    }
+  }
+
+  static void _validateCustomOrders(dynamic rawOrders) {
+    if (rawOrders == null) return;
+    if (rawOrders is! Map || rawOrders.length > CollectionStatusCode.values.length) {
+      throw const FormatException('Invalid custom collection order.');
+    }
+    for (final entry in rawOrders.entries) {
+      final validStatus = CollectionStatusCode.values.any(
+        (status) => status.name == entry.key,
+      );
+      final values = entry.value;
+      if (!validStatus ||
+          values is! List ||
+          values.length > _maxBackupRecords ||
+          values.any(
+            (id) => id is! String || !RegExp(r'^v[0-9]{1,10}$').hasMatch(id),
+          )) {
+        throw const FormatException('Invalid custom collection order.');
+      }
+    }
   }
 
   Future<void> _restoreCachedVnData(

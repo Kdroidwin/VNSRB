@@ -27,7 +27,10 @@ class RemoteSyncRepo {
   Future<Response> authenticate(String token) async {
     return await _apiService.get(
       url: authEndpoint,
-      options: Options(headers: {'Authorization': 'token $token'}),
+      options: Options(
+        followRedirects: false,
+        headers: {'Authorization': 'token $token'},
+      ),
     );
   }
 
@@ -195,6 +198,7 @@ class RemoteSyncRepo {
         url: "${NetConsts.BASE_URL}/kana/ulist/$vnId",
         options: Options(
           contentType: 'application/json',
+          followRedirects: false,
           headers: {'Authorization': 'token $authToken'},
         ),
       );
@@ -217,6 +221,7 @@ class RemoteSyncRepo {
         url: "${NetConsts.BASE_URL}/kana/ulist/${localRecord.id}",
         options: Options(
           contentType: 'application/json',
+          followRedirects: false,
           headers: {'Authorization': 'token $authToken'},
         ),
         data: {

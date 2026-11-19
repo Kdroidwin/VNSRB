@@ -111,9 +111,8 @@ Future<void> showSyncDialog() async {
                                     );
                                 ref_.invalidate(vnRecordStateProvider);
                                 //
-                              } catch (e) {
-                                //
-                                debugPrint(e.toString());
+                              } catch (_) {
+                                // Request errors can contain the Authorization header.
                               } finally {
                                 ref_.read(bottomProgressIndicatorProvider.notifier).show = false;
                               }
@@ -165,9 +164,8 @@ Future<void> showSyncDialog() async {
                                       );
                                   ref_.invalidate(vnRecordStateProvider);
                                   //
-                                } catch (e) {
-                                  // TODO catch e
-                                  debugPrint(e.toString());
+                                } catch (_) {
+                                  // Request errors can contain the Authorization header.
                                 } finally {
                                   ref_.read(bottomProgressIndicatorProvider.notifier).show = false;
                                 }

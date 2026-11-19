@@ -11,11 +11,7 @@ class UserIdentity {
   final String id;
   final String authToken;
 
-  UserIdentity copyWith({
-    String? username,
-    String? id,
-    String? authToken,
-  }) {
+  UserIdentity copyWith({String? username, String? id, String? authToken}) {
     return UserIdentity(
       username: username ?? this.username,
       id: id ?? this.id,
@@ -24,18 +20,14 @@ class UserIdentity {
   }
 
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'username': username,
-      'id': id,
-      'authToken': authToken,
-    };
+    return <String, dynamic>{'username': username, 'id': id};
   }
 
   factory UserIdentity.fromMap(Map<String, dynamic> map) {
     return UserIdentity(
       username: map['username'] as String,
       id: map['id'] as String,
-      authToken: map['authToken'] as String,
+      authToken: map['authToken'] as String? ?? '',
     );
   }
 
@@ -45,13 +37,16 @@ class UserIdentity {
       UserIdentity.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
-  String toString() => 'UserIdentity(username: $username, id: $id, authToken: $authToken)';
+  String toString() =>
+      'UserIdentity(username: $username, id: $id, authToken: [REDACTED])';
 
   @override
   bool operator ==(covariant UserIdentity other) {
     if (identical(this, other)) return true;
 
-    return other.username == username && other.id == id && other.authToken == authToken;
+    return other.username == username &&
+        other.id == id &&
+        other.authToken == authToken;
   }
 
   @override

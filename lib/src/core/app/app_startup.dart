@@ -68,9 +68,6 @@ class AppStartup {
     GoTransition.defaultCurve = Curves.easeInOut;
     GoTransition.defaultDuration = const Duration(milliseconds: 600);
 
-    // Necessary to prevent http error for some devices.
-    HttpOverrides.global = MyHttpOverrides();
-
     // Removing the # sign, and follow the real configured route in the URL for the web.
     if (kIsWeb) {
       usePathUrlStrategy();

@@ -13,16 +13,20 @@ class AuthScreenController extends _$AuthScreenController {
     return _userIdentity;
   }
 
-  UserIdentity? get _userIdentity => ref.read(localSyncRepoProvider).userIdentity;
+  UserIdentity? get _userIdentity =>
+      ref.read(localSyncRepoProvider).userIdentity;
 
-  void userIdentityFromResponse(Map<String, dynamic> responseData, String authToken) {
+  Future<void> userIdentityFromResponse(
+    Map<String, dynamic> responseData,
+    String authToken,
+  ) async {
     final uId = UserIdentity(
       authToken: authToken,
       id: responseData['id'],
       username: responseData['username'],
     );
 
-    ref.read(localSyncRepoProvider).userIdentity = uId;
+    await ref.read(localSyncRepoProvider).saveUserIdentity(uId);
   }
 
   bool isUserSynced() => ref.read(localSyncRepoProvider).isUserSynchronized;

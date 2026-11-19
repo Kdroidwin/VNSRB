@@ -1,10 +1,7 @@
 // ignore_for_file: constant_identifier_names
 
-import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:dio/io.dart';
 import 'package:flutter/foundation.dart';
-import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../constants/_constants.dart';
@@ -15,15 +12,6 @@ part 'dio_factory.g.dart';
 class DioFactory {
   static Dio produce() {
     final Dio dio = Dio();
-
-    // Certificate issue handler.
-    dio.httpClientAdapter = IOHttpClientAdapter(
-      createHttpClient: () {
-        final HttpClient client = HttpClient(context: SecurityContext(withTrustedRoots: false));
-        client.badCertificateCallback = ((X509Certificate cert, String host, int port) => true);
-        return client;
-      },
-    );
 
     dio.options = BaseOptions(
       headers: {

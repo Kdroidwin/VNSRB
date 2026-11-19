@@ -16,9 +16,11 @@ build/linux/x64/release/bundle/vnsrb
 
 For distribution, copy the entire `build/linux/x64/release/bundle` directory;
 the executable relies on the adjacent `data` and `lib` directories. The host
-needs GTK 3 and its normal desktop runtime libraries. On Ubuntu/Debian, the
-build prerequisites are `clang`, `cmake`, `ninja-build`, `pkg-config`,
-`libgtk-3-dev`, and `liblzma-dev`.
+needs GTK 3 and its normal desktop runtime libraries. VNDB sync credentials use
+the Secret Service keyring (such as GNOME Keyring or KWallet), so install an
+unlocked keyring service and the `libsecret-1-0` runtime library. On
+Ubuntu/Debian, the build prerequisites are `clang`, `cmake`, `ninja-build`,
+`pkg-config`, `libgtk-3-dev`, `liblzma-dev`, and `libsecret-1-dev`.
 
 Linux uses the native file chooser for custom cover/background images and for
 importing backups. Exporting JSON and full ZIP backups opens a save dialog.
