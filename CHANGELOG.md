@@ -8,9 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+### Security
 
-- None.
+- Restrict API traffic to approved HTTPS hosts and reject redirects.
+- Bound and validate account synchronization responses and request identifiers.
+- Constrain remote images and VNDB external links to validated destinations.
+- Validate update metadata and point version links at the VNSRB repository.
 
 ## [4.1.0] - 2026-11-19
 

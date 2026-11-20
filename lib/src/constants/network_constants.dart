@@ -11,9 +11,17 @@ class NetConsts {
 
   // Used for [VersionCheck].
   static const String URL_CHECK_VERSION =
-      "https://raw.githubusercontent.com/Kdroidwin/VNPockets/refs/heads/master/VERSION.json";
+      "https://raw.githubusercontent.com/Kdroidwin/VNSRB/refs/heads/master/VERSION.json";
   static const String URL_UPDATE_VERSION =
-      "https://github.com/Kdroidwin/VNPockets/releases/latest";
+      "https://github.com/Kdroidwin/VNSRB/releases/latest";
+
+  /// Hosts used by Dio-backed application APIs. Redirects are disabled so
+  /// authenticated or user-specific requests cannot be forwarded elsewhere.
+  static const Set<String> TRUSTED_HTTPS_HOSTS = {
+    'api.vndb.org',
+    'raw.githubusercontent.com',
+  };
+  static const Set<String> TRUSTED_IMAGE_HOSTS = {'t.vndb.org'};
 
   // API base url.
   static const String BASE_URL = "https://api.vndb.org";

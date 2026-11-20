@@ -45,24 +45,38 @@ class SyncService {
     // User friendly message.
     ref
         .read(localNotifServiceProvider)
-        .show(title: SyncStatus.ongoing.title, detail: getSyncNotifDetail(SyncStatus.ongoing));
-    snackbar('Synchronizing account...', icon: Icons.sync, iconColor: kColor().tertiary);
-
-    if (!await isTokenValid()) return returnError(status: 1);
+        .show(
+          title: SyncStatus.ongoing.title,
+          detail: getSyncNotifDetail(SyncStatus.ongoing),
+        );
+    snackbar(
+      'Synchronizing account...',
+      icon: Icons.sync,
+      iconColor: kColor().tertiary,
+    );
 
     final remoteSyncRepo = ref.read(remoteSyncRepoProvider);
     // Sync process begin
     try {
+      if (!await isTokenValid()) return returnError(status: 1);
+
       // 1. Fetch all Vns data from the cloud collection
       await Future.delayed(const Duration(milliseconds: 1500));
-      List rawRecords = await remoteSyncRepo.getLatestDataFromCloud(userIdentity.id);
+      List rawRecords = await remoteSyncRepo.getLatestDataFromCloud(
+        userIdentity.id,
+      );
 
       // 2. If user chose to keep his/her Vns from the local collection (default), then post and patch
       // the vns to the cloud collection.
       if (keepVns) {
-        final localRecords = await ref.read(localCollectionRepoProvider).getAllRecords();
+        final localRecords =
+            await ref.read(localCollectionRepoProvider).getAllRecords();
 
-        snackbar('Processing records...', icon: Icons.sync, iconColor: kColor().tertiary);
+        snackbar(
+          'Processing records...',
+          icon: Icons.sync,
+          iconColor: kColor().tertiary,
+        );
         rawRecords = await remoteSyncRepo.filterAndSyncRecords(
           localRecords,
           rawRecords,
@@ -116,7 +130,10 @@ class SyncService {
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   //
 
-  Future<void> getDataPhases(List records, VoidCallback whenDownloadingAndSaving) async {
+  Future<void> getDataPhases(
+    List records,
+    VoidCallback whenDownloadingAndSaving,
+  ) async {
     final Set<VnRecord> vnRecords = {};
 
     for (var record in records) {
@@ -159,7 +176,9 @@ class SyncService {
     final localVnRepo = ref.read(localVnRepoProvider);
     final collectionRepo = ref.read(localCollectionRepoProvider);
 
-    _refreshCollection = Timer.periodic(const Duration(milliseconds: 6000), (_) async {
+    _refreshCollection = Timer.periodic(const Duration(milliseconds: 6000), (
+      _,
+    ) async {
       whenDownloadingAndSaving();
     });
 
@@ -175,11 +194,21 @@ class SyncService {
       await Future.delayed(const Duration(milliseconds: 500));
 
       final title =
-          (record.title.length >= 14) ? '${record.title.substring(0, 12)}...' : record.title;
+          (record.title.length >= 14)
+              ? '${record.title.substring(0, 12)}...'
+              : record.title;
       if (!localVnRepo.p1Exist(record.id) || !localVnRepo.p2Exist(record.id)) {
-        snackbar("Failed to sync $title", icon: Icons.error, iconColor: Colors.red);
+        snackbar(
+          "Failed to sync $title",
+          icon: Icons.error,
+          iconColor: Colors.red,
+        );
       } else {
-        snackbar("$title synced! ", icon: Icons.check_circle, iconColor: Colors.green);
+        snackbar(
+          "$title synced! ",
+          icon: Icons.check_circle,
+          iconColor: Colors.green,
+        );
       }
     }
   }
@@ -199,16 +228,27 @@ class SyncService {
         );
         //
       } else if (status == 1) {
-        snackbar('Bad Token Permissions', icon: Icons.error, iconColor: Colors.red);
+        snackbar(
+          'Bad Token Permissions',
+          icon: Icons.error,
+          iconColor: Colors.red,
+        );
         //
       } else {
-        snackbar('Error. Please try to re-authenticate.', icon: Icons.error, iconColor: Colors.red);
+        snackbar(
+          'Error. Please try to re-authenticate.',
+          icon: Icons.error,
+          iconColor: Colors.red,
+        );
       }
 
       // Shows statusbar notification error.
       ref
           .read(localNotifServiceProvider)
-          .show(title: SyncStatus.failed.title, detail: getSyncNotifDetail(SyncStatus.failed));
+          .show(
+            title: SyncStatus.failed.title,
+            detail: getSyncNotifDetail(SyncStatus.failed),
+          );
     });
   }
 
@@ -223,8 +263,15 @@ class SyncService {
       whenSuccess();
       ref
           .read(localNotifServiceProvider)
-          .show(title: SyncStatus.success.title, detail: getSyncNotifDetail(SyncStatus.success));
-      snackbar('Synchronization successful', icon: Icons.sync, iconColor: kColor().tertiary);
+          .show(
+            title: SyncStatus.success.title,
+            detail: getSyncNotifDetail(SyncStatus.success),
+          );
+      snackbar(
+        'Synchronization successful',
+        icon: Icons.sync,
+        iconColor: kColor().tertiary,
+      );
     });
 
     return;

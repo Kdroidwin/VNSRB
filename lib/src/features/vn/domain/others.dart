@@ -1,6 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first, non_constant_identifier_names
 import 'dart:convert';
 
+import 'package:vndb_lite/src/constants/network_constants.dart';
+
 class VnImage {
   const VnImage({this.url, this.thumbnail, this.sexual, this.violence});
 
@@ -9,7 +11,12 @@ class VnImage {
   final double? sexual;
   final double? violence;
 
-  VnImage copyWith({String? url, String? thumbnail, double? sexual, double? violence}) {
+  VnImage copyWith({
+    String? url,
+    String? thumbnail,
+    double? sexual,
+    double? violence,
+  }) {
     return VnImage(
       url: url ?? this.url,
       thumbnail: thumbnail ?? this.thumbnail,
@@ -29,11 +36,25 @@ class VnImage {
 
   factory VnImage.fromMap(Map<String, dynamic> map) {
     return VnImage(
-      url: map['url'] != null ? map['url'] as String : null,
-      thumbnail: map['thumbnail'] != null ? map['thumbnail'] as String : null,
-      sexual: map['sexual'] != null ? map['sexual'] as double : null,
-      violence: map['violence'] != null ? map['violence'] as double : null,
+      url: validatedRemoteImageUrl(map['url']),
+      thumbnail: validatedRemoteImageUrl(map['thumbnail']),
+      sexual: (map['sexual'] as num?)?.toDouble(),
+      violence: (map['violence'] as num?)?.toDouble(),
     );
+  }
+
+  static String? validatedRemoteImageUrl(dynamic value) {
+    if (value is! String || value.isEmpty || value.length > 2048) return null;
+    final uri = Uri.tryParse(value);
+    if (uri == null ||
+        uri.scheme.toLowerCase() != 'https' ||
+        !NetConsts.TRUSTED_IMAGE_HOSTS.contains(uri.host.toLowerCase()) ||
+        uri.userInfo.isNotEmpty ||
+        uri.port != 443 ||
+        uri.hasFragment) {
+      return null;
+    }
+    return uri.toString();
   }
 
   String toJson() => json.encode(toMap());
@@ -58,7 +79,10 @@ class VnImage {
 
   @override
   int get hashCode {
-    return url.hashCode ^ thumbnail.hashCode ^ sexual.hashCode ^ violence.hashCode;
+    return url.hashCode ^
+        thumbnail.hashCode ^
+        sexual.hashCode ^
+        violence.hashCode;
   }
 }
 
@@ -80,7 +104,12 @@ class VnTag {
   }
 
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{'name': name, 'id': id, 'rating': rating, 'spoiler': spoiler};
+    return <String, dynamic>{
+      'name': name,
+      'id': id,
+      'rating': rating,
+      'spoiler': spoiler,
+    };
   }
 
   factory VnTag.fromMap(Map<String, dynamic> map) {
@@ -143,7 +172,10 @@ class VnRelation {
 
   factory VnRelation.fromMap(Map<String, dynamic> map) {
     return VnRelation(
-      relation_official: map['relation_official'] != null ? map['relation_official'] as bool : null,
+      relation_official:
+          map['relation_official'] != null
+              ? map['relation_official'] as bool
+              : null,
       relation: map['relation'] != null ? map['relation'] as String : null,
       id: map['id'] != null ? map['id'] as String : null,
     );
@@ -168,5 +200,6 @@ class VnRelation {
   }
 
   @override
-  int get hashCode => relation_official.hashCode ^ relation.hashCode ^ id.hashCode;
+  int get hashCode =>
+      relation_official.hashCode ^ relation.hashCode ^ id.hashCode;
 }

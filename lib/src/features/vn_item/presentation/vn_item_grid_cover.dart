@@ -126,7 +126,7 @@ class _VnItemGridCoverState extends State<VnItemGridCover> {
             fadeOutDuration: Duration.zero,
             errorWidget: (_, url, error) => const GenericErrorImage(),
             errorListener: null,
-            cacheManager: (!App.isInSearchScreen) ? CustomCacheManager() : null,
+            cacheManager: CustomCacheManager(),
             cacheKey:
                 (!App.isInSearchScreen)
                     ? (isCensor)

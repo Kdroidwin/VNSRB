@@ -30,14 +30,34 @@ class RemoteVersionCheckRepo implements VersionCheckRepo {
 
   /// Fetch raw latest version data.
   Future<Response> fetchLatestVersion() async {
-    return await _apiService.get(url: NetConsts.URL_CHECK_VERSION);
+    return await _apiService.get(
+      url: NetConsts.URL_CHECK_VERSION,
+      options: Options(responseType: ResponseType.plain),
+    );
   }
 
   VersionCheck _parseVersionFromResponse(Response resp) {
-    final mappedResp = json.decode(resp.data as String);
-    final latestVer = _parseToVersion(mappedResp['latestV']);
+    final payload = resp.data;
+    final dynamic mappedResp;
+    if (payload is Map) {
+      mappedResp = payload;
+    } else if (payload is String && payload.length <= 4096) {
+      mappedResp = json.decode(payload);
+    } else {
+      throw const FormatException('Invalid version metadata response.');
+    }
+    if (mappedResp is! Map ||
+        mappedResp['latestV'] is! String ||
+        mappedResp['requiredV'] is! String ||
+        (mappedResp['latestV'] as String).length > 64 ||
+        (mappedResp['requiredV'] as String).length > 64) {
+      throw const FormatException('Invalid version metadata response.');
+    }
+    final latestVer = _parseToVersion(mappedResp['latestV'] as String);
     final currentVer = _parseToVersion(AppInfo.CURRENT_VERSION);
-    final requiredToUpdateVer = _parseToVersion(mappedResp['requiredV']);
+    final requiredToUpdateVer = _parseToVersion(
+      mappedResp['requiredV'] as String,
+    );
 
     return VersionCheck(
       latestVersion: latestVer,
@@ -50,7 +70,8 @@ class RemoteVersionCheckRepo implements VersionCheckRepo {
   Version _parseToVersion(String raw) => Version.parse(raw);
 
   @visibleForTesting
-  VersionCheck parseVersionFromResponse(Response resp) => _parseVersionFromResponse(resp);
+  VersionCheck parseVersionFromResponse(Response resp) =>
+      _parseVersionFromResponse(resp);
 
   @visibleForTesting
   Version parseToVersion(String raw) => _parseToVersion(raw);

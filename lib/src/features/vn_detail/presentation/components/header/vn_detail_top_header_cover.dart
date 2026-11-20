@@ -3,10 +3,8 @@ import 'dart:ui' as ui;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:vndb_lite/src/app.dart';
 import 'package:vndb_lite/src/common_widgets/generic_image_error.dart';
 import 'package:vndb_lite/src/common_widgets/status_label.dart';
-import 'package:vndb_lite/src/routing/app_router.dart';
 import 'package:vndb_lite/src/util/responsive.dart';
 import 'package:vndb_lite/src/features/settings/presentation/settings_general_state.dart';
 import 'package:vndb_lite/src/features/vn/domain/p1.dart';
@@ -85,7 +83,6 @@ class _VnDetailTopHeaderCoverState
   //
 
   Widget _imgCover({required bool isCensor}) {
-    final isNotSearch = !App.currentRootRoute.contains(AppRoute.search.name);
     final imageUrl =
         (widget.p1.image?.url?.isNotEmpty ?? false)
             ? widget.p1.image!.url!
@@ -106,7 +103,7 @@ class _VnDetailTopHeaderCoverState
               // * Using the same cache key as that of VnItemGrid's censor key.
               ? "CENSORED-PREVIEW-${widget.p1.id}"
               : 'DETAIL-${widget.p1.id}-${imageUrl.hashCode}',
-      cacheManager: (isNotSearch) ? CustomCacheManager() : null,
+      cacheManager: CustomCacheManager(),
       maxHeightDiskCache: 1600,
       maxWidthDiskCache: 1200,
     );

@@ -14,6 +14,7 @@ import 'package:vndb_lite/src/util/alt_provider_reader.dart';
 import 'package:vndb_lite/src/common_widgets/widget_zoom/widget_zoom.dart';
 import 'package:vndb_lite/src/util/context_shortcut.dart';
 import 'package:vndb_lite/src/util/app_text.dart';
+import 'package:vndb_lite/src/util/custom_cache_manager.dart';
 
 class VnDetailGeneralScreenshots extends StatefulWidget {
   const VnDetailGeneralScreenshots({super.key, required this.p2});
@@ -21,10 +22,12 @@ class VnDetailGeneralScreenshots extends StatefulWidget {
   final VnDataPhase02 p2;
 
   @override
-  State<VnDetailGeneralScreenshots> createState() => _VnDetailGeneralScreenshotsState();
+  State<VnDetailGeneralScreenshots> createState() =>
+      _VnDetailGeneralScreenshotsState();
 }
 
-class _VnDetailGeneralScreenshotsState extends State<VnDetailGeneralScreenshots> {
+class _VnDetailGeneralScreenshotsState
+    extends State<VnDetailGeneralScreenshots> {
   bool _screenshotsContentExplicit = false;
 
   List<String> get _screenshotsUrl {
@@ -67,7 +70,8 @@ class _VnDetailGeneralScreenshotsState extends State<VnDetailGeneralScreenshots>
         child: CustomButton(
           onTap: () {
             setState(() {
-              _screenshotsContentExplicit = (contentLevelExplicit) ? true : false;
+              _screenshotsContentExplicit =
+                  (contentLevelExplicit) ? true : false;
             });
           },
           padding: EdgeInsets.symmetric(horizontal: responsiveUI.own(0.025)),
@@ -144,30 +148,42 @@ class _VnDetailGeneralScreenshotsState extends State<VnDetailGeneralScreenshots>
                     return WidgetZoom(
                       onTap: () {
                         SchedulerBinding.instance.addPostFrameCallback((_) {
-                          ref_.read(vnDetailScreenshotStateProvider.notifier).click = true;
+                          ref_
+                              .read(vnDetailScreenshotStateProvider.notifier)
+                              .click = true;
                         });
                       },
                       onExit: () {
                         SchedulerBinding.instance.addPostFrameCallback((_) {
-                          ref_.read(vnDetailScreenshotStateProvider.notifier).click = false;
+                          ref_
+                              .read(vnDetailScreenshotStateProvider.notifier)
+                              .click = false;
                         });
                       },
                       heroAnimationTag: 'vnScreenshots$index',
                       zoomWidget: Consumer(
                         builder: (context, ref, child) {
-                          final imgClicked = ref.watch(vnDetailScreenshotStateProvider);
+                          final imgClicked = ref.watch(
+                            vnDetailScreenshotStateProvider,
+                          );
 
                           return CachedNetworkImage(
                             imageUrl: screenshotsUrl[index],
+                            cacheManager: CustomCacheManager(),
                             filterQuality: FilterQuality.high,
                             fit: (imgClicked) ? null : BoxFit.cover,
-                            height: (imgClicked) ? responsiveUI.own(0.9) : responsiveUI.own(0.6),
+                            height:
+                                (imgClicked)
+                                    ? responsiveUI.own(0.9)
+                                    : responsiveUI.own(0.6),
                             placeholder:
                                 (context, str) => SizedBox(
                                   width: responsiveUI.own(0.4),
                                   height: responsiveUI.own(0.2),
                                 ),
-                            errorWidget: (context, url, error) => const GenericErrorImage(),
+                            errorWidget:
+                                (context, url, error) =>
+                                    const GenericErrorImage(),
                             maxHeightDiskCache: 1400,
                             maxWidthDiskCache: 1400,
                           );

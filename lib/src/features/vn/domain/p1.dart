@@ -92,12 +92,10 @@ class VnDataPhase01 implements VnDataPhase {
       title: data['title'],
       japaneseTitle:
           _japaneseTitle(data['titles']) ?? data['japaneseTitle'] as String?,
-      image: VnImage(
-        url: (data['image']?['url']) ?? '',
-        thumbnail: (data['image']?['thumbnail']) ?? '',
-        sexual: (data['image']?['sexual'] ?? 0).toDouble(),
-        violence: (data['image']?['violence'] ?? 0).toDouble(),
-      ),
+      image:
+          data['image'] is Map
+              ? VnImage.fromMap(Map<String, dynamic>.from(data['image'] as Map))
+              : const VnImage(url: '', thumbnail: ''),
       description: data['description'] ?? '--',
       length: data['length'] ?? 0,
       olang: data['olang'] ?? 'Unknown',

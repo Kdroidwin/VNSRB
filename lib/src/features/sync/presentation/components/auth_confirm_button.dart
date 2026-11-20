@@ -54,14 +54,29 @@ class _AuthButtonState extends ConsumerState<AuthConfirmButton>
       final response = await ref
           .read(authScreenControllerProvider.notifier)
           .authenticate(token);
+      final responseData = response.data;
+      final permissions =
+          responseData is Map ? responseData['permissions'] : null;
+      final userId = responseData is Map ? responseData['id'] : null;
+      final username = responseData is Map ? responseData['username'] : null;
 
       // Notify change when success.
-      if (response.data['permissions'].contains('listread') &&
-          response.data['permissions'].contains('listwrite')) {
+      if (permissions is List &&
+          permissions.every((permission) => permission is String) &&
+          userId is String &&
+          RegExp(r'^u[0-9]{1,12}$').hasMatch(userId) &&
+          username is String &&
+          username.trim().isNotEmpty &&
+          username.length <= 128 &&
+          permissions.contains('listread') &&
+          permissions.contains('listwrite')) {
         // ref.invalidate(authScreenControllerProvider);
         await ref
             .read(authScreenControllerProvider.notifier)
-            .userIdentityFromResponse(response.data, token);
+            .userIdentityFromResponse(
+              Map<String, dynamic>.from(responseData as Map),
+              token,
+            );
         ref.read(authButtonStateProvider.notifier).state = ButtonState.active;
 
         ref.read(showAuthTokenFieldStateProvider.notifier).show = false;
@@ -73,8 +88,7 @@ class _AuthButtonState extends ConsumerState<AuthConfirmButton>
 
       ref.invalidate(authTokenFieldServerErrorStateProvider);
       ref.read(authTokenFieldServerErrorStateProvider.notifier).error =
-          'Invalid authorization given. Please ensure the authentication token '
-          'grant both read and write permissions.';
+          'Invalid authorization response or token permissions.';
 
       ref.read(authButtonStateProvider.notifier).state = ButtonState.inactive;
       return;

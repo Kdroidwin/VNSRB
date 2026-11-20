@@ -14,6 +14,8 @@ class DioFactory {
     final Dio dio = Dio();
 
     dio.options = BaseOptions(
+      followRedirects: false,
+      maxRedirects: 0,
       headers: {
         NetConsts.CONTENT_TYPE: NetConsts.APPLICATION_JSON,
         NetConsts.ACCEPT: NetConsts.APPLICATION_JSON,
@@ -22,6 +24,28 @@ class DioFactory {
       receiveTimeout: const Duration(milliseconds: NetConsts.API_TIMEOUT),
       sendTimeout: const Duration(milliseconds: NetConsts.API_TIMEOUT),
       connectTimeout: const Duration(milliseconds: NetConsts.API_TIMEOUT),
+    );
+
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          final uri = options.uri;
+          if (uri.scheme.toLowerCase() != 'https' ||
+              !NetConsts.TRUSTED_HTTPS_HOSTS.contains(uri.host.toLowerCase()) ||
+              uri.port != 443 ||
+              uri.userInfo.isNotEmpty) {
+            handler.reject(
+              DioException(
+                requestOptions: options,
+                type: DioExceptionType.unknown,
+                message: 'Blocked an untrusted network destination.',
+              ),
+            );
+            return;
+          }
+          handler.next(options);
+        },
+      ),
     );
 
     // If not in release mode, log network requests with dio

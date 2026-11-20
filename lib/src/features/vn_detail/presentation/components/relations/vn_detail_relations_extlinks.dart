@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import 'package:vndb_lite/src/app.dart';
 import 'package:vndb_lite/src/common_widgets/generic_shadowy_text.dart';
 import 'package:vndb_lite/src/util/responsive.dart';
 import 'package:vndb_lite/src/features/vn/domain/p3.dart';
@@ -13,7 +12,8 @@ class VnDetailRelationsExtlinks extends StatefulWidget {
   final VnDataPhase03 p3;
 
   @override
-  State<VnDetailRelationsExtlinks> createState() => _VnDetailRelationsExtlinksState();
+  State<VnDetailRelationsExtlinks> createState() =>
+      _VnDetailRelationsExtlinksState();
 }
 
 class _VnDetailRelationsExtlinksState extends State<VnDetailRelationsExtlinks> {
@@ -22,20 +22,22 @@ class _VnDetailRelationsExtlinksState extends State<VnDetailRelationsExtlinks> {
   Stream<List<Widget>> get _extLinks async* {
     List<Widget> tempExtLinks = [];
 
-    for (String extlink in (widget.p3.extlinks ?? [])) {
+    for (final extlink in (widget.p3.extlinks ?? []).take(100)) {
       // Get only the first 5 links to be shown and add an additional widget.
       // (See below additional widget, why 5?)
       if (tempExtLinks.length >= 6) {
         if (!_showMoreLinks) break;
       }
 
-      final Uri extLinked = Uri.parse(extlink);
+      if (extlink.length > 2048) continue;
+      final Uri? extLinked = _safeExternalUri(extlink);
+      if (extLinked == null) continue;
       await Future.microtask(() {
         tempExtLinks.add(
           Tooltip(
             message: extlink,
             child: InkWell(
-              onTap: () => launchUrlString(extlink),
+              onTap: () => launchUrlString(extLinked.toString()),
               child: ShadowText(extLinked.host),
             ),
           ),
@@ -70,7 +72,10 @@ class _VnDetailRelationsExtlinksState extends State<VnDetailRelationsExtlinks> {
             color: kColor(context).secondary,
             shadows: [
               Shadow(
-                color: Color.alphaBlend(Colors.black.withOpacity(0.5), kColor(context).primary),
+                color: Color.alphaBlend(
+                  Colors.black.withOpacity(0.5),
+                  kColor(context).primary,
+                ),
                 blurRadius: 15,
               ),
             ],
@@ -80,6 +85,18 @@ class _VnDetailRelationsExtlinksState extends State<VnDetailRelationsExtlinks> {
 
       yield tempExtLinks;
     }
+  }
+
+  Uri? _safeExternalUri(String raw) {
+    final uri = Uri.tryParse(raw);
+    if (uri == null ||
+        (uri.scheme.toLowerCase() != 'https' &&
+            uri.scheme.toLowerCase() != 'http') ||
+        uri.host.isEmpty ||
+        uri.userInfo.isNotEmpty) {
+      return null;
+    }
+    return uri;
   }
 
   @override
@@ -107,7 +124,10 @@ class _VnDetailRelationsExtlinksState extends State<VnDetailRelationsExtlinks> {
               );
             }
 
-            return Column(crossAxisAlignment: CrossAxisAlignment.start, children: snapshot.data);
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: snapshot.data,
+            );
           },
         ),
       ],

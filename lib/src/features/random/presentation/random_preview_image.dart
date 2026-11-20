@@ -6,6 +6,7 @@ import 'package:vndb_lite/src/features/random/presentation/random_preview.dart';
 import 'package:vndb_lite/src/features/settings/presentation/settings_general_state.dart';
 import 'package:vndb_lite/src/features/vn/domain/p1.dart';
 import 'package:vndb_lite/src/features/vn_item/presentation/detail_non_summary/vn_item_detail_title.dart';
+import 'package:vndb_lite/src/util/custom_cache_manager.dart';
 
 class RandomPreviewImage extends ConsumerWidget {
   const RandomPreviewImage({super.key, required this.p1});
@@ -28,6 +29,7 @@ class RandomPreviewImage extends ConsumerWidget {
         Positioned.fill(
           child: CachedNetworkImage(
             imageUrl: p1.image?.thumbnail ?? "",
+            cacheManager: CustomCacheManager(),
             filterQuality: FilterQuality.high,
             fit: BoxFit.cover,
             alignment: const Alignment(0, -0.45),

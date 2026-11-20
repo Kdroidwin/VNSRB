@@ -87,59 +87,74 @@ class VnDataPhase02 implements VnDataPhase {
     return VnDataPhase02(
       id: data['id'],
       //
-      aliases: (data['aliases'] != null) ? [for (String val in data['aliases']) val] : ['--'],
+      aliases:
+          (data['aliases'] != null)
+              ? [for (String val in data['aliases']) val]
+              : ['--'],
       //
-      developers: (data['developers'] != null)
-          ? [
-              for (var val in data['developers'])
-                // If data is raw
-                if (val is Map)
-                  (val['name'] ?? "")
-
-                // If data is already formatted
-                else if (val is String?)
-                  (val ?? "")
-            ]
-          : [],
+      developers:
+          (data['developers'] != null)
+              ? [
+                for (var val in data['developers'])
+                  // If data is raw
+                  if (val is Map)
+                    (val['name'] ?? "")
+                  // If data is already formatted
+                  else if (val is String?)
+                    (val ?? ""),
+              ]
+              : [],
       developerOriginals: _getDeveloperOriginals(data),
       mtl: (data['mtl'] != null) ? [for (String val in data['mtl']) val] : [],
       //
-      minage: (data['minage'] != null) ? [for (int val in data['minage']) val] : [],
+      minage:
+          (data['minage'] != null) ? [for (int val in data['minage']) val] : [],
       //
       devstatus: data['devstatus'] ?? -1,
       //
-      languages: (data['languages'] != null) ? [for (String val in data['languages']) val] : [],
+      languages:
+          (data['languages'] != null)
+              ? [for (String val in data['languages']) val]
+              : [],
       //
       length_minutes: data['length_minutes'] ?? 0,
       //
-      platforms: (data['platforms'] != null) ? [for (String val in data['platforms']) val] : [],
+      platforms:
+          (data['platforms'] != null)
+              ? [for (String val in data['platforms']) val]
+              : [],
       //
-      screenshots: (data['screenshots'] != null)
-          ? (!data['screenshots'].toString().contains('t.vndb.org'))
-              // If data is raw
+      screenshots:
+          (data['screenshots'] != null)
+              ? (!data['screenshots'].toString().contains('t.vndb.org'))
+                  // If data is raw
+                  ? [
+                    for (Map<String, dynamic> screenshot in data['screenshots'])
+                      VnImage(
+                        url: _getScreenshotUrl(screenshot),
+                        sexual: screenshot['sexual'].toDouble(),
+                        violence: screenshot['violence'].toDouble(),
+                      ),
+                  ]
+                  // If data is already formatted
+                  : [
+                    for (Map<String, dynamic> screenshot in data['screenshots'])
+                      VnImage.fromMap(screenshot),
+                  ]
+              : [],
+      //
+      tags:
+          (data['tags'] != null)
               ? [
-                  for (Map<String, dynamic> screenshot in data['screenshots'])
-                    VnImage(
-                      url: _getScreenshotUrl(screenshot),
-                      sexual: screenshot['sexual'].toDouble(),
-                      violence: screenshot['violence'].toDouble(),
-                    )
-                ]
-              // If data is already formatted
-              : [for (Map<String, dynamic> screenshot in data['screenshots']) VnImage.fromMap(screenshot)]
-          : [],
-      //
-      tags: (data['tags'] != null)
-          ? [
-              for (Map<String, dynamic> tag in data['tags'])
-                VnTag(
-                  id: tag['id'],
-                  name: tag['name'] ?? "???",
-                  rating: (tag['rating'] ?? 0).toDouble(),
-                  spoiler: (tag['spoiler'] ?? 0).toDouble(),
-                )
-            ]
-          : [],
+                for (Map<String, dynamic> tag in data['tags'])
+                  VnTag(
+                    id: tag['id'],
+                    name: tag['name'] ?? "???",
+                    rating: (tag['rating'] ?? 0).toDouble(),
+                    spoiler: (tag['spoiler'] ?? 0).toDouble(),
+                  ),
+              ]
+              : [],
     );
   }
 
@@ -165,9 +180,16 @@ class VnDataPhase02 implements VnDataPhase {
   }
 
   static String _getScreenshotUrl(Map<String, dynamic> screenshot) {
-    final String screenshotId = screenshot['id'];
+    final screenshotId = screenshot['id'];
+    if (screenshotId is! String ||
+        !RegExp(r'^sf[0-9]{1,12}$').hasMatch(screenshotId)) {
+      return '';
+    }
     final String pathCode = screenshotId.substring(screenshotId.length - 2);
-    final String screenshotCode = screenshotId.substring(2, screenshotId.length);
+    final String screenshotCode = screenshotId.substring(
+      2,
+      screenshotId.length,
+    );
     return 'https://t.vndb.org/sf/$pathCode/$screenshotCode.jpg';
   }
 
@@ -189,15 +211,16 @@ class VnDataPhase02 implements VnDataPhase {
 
     if (langMTL.isNotEmpty && minage.isNotEmpty) {
       // Extract only those language code with mtl value of true
-      langMTL = langMTL.where((mtl) {
-        if (mtl['mtl'] == null) return false;
-        return mtl['mtl'] == true;
-      }).toList();
+      langMTL =
+          langMTL.where((mtl) {
+            if (mtl['mtl'] == null) return false;
+            return mtl['mtl'] == true;
+          }).toList();
 
       // Only interestes in the language code
       langCodes = [
         for (Map<String, dynamic> entry in langMTL)
-          if (entry['lang'] != null && entry['lang'] is String) entry['lang']
+          if (entry['lang'] != null && entry['lang'] is String) entry['lang'],
       ];
 
       // Remove duplication
