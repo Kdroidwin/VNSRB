@@ -28,6 +28,7 @@ class SettingsGeneralState extends _$SettingsGeneralState {
       defaultCollectionStatus: _defaultCollectionStatus,
       showNavigationLabelsOnTap: _showNavigationLabelsOnTap,
       floatingBottomNavigation: _floatingBottomNavigation,
+      modernFloatingBottomNavigation: _modernFloatingBottomNavigation,
       hideCollectionBarsOnScroll: _hideCollectionBarsOnScroll,
     );
   }
@@ -176,6 +177,12 @@ class SettingsGeneralState extends _$SettingsGeneralState {
       ref.read(sharedPrefProvider).getBool(DBKeys.FLOATING_BOTTOM_NAVIGATION) ??
       true;
 
+  bool get _modernFloatingBottomNavigation =>
+      ref
+          .read(sharedPrefProvider)
+          .getBool(DBKeys.MODERN_FLOATING_BOTTOM_NAVIGATION) ??
+      true;
+
   bool get _hideCollectionBarsOnScroll =>
       ref
           .read(sharedPrefProvider)
@@ -294,6 +301,13 @@ class SettingsGeneralState extends _$SettingsGeneralState {
         .read(sharedPrefProvider)
         .setBool(DBKeys.FLOATING_BOTTOM_NAVIGATION, value);
     state = state.copyWith(floatingBottomNavigation: value);
+  }
+
+  set modernFloatingBottomNavigation(bool value) {
+    ref
+        .read(sharedPrefProvider)
+        .setBool(DBKeys.MODERN_FLOATING_BOTTOM_NAVIGATION, value);
+    state = state.copyWith(modernFloatingBottomNavigation: value);
   }
 
   set hideCollectionBarsOnScroll(bool value) {

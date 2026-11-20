@@ -83,6 +83,14 @@ class _SettingsGeneralState extends ConsumerState<SettingsGeneral>
         !enabled;
   }
 
+  void _modernFloatingBottomNavigationSwitch() {
+    final enabled =
+        ref.read(settingsGeneralStateProvider).modernFloatingBottomNavigation;
+    ref
+        .read(settingsGeneralStateProvider.notifier)
+        .modernFloatingBottomNavigation = !enabled;
+  }
+
   void _collectionBarsOnScrollSwitch() {
     final hidden =
         ref.read(settingsGeneralStateProvider).hideCollectionBarsOnScroll;
@@ -673,6 +681,35 @@ class _SettingsGeneralState extends ConsumerState<SettingsGeneral>
                     fontWeight: FontWeight.bold,
                     color:
                         settings.floatingBottomNavigation
+                            ? Colors.green
+                            : Colors.red,
+                  ),
+                ],
+              ),
+
+              SizedBox(height: responsiveUI.own(0.03)),
+              CustomLabel(
+                useBorder: true,
+                borderRadius: 12,
+                isSelected: false,
+                borderColor: kColor(context).secondary,
+                padding: EdgeInsets.all(responsiveUI.own(0.02)),
+                onTap: _modernFloatingBottomNavigationSwitch,
+                children: [
+                  ShadowText(
+                    appText(
+                      context,
+                      'Modern floating navigation style: ',
+                      'モダンなフローティング表示：',
+                    ),
+                  ),
+                  ShadowText(
+                    settings.modernFloatingBottomNavigation
+                        ? appText(context, ' ON', ' オン')
+                        : appText(context, ' OFF', ' オフ'),
+                    fontWeight: FontWeight.bold,
+                    color:
+                        settings.modernFloatingBottomNavigation
                             ? Colors.green
                             : Colors.red,
                   ),

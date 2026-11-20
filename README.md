@@ -18,8 +18,8 @@
         <img src="https://img.shields.io/badge/Platform-Flutter-02569B?logo=flutter"
         alt="Platform" />
     </a>
-    <img src="https://img.shields.io/github/license/Kdroidwin/VNPockets" alt="license">
-    <img src="https://img.shields.io/github/v/release/Kdroidwin/VNPockets" alt="release">
+    <img src="https://img.shields.io/github/license/Kdroidwin/VNSRB" alt="license">
+    <img src="https://img.shields.io/github/v/release/Kdroidwin/VNSRB" alt="release">
 </div>
 
 <br>
@@ -62,7 +62,7 @@ est. read time: <b>6.5 minutes</b>
 
 ## Quick start
 
-[Download the latest version here.](https://github.com/Kdroidwin/VNPockets/releases)
+[Download the latest version here.](https://github.com/Kdroidwin/VNSRB/releases)
 
 VNSRB currently provides Android and Linux builds. Other Flutter targets may need additional testing.
 
@@ -121,9 +121,9 @@ As the name implies: this is a **lite** application, it does not cover all of th
 Here are the primary features:
 1. Up to 11 VNDB official themes (well, some of them suck, but these are the official themes, so don't blame me XD)
 2. Previews of VNs (based on the latest user collection, and top VNs)
-<br>[![Previews](https://img.icons8.com/ios-filled/50/000000/video.png)](https://github.com/Kdroidwin/VNPockets/raw/refs/heads/master/media/feature/preview.mkv)
+<br>[![Previews](https://img.icons8.com/ios-filled/50/000000/video.png)](https://github.com/Kdroidwin/VNSRB/raw/refs/heads/master/media/feature/preview.mkv)
 3. Advanced search
-<br>[![Previews](https://img.icons8.com/ios-filled/50/000000/video.png)](https://github.com/Kdroidwin/VNPockets/raw/refs/heads/master/media/feature/adv_search.mkv)
+<br>[![Previews](https://img.icons8.com/ios-filled/50/000000/video.png)](https://github.com/Kdroidwin/VNSRB/raw/refs/heads/master/media/feature/adv_search.mkv)
 4. Easy way to save VN selection and multi-selection
 <br><img src ="./media/feature/selection.png" width=150>
 5. A chart of VNDB's latest statistics (I know it's ugly, but at least it can **spin** XD)
@@ -150,7 +150,7 @@ Here are the primary features:
 
 <br>
 
-VNSRB is currently at version **4.1.0**. See the repository releases and Linux build guide for installation options.
+VNSRB is currently at version **4.2.0**. See the repository releases and Linux build guide for installation options.
 
 Dev note:
 - Japanese UI localization is available from Settings.
@@ -209,12 +209,12 @@ flutter doctor -v
 
 1. Clone this repository
 ```sh
-git clone https://github.com/Kdroidwin/VNPockets.git
+git clone https://github.com/Kdroidwin/VNSRB.git
 ```
 
 2. Open your terminal and `cd` to the root path of the repository, for example:
 ```sh
-cd VNPockets
+cd VNSRB
 ```
 
 3. Type `flutter build --help` then head down to the `Available subcommands:` section, you'll be able to find the platform specific options to compile the app.
@@ -264,7 +264,7 @@ Distributed under terms of the [Apache-2.0 License](./LICENSE).
 <!-- CONTACT -->
 ## Contact
 
-VNSRB contributors: [GitHub Issues](https://github.com/Kdroidwin/VNPockets/issues).
+VNSRB contributors: [GitHub Issues](https://github.com/Kdroidwin/VNSRB/issues).
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

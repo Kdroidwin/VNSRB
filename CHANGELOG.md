@@ -8,12 +8,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- None.
+
+## [4.2.0] - 2026-11-20
+
+### Added
+
+- Added a modern glass-style floating navigation option, enabled by default, with a blurred translucent surface.
+- Kept the floating bar within the system navigation safe area so it no longer extends under the system navigation region.
+
 ### Security
 
-- Restrict API traffic to approved HTTPS hosts and reject redirects.
-- Bound and validate account synchronization responses and request identifiers.
-- Constrain remote images and VNDB external links to validated destinations.
-- Validate update metadata and point version links at the VNSRB repository.
+- Restricted app API requests to approved HTTPS hosts and disabled redirects globally.
+- Validated VNDB authentication and collection responses; bounded collection sync to 50,000 records and replaced recursive pagination with an iterative flow.
+- Restricted remotely supplied cover and screenshot URLs to VNDB's HTTPS image host, including data restored from backups.
+- Updated version-check and release links to the current VNSRB repository.
+
+### Performance
+
+- Removed quadratic lookup work from collection synchronization and moved authentication validation inside the sync error-handling boundary.
 
 ## [4.1.0] - 2026-11-19
 

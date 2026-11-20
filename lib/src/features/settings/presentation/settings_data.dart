@@ -42,6 +42,7 @@ const _backupBooleanSettings = <String>{
   DBKeys.SHOW_COLLECTION_COVER_DATES,
   DBKeys.SHOW_NAVIGATION_LABELS_ON_TAP,
   DBKeys.FLOATING_BOTTOM_NAVIGATION,
+  DBKeys.MODERN_FLOATING_BOTTOM_NAVIGATION,
   DBKeys.HIDE_COLLECTION_BARS_ON_SCROLL,
 };
 
@@ -335,6 +336,7 @@ class _SettingsDataState extends ConsumerState<SettingsData>
               key == DBKeys.DEFAULT_COLLECTION_STATUS ||
               key == DBKeys.SHOW_NAVIGATION_LABELS_ON_TAP ||
               key == DBKeys.FLOATING_BOTTOM_NAVIGATION ||
+              key == DBKeys.MODERN_FLOATING_BOTTOM_NAVIGATION ||
               key == DBKeys.HIDE_COLLECTION_BARS_ON_SCROLL ||
               key == DBKeys.GROUP_COLLECTION_BY_DEVELOPER ||
               key == DBKeys.CUSTOM_FONT_SIZE_CONF ||

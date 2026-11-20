@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:vndb_lite/src/common_widgets/generic_shadowy_text.dart';
@@ -30,85 +32,104 @@ class TabsBottomNavbar extends ConsumerWidget {
         ref.watch(settingsGeneralStateProvider).showNavigationLabelsOnTap;
     final isFloating =
         ref.watch(settingsGeneralStateProvider).floatingBottomNavigation;
+    final modernFloating =
+        ref.watch(settingsGeneralStateProvider).modernFloatingBottomNavigation;
     const japaneseLabels = ['ホーム', '検索', 'コレクション', 'その他'];
     final menus = BASE_TAB_MENU_SECTIONS.entries.indexed;
 
     final Widget navigationBar;
     if (isFloating) {
-      final radius = BorderRadius.circular(responsiveUI.own(0.045));
-      navigationBar = Container(
-        margin: EdgeInsets.fromLTRB(
-          responsiveUI.own(0.035),
-          responsiveUI.own(0.012),
-          responsiveUI.own(0.035),
-          responsiveUI.own(0.018),
-        ),
-        decoration: BoxDecoration(
-          borderRadius: radius,
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              kColor(context).primary.withAlpha(238),
-              kColor(context).primary.withAlpha(250),
-            ],
+      final radius = BorderRadius.circular(
+        responsiveUI.own(modernFloating ? 0.05 : 0.025),
+      );
+      navigationBar = SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            responsiveUI.own(0.035),
+            responsiveUI.own(0.012),
+            responsiveUI.own(0.035),
+            responsiveUI.own(0.02),
           ),
-          boxShadow: const [
-            BoxShadow(
-              color: Color.fromARGB(150, 0, 0, 0),
-              spreadRadius: 1,
-              blurRadius: 10,
-              offset: Offset(0, 3),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: radius,
-          child: NavigationBarTheme(
-            data: NavigationBarThemeData(
-              iconTheme: WidgetStateProperty.resolveWith((states) {
-                final selected = states.contains(WidgetState.selected);
-                return IconThemeData(
-                  color:
-                      selected
-                          ? kColor(context).secondary
-                          : kColor(context).secondary.withAlpha(120),
-                );
-              }),
-              labelTextStyle: WidgetStateProperty.resolveWith((states) {
-                final selected = states.contains(WidgetState.selected);
-                return styleText(
-                  fontSize: responsiveUI.normalSize * 0.85,
-                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                  color: kColor(context).tertiary,
-                );
-              }),
-            ),
-            child: NavigationBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              indicatorColor: kColor(context).secondary.withAlpha(24),
-              labelBehavior:
-                  showSelectedLabels
-                      ? NavigationDestinationLabelBehavior.onlyShowSelected
-                      : NavigationDestinationLabelBehavior.alwaysHide,
-              selectedIndex: selectedIndex,
-              onDestinationSelected: onTap,
-              destinations: [
-                for (final (index, menu) in menus)
-                  NavigationDestination(
-                    icon: Icon(
-                      menu.value.nonActiveIcon,
-                      size: responsiveUI.standardIcon,
-                    ),
-                    selectedIcon: Icon(
-                      menu.value.activeIcon,
-                      size: responsiveUI.standardIcon,
-                    ),
-                    label:
-                        japaneseUi ? japaneseLabels[index] : menu.value.title,
-                  ),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: radius,
+              border:
+                  modernFloating
+                      ? Border.all(
+                        color: kColor(context).secondary.withAlpha(64),
+                      )
+                      : null,
+              boxShadow: [
+                BoxShadow(
+                  color: const Color.fromARGB(145, 0, 0, 0),
+                  spreadRadius: modernFloating ? 1 : 0,
+                  blurRadius: modernFloating ? 18 : 8,
+                  offset: const Offset(0, 4),
+                ),
               ],
+            ),
+            child: ClipRRect(
+              borderRadius: radius,
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                child: NavigationBarTheme(
+                  data: NavigationBarThemeData(
+                    iconTheme: WidgetStateProperty.resolveWith((states) {
+                      final selected = states.contains(WidgetState.selected);
+                      return IconThemeData(
+                        color:
+                            selected
+                                ? kColor(context).secondary
+                                : kColor(context).secondary.withAlpha(145),
+                      );
+                    }),
+                    labelTextStyle: WidgetStateProperty.resolveWith((states) {
+                      final selected = states.contains(WidgetState.selected);
+                      return styleText(
+                        fontSize: responsiveUI.normalSize * 0.85,
+                        fontWeight:
+                            selected ? FontWeight.bold : FontWeight.normal,
+                        color: kColor(context).tertiary,
+                      );
+                    }),
+                  ),
+                  child: NavigationBar(
+                    height: modernFloating ? 70 : 80,
+                    backgroundColor: kColor(
+                      context,
+                    ).primary.withAlpha(modernFloating ? 166 : 212),
+                    elevation: 0,
+                    indicatorColor: kColor(
+                      context,
+                    ).secondary.withAlpha(modernFloating ? 58 : 24),
+                    labelBehavior:
+                        showSelectedLabels
+                            ? NavigationDestinationLabelBehavior
+                                .onlyShowSelected
+                            : NavigationDestinationLabelBehavior.alwaysHide,
+                    selectedIndex: selectedIndex,
+                    onDestinationSelected: onTap,
+                    destinations: [
+                      for (final (index, menu) in menus)
+                        NavigationDestination(
+                          icon: Icon(
+                            menu.value.nonActiveIcon,
+                            size: responsiveUI.standardIcon,
+                          ),
+                          selectedIcon: Icon(
+                            menu.value.activeIcon,
+                            size: responsiveUI.standardIcon,
+                          ),
+                          label:
+                              japaneseUi
+                                  ? japaneseLabels[index]
+                                  : menu.value.title,
+                        ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
         ),
